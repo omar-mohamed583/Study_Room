@@ -5,23 +5,49 @@
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
+* {
+  transition: all .3s;
+  font-variant-numeric: tabular-nums;
+}
+
 :root {
-  --text-primary: #000;
-  --text-secondary: #636363;
-  --contrast-text: #fff;
+  --accent-100: hsl(12, 100%, 66%);
+  --accent-200: hsl(227, 100%, 45%);
+  --accent-300: hsla(17, 83%, 56%, 0.878);
+  --text-primary: hsl(0, 0%, 0%);
+  --text-secondary: hsl(0, 0%, 17%);
+  --pale-text: hsl(0, 0%, 39%);
+  --contrast-text: hsl(0, 0%, 100%);
   --sect-bg: hsl(0, 0%, 100%);
   --body-gray: hsl(0, 0%, 92%);
   --secondary-gray: hsl(0, 0%, 74%);
   --items-bg: hsla(0, 0%, 90%, 81%);
+  --border-clr: hsla(0, 0%, 74%, 0.85);
+  --shadow-clr: rgba(0, 0, 0, 0.1);
+  --xs-shadow: 0 1px 2px 0 var(--shadow-clr);
+  --xl-shadow: 0 20px 25px -5px var(--shadow-clr), 0 8px 10px -6px var(--shadow-clr);
 }
 
 body.dark {
-  --text-primary: #000;
-  --text-secondary: #636363;
-  --sect-bg: hsl(0, 0%, 100%);
-  --body-gray: hsl(0, 0%, 92%);
-  --secondary-gray: hsl(0, 0%, 74%);
-  --tasks-bg: hsl(0 0 85 25%);
+  --accent-100: hsl(12, 100%, 66%);
+  --accent-200: hsl(227, 100%, 45%);
+  --accent-300: hsla(17, 83%, 56%, 0.878);
+  --text-primary: hsl(0, 0%, 100%);
+  --text-secondary: hsl(0, 0%, 83%);
+  --pale-text: hsl(0, 0%, 61%);
+  --contrast-text: hsl(0, 0%, 0%);
+  --sect-bg: hsl(0, 0%, 0%);
+  --body-gray: hsl(0, 0%, 8%);
+  --secondary-gray: hsl(0, 0%, 26%);
+  --items-bg: hsla(0, 0%, 30%, 81%);
+  --border-clr: hsla(0, 0%, 74%, 0.85);
+  --shadow-clr: rgba(255, 255, 255, 0.1);
+  --xs-shadow: 0 1px 2px 0 var(--shadow-clr);
+  --xl-shadow: 0 20px 25px -5px var(--shadow-clr), 0 8px 10px -6px var(--shadow-clr);
 }
 
 #search:not(:placeholder-shown) + label {

@@ -2,13 +2,15 @@ import {
   isRouteErrorResponse,
   Links,
   Meta,
+  Outlet,
   Scripts,
   ScrollRestoration,
 } from "react-router";
 
 import type { Route } from "./+types/root";
 import "./app.css";
-import Home from "./pages/home";
+import Header from "./components/layout/Header";
+import { useEffect, useState } from "react";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -35,7 +37,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body className="bg-[#EBEBEB] text-(--text-primary)">
+      <body className="bg-(--body-gray) text-(--text-primary) py-36">
         {children}
         <ScrollRestoration />
         <Scripts />
@@ -45,9 +47,23 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+  useEffect(() => {
+    document.body.classList.add(theme);
+  }, [])
+
+  useEffect(() => {
+    document.body.classList.replace(theme === "dark" ? "dark" : "light", theme);
+    console.log(document.body.classList.replace(theme === "dark" ? "light" : "dark", theme));
+  }, [theme]);
+
   return (
     <>
-      <Home />
+      <Header
+        setTheme={setTheme}
+        theme={theme}
+      />
+      <Outlet />
     </>
   );
 }

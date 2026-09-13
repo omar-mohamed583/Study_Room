@@ -1,5 +1,5 @@
 import { type RouteConfig, route } from "@react-router/dev/routes";
 
 export default [
-  route("Tasks", "./pages/tasks.tsx"),
+  route("/", "./components/layout/Main.tsx"),
 ] satisfies RouteConfig;
