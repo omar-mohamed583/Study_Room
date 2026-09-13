@@ -12,10 +12,10 @@
   --sect-bg: hsl(0, 0%, 100%);
   --body-gray: hsl(0, 0%, 92%);
   --secondary-gray: hsl(0, 0%, 74%);
-  --tasks-bg: hsla(0, 0%, 85%, 0.25);
+  --items-bg: hsla(0, 0%, 90%, 81%);
 }
 
-body:has(.dark) {
+body.dark {
   --text-primary: #000;
   --text-secondary: #636363;
   --sect-bg: hsl(0, 0%, 100%);
