@@ -3,66 +3,12 @@ import { Link, useNavigate } from "react-router";
 import type DefaultMainSecType from "~/types/defaultMain";
 import type SubjectTypes from "~/types/subjectTypes";
 import type TaskItemType from "~/types/taskItemTypes";
+import { fakeData } from "~/api/fakeapi";
 
 export default function DefaultMain() {
-  const fakeData = {
-    NAME: "Omar",
-    TASK: [
-      {
-        id: crypto.randomUUID(),
-        title: "Do Homework",
-        subject: "Arabic",
-      },
-      {
-        id: crypto.randomUUID(),
-        title: "Attend The Class",
-        subject: "English",
-      },
-      {
-        id: crypto.randomUUID(),
-        title: "Prepare For The Test",
-        subject: "Mechanics",
-      },
-    ],
-    SUBJECT: [
-      {
-        id: crypto.randomUUID(),
-        creationDate: new Date(),
-        title: "Maths",
-        tasksCount: 15,
-        completed: 8,
-        timeSpent: 2,
-      },
-      {
-        id: crypto.randomUUID(),
-        creationDate: new Date(),
-        title: "Arabic",
-        tasksCount: 7,
-        completed: 3,
-        timeSpent: 1,
-      },
-      {
-        id: crypto.randomUUID(),
-        creationDate: new Date(),
-        title: "English",
-        tasksCount: 10,
-        completed: 5,
-        timeSpent: 3,
-      },
-      {
-        id: crypto.randomUUID(),
-        creationDate: new Date(),
-        title: "Mechanics",
-        tasksCount: 2,
-        completed: 1,
-        timeSpent: 1,
-      },
-    ],
-  };
-
   return (
-    <main className="grid grid-cols-2 gap-4 max-w-350 mx-auto px-4 md:px-8">
-      <section className="flex flex-col gap-8 bg-(--sect-bg) p-3 rounded-[25px]">
+    <main className="grid grid-cols-2 gap-4 max-w-300 mx-auto px-4 md:px-8">
+      <section className="flex flex-col gap-12 bg-(--sect-bg) p-3 rounded-[25px]">
         <DefaultMainSection sectionTitle="Today Tasks">
           {fakeData.TASK.map((task) => (
             <TaskItem
@@ -89,19 +35,20 @@ export default function DefaultMain() {
         </DefaultMainSection>
       </section>
 
-      <section className="flex flex-col gap-8 bg-(--sect-bg) p-3 rounded-[25px]">
+      <section className="flex flex-col gap-12 bg-(--sect-bg) p-3 rounded-[25px]">
         <DefaultMainSection
           shrinkable={false}
           alignContentBetween
+          bgImage="../../assets/download.jpg"
         >
-          <div className="px-3 pt-5">
+          <div className="px-3">
             <h2 className="font-medium text-3xl text-white leading-[normal] text-center">
               Have A Good Day,<br></br>
               {fakeData.NAME} 👋
             </h2>
           </div>
 
-          <div className="px-3 pt-5">
+          <div className="px-3">
             <h4 className="text-xl text-center leading-[normal] text-white">
               What Do You Want To Do ?
             </h4>
@@ -138,10 +85,9 @@ function DefaultMainSection({
 
   return (
     <section
-      className="show rounded-[17px] border border-(--border-clr) overflow-hidden"
+      className={`show rounded-[17px] border border-(--border-clr) overflow-hidden ${bgImage && "bg-image"}`}
       style={{
         maxHeight: "fit-content",
-        backgroundImage: bgImage && `url(${bgImage})`,
       }}
     >
       {sectionTitle && (
@@ -193,6 +139,7 @@ function DefaultMainSection({
           alignContent: alignContentBetween ? "space-between" : "",
           display: alignContentBetween ? "grid" : "",
           paddingBlock: alignContentBetween ? "2.5rem" : "",
+          gap: "5rem",
         }}
       >
         {children}
@@ -200,7 +147,7 @@ function DefaultMainSection({
       {sectionTitle && (
         <Link
           to={""}
-          className="block p-3 text-white text-center px-4 bg-(--accent-200)"
+          className="block p-2 text-white text-center px-6 bg-(--accent-300)"
         >
           See more...
         </Link>
@@ -216,25 +163,52 @@ function TaskItem({ id, title, subject }: TaskItemType) {
     <div
       className="bg-(--items-bg) grid grid-cols-[1.3fr_.7fr] py-4 px-3 has-[+div]:border-b border-(--secondary-gray) items-center content-center"
       aria-label={`${title} (Today task)`}
-      onClick={() => navigate(`/tasks?id=${id}`)}
     >
       <div className="grid gap-4 *:leading-[normal]">
         <span className="text-(--text-secondary)">{subject} /</span>
-        <h3 className="indent-4 text-2xl font-bold">{title}</h3>
+        <h3 className="indent-4 text-2xl font-semibold">{title}</h3>
       </div>
 
-      <div className="flex gap-2 flex-wrap *:aspect-square *:rounded-md *:w-10 *:bg-(--accent-300) justify-end *:cursor-pointer *:shadow-[0px_3px_4px_0px_rgba(0_0_0/0.56)] *:fill-(--contrast-text) *:text-(--contrast-text) *:place-content-center *:grid">
-        <button>f</button>
-        <button>d</button>
-        <button>d</button>
-        <button>d</button>
+      <div className="flex gap-2 flex-wrap *:aspect-square *:rounded-md *:w-9 *:bg-(--accent-200) justify-end *:cursor-pointer *:shadow-[0px_3px_4px_0px_rgba(0_0_0/0.56)] *:fill-white *:text-(--contrast-text) *:place-content-center *:grid">
         <button>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             height="24px"
             viewBox="0 -960 960 960"
             width="24px"
-            fill="#fff"
+          >
+            <path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z" />
+          </svg>
+        </button>
+        <button>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="24px"
+            viewBox="0 -960 960 960"
+            width="24px"
+          >
+            <path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z" />
+          </svg>
+        </button>
+        <button aria-label="Mark Task As Completed">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="24px"
+            viewBox="0 -960 960 960"
+            width="24px"
+          >
+            <path d="M268-240 42-466l57-56 170 170 56 56-57 56Zm226 0L268-466l56-57 170 170 368-368 56 57-424 424Zm0-226-57-56 198-198 57 56-198 198Z" />
+          </svg>
+        </button>
+        <button
+          aria-label="Start Focus Timer For This Task"
+          onClick={() => navigate(`/tasks?id=${id}`)}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="24px"
+            viewBox="0 -960 960 960"
+            width="24px"
           >
             <path d="M320-200v-560l440 280-440 280Zm80-280Zm0 134 210-134-210-134v268Z" />
           </svg>
@@ -258,7 +232,7 @@ function SubjectItem({
         <span className="text-sm text-(--pale-text)">
           Created {creationDate?.getDate()} days ago
         </span>
-        <h3 className="text-3xl font-medium">{title}</h3>
+        <h3 className="text-2xl font-semibold">{title}</h3>
       </div>
 
       <div className="flex gap-4 *:grid *:text-center *:gap-2">
