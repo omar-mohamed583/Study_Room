@@ -1,104 +1,117 @@
 import { useLayoutEffect, useRef, useState } from "react";
-import { Link, Navigate, useNavigate } from "react-router";
+import {
+  Link,
+  redirect,
+  RouterContextProvider,
+  useNavigate,
+  type Params,
+} from "react-router";
 import type DefaultMainSecType from "~/types/defaultMain";
 import type SubjectTypes from "~/types/subjectTypes";
 import type TaskItemType from "~/types/taskItemTypes";
 import { fakeData } from "~/api/fakeapi";
 import Button from "../ui/Button";
+import { userContext } from "~/context/userContext";
+import Header from "./Header";
 
 export default function DefaultMain() {
   return (
-    <main className="relative grid grid-cols-2 gap-8 max-w-330 mx-auto px-4 md:px-8">
-      <section className="flex flex-col gap-12 bg-(--sect-bg) p-3 rounded-[25px]">
-        <DefaultMainSection sectionTitle="Today Tasks">
-          {fakeData.TASK.map((task) => (
-            <TaskItem
-              id={task.id}
-              key={task.id}
-              subject={task.subject}
-              title={task.title}
-            />
-          ))}
-        </DefaultMainSection>
+    <>
+      <Header />
+      <main className="relative grid grid-cols-2 gap-8 max-w-330 mx-auto px-4 md:px-8">
+        <section className="flex flex-col gap-12 bg-(--sect-bg) p-4 rounded-[25px]">
+          <DefaultMainSection sectionTitle="Today Tasks">
+            {fakeData.TASK.map((task) => (
+              <TaskItem
+                id={task.id}
+                key={task.id}
+                subject={task.subject}
+                title={task.title}
+              />
+            ))}
+          </DefaultMainSection>
 
-        <DefaultMainSection sectionTitle="Subjects">
-          {fakeData.SUBJECT.map((subj) => (
-            <SubjectItem
-              id={subj.id}
-              key={subj.id}
-              title={subj.title}
-              creationDate={subj.creationDate}
-              completedTasks={subj.completed}
-              tasksCount={subj.tasksCount}
-              timeSpent={subj.timeSpent}
-            />
-          ))}
-        </DefaultMainSection>
-      </section>
+          <DefaultMainSection sectionTitle="Subjects">
+            {fakeData.SUBJECT.map((subj) => (
+              <SubjectItem
+                id={subj.id}
+                key={subj.id}
+                title={subj.title}
+                creationDate={subj.creationDate}
+                completedTasks={subj.completed}
+                tasksCount={subj.tasksCount}
+                timeSpent={subj.timeSpent}
+              />
+            ))}
+          </DefaultMainSection>
+        </section>
 
-      <section className="flex flex-col gap-12 bg-(--sect-bg) p-3 rounded-[25px]">
-        <DefaultMainSection
-          shrinkable={false}
-          alignContentBetween
-          bgImage="../../assets/hope.jpg"
-        >
-          <div className="px-3">
-            <h2 className="font-medium text-3xl text-white leading-[normal] text-center">
-              Have A Good Day,<br></br>
-              {fakeData.NAME} 👋
-            </h2>
-          </div>
-
-          <div className="px-3">
-            <h4 className="text-2xl text-center leading-[normal] text-white mb-5 text-shadow-lg text-shadow-black">
-              What Do You Want To Do ?
-            </h4>
-
-            <div className="flex justify-center gap-6 gap-y-4 flex-wrap">
-              {[
-                {
-                  name: "Start new task",
-                  variation: "bg-(--accent-100) text-white",
-                  toLocation: "/tasks/new",
-                },
-                {
-                  name: "Set new exam",
-                  variation: "bg-(--btns-bg)",
-                  toLocation: "/exam/new",
-                },
-                {
-                  name: "Start focus timer",
-                  variation: "bg-(--accent-200) text-white",
-                  toLocation: "/focus-timer",
-                },
-                {
-                  name: "See calendar",
-                  variation: "bg-(--btns-bg)",
-                  toLocation: "/calendar",
-                },
-                {
-                  name: "See your progress",
-                  variation: "bg-(--accent-100) text-white",
-                  toLocation: "/dashboard",
-                },
-              ].map((btn) => (
-                <Button
-                  key={btn.name}
-                  className={btn.variation + " text-[.9rem] px-4 hover:bg-[]"}
-                  navigation={{to: btn.toLocation}}
-                >
-                  {btn.name}
-                </Button>
-              ))}
+        <section className="flex flex-col gap-12 bg-(--sect-bg) p-4 rounded-[25px]">
+          <DefaultMainSection
+            shrinkable={false}
+            alignContentBetween
+            bgImage="../../assets/hope.jpg"
+          >
+            <div className="px-3">
+              <h2 className="font-medium text-3xl text-white leading-[normal] text-center">
+                Have A Good Day,<br></br>
+                {fakeData.NAME} 👋
+              </h2>
             </div>
-          </div>
-        </DefaultMainSection>
 
-        <DefaultMainSection>
-          <div></div>
-        </DefaultMainSection>
-      </section>
-    </main>
+            <div className="px-3">
+              <h4 className="text-2xl text-center leading-[normal] text-white mb-5 text-shadow-lg text-shadow-black">
+                What Do You Want To Do ?
+              </h4>
+
+              <div className="flex justify-center gap-6 gap-y-4 flex-wrap">
+                {[
+                  {
+                    name: "Start new task",
+                    variation: "bg-(--accent-100) text-white",
+                    toLocation: "/tasks/new",
+                  },
+                  {
+                    name: "Set new exam",
+                    variation: "bg-(--btns-bg) text-black",
+                    toLocation: "/exam/new",
+                  },
+                  {
+                    name: "Start focus timer",
+                    variation: "bg-(--accent-200) text-white",
+                    toLocation: "/focus-timer",
+                  },
+                  {
+                    name: "See calendar",
+                    variation: "bg-(--btns-bg) text-black",
+                    toLocation: "/calendar",
+                  },
+                  {
+                    name: "See your progress",
+                    variation: "bg-(--accent-100) text-white",
+                    toLocation: "/dashboard",
+                  },
+                ].map((btn) => (
+                  <Button
+                    key={btn.name}
+                    className={
+                      btn.variation + " text-[.9rem] px-4 hover:brightness-75"
+                    }
+                    navigation={{ to: btn.toLocation }}
+                  >
+                    {btn.name}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </DefaultMainSection>
+
+          <DefaultMainSection>
+            <div></div>
+          </DefaultMainSection>
+        </section>
+      </main>
+    </>
   );
 }
 
@@ -208,7 +221,7 @@ function TaskItem({ id, title, subject }: TaskItemType) {
         <h3 className="indent-4 text-2xl font-semibold">{title}</h3>
       </div>
 
-      <div className="flex gap-2 flex-wrap *:aspect-square *:rounded-md *:w-9 *:bg-(--accent-200) justify-end *:cursor-pointer *:shadow-[0px_3px_4px_0px_rgba(0_0_0/0.56)] *:fill-white *:text-(--contrast-text) *:place-content-center *:grid">
+      <div className="flex gap-2 flex-wrap *:aspect-square *:rounded-md *:w-9 *:bg-(--accent-200) justify-end *:cursor-pointer *:shadow-[0px_3px_4px_0px_rgba(0_0_0/0.56)] *:fill-white *:text-(--contrast-text) *:place-content-center *:grid *:hover:brightness-75">
         <button>
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -274,7 +287,7 @@ function SubjectItem({
         <h3 className="text-2xl font-semibold">{title}</h3>
       </div>
 
-      <div className="flex gap-4 *:grid *:text-center *:gap-2">
+      <div className="flex gap-4 *:grid *:text-center *:gap-3">
         <div>
           <span className="leading-[normal] text-sm">Tasks</span>
           <span className="text-2xl font-semibold leading-[normal]">{`${tasksCount}`}</span>
@@ -292,4 +305,18 @@ function SubjectItem({
       </div>
     </div>
   );
+}
+
+export const clientMiddleware = [authMiddleware];
+
+type MiddlewareArgs = {
+  request: Request;
+  context: Readonly<RouterContextProvider>;
+};
+
+async function authMiddleware({ request, context }: MiddlewareArgs) {
+  const user = localStorage?.getItem("user");
+  if (!user) throw redirect("/login");
+
+  context.set(userContext, user);
 }

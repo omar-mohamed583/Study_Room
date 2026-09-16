@@ -9,7 +9,6 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
-import Header from "./components/layout/Header";
 import ThemeContextProvider from "./components/providers/themeContextprovider";
 
 export const links: Route.LinksFunction = () => [
@@ -49,7 +48,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <ThemeContextProvider>
-      <Header />
       <Outlet />
     </ThemeContextProvider>
   );

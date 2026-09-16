@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Navigate } from "react-router";
+import { useNavigate } from "react-router";
 
 export default function Button({
   children,
@@ -10,10 +10,11 @@ export default function Button({
   className: string;
   navigation: { to: string };
 }) {
+  const navigate = useNavigate();
   return (
     <button
       className={`p-2 rounded-xl cursor-pointer ${className}`}
-      onClick={navigation.to ? () => Navigate({ to: navigation.to }) : () => ""}
+      onClick={navigation.to ? () => navigate(navigation.to) : () => ""}
     >
       {children}
     </button>

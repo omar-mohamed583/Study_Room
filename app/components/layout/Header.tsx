@@ -1,7 +1,7 @@
-import { Link } from "react-router";
 import ShinyText from "../ui/ShinyText";
 import useTheme from "~/context/themeContext";
 import { useEffect } from "react";
+import { Link } from "react-router";
 
 export default function Header() {
   const { theme, setTheme } = useTheme();
@@ -45,7 +45,7 @@ export default function Header() {
         <Link to="">Focus Timer</Link>
       </div>
 
-      <div className="flex gap-3 p-2 *:bg-zinc-100 *:in-[.dark]:bg-zinc-900/65 *:rounded-full [&_button]:cursor-pointer [&_button]:hover:bg-gray-400/25 in-[.dark]:[&_button]:hover:bg-zinc-800/75 [&_button]:transition-colors duration-300">
+      <div className="flex gap-3 p-2 *:bg-zinc-100/80 *:in-[.dark]:bg-zinc-900/65 *:backdrop-blur-3xl *:rounded-full [&_button]:cursor-pointer [&_button]:hover:bg-gray-400/25 in-[.dark]:[&_button]:hover:bg-zinc-800/75 [&_button]:transition-colors duration-300">
         <div className="search isolate *:rounded-full rounded-full relative">
           <input
             type="text"
