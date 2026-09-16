@@ -5,13 +5,12 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-}
-
 html {
   scroll-behavior: smooth;
+  font-family: "DM Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
 }
 
 * {
@@ -26,6 +25,7 @@ html {
   --text-primary: hsl(0, 0%, 0%);
   --text-secondary: hsl(0, 0%, 17%);
   --pale-text: hsl(0, 0%, 39%);
+  --btns-bg: #d9d9d9;
   --contrast-text: hsl(0, 0%, 100%);
   --sect-bg: hsl(0, 0%, 100%);
   --body-gray: hsl(0, 0%, 92%);
@@ -80,7 +80,7 @@ body.dark {
   --sect-bg: hsl(0, 0%, 0%);
   --body-gray: hsl(0, 0%, 8%);
   --secondary-gray: hsl(0, 0%, 26%);
-  --items-bg: hsla(0, 0%, 30%, 81%);
+  --items-bg: hsla(0, 0%, 30%, 51%);
   --border-clr: hsla(0, 0%, 74%, 0.85);
   --shadow-clr: rgba(255, 255, 255, 0.1);
   --xs-shadow: 0 1px 2px 0 var(--shadow-clr);
@@ -93,7 +93,7 @@ body.dark {
 
 .bg-image {
   min-height: 420px;
-  background-image: linear-gradient(hsl(0 0 0 / .02)) , url(./assets/download.jpg);
+  background-image: linear-gradient(hsl(0 0 0 / .2)) , url(./assets/hope.jpg);
   background-size: cover;
   background-position: 50% 80%;
   background-repeat: no-repeat;

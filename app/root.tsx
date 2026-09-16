@@ -10,8 +10,7 @@ import {
 import type { Route } from "./+types/root";
 import "./app.css";
 import Header from "./components/layout/Header";
-import { useEffect } from "react";
-import { useLocalStorage } from "./hooks/useLocalStorage";
+import ThemeContextProvider from "./components/providers/themeContextprovider";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -22,7 +21,7 @@ export const links: Route.LinksFunction = () => [
   },
   {
     rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
+    href: "https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap",
   },
 ];
 
@@ -38,7 +37,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body className="bg-(--body-gray) text-(--text-primary) py-36">
+      <body className="relative bg-(--body-gray) text-(--text-primary) py-36 overflow-x-hidden min-h-screen">
         {children}
         <ScrollRestoration />
         <Scripts />
@@ -48,25 +47,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  const [theme, setTheme] = useLocalStorage("theme", "light");
-
-  useEffect(() => {
-    document.body.classList.add(theme);
-  }, [])
-
-  useEffect(() => {
-    document.body.classList.replace(theme === "dark" ? "dark" : "light", theme);
-    console.log(document.body.classList.replace(theme === "dark" ? "light" : "dark", theme));
-  }, [theme]);
-
   return (
-    <>
-      <Header
-        setTheme={setTheme}
-        theme={theme}
-      />
+    <ThemeContextProvider>
+      <Header />
       <Outlet />
-    </>
+    </ThemeContextProvider>
   );
 }
 

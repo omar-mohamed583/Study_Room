@@ -1,6 +1,8 @@
 {
   "js/ts.tsdk.path": "node_modules\\typescript\\lib",
   "cSpell.words": [
-    "fakeapi"
+    "Contextprovider",
+    "fakeapi",
+    "yoyo"
   ]
 }

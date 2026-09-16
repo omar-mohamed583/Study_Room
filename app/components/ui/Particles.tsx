@@ -116,11 +116,10 @@ const Particles: React.FC<ParticlesProps> = ({
   pixelRatio = 1,
   className,
 }) => {
-  const containerRef = useRef<HTMLDivElement | null>(null);
   const mouseRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
   useEffect(() => {
-    const container = containerRef.current;
+    const container = document.body;
     if (!container) return;
 
     const renderer = new Renderer({
@@ -260,12 +259,6 @@ const Particles: React.FC<ParticlesProps> = ({
     pixelRatio,
   ]);
 
-  return (
-    <div
-      ref={containerRef}
-      className={`particles-container ${className ?? ""}`}
-    />
-  );
 };
 
 export default Particles;

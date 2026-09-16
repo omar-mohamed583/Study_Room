@@ -1,24 +1,51 @@
 import { Link } from "react-router";
+import ShinyText from "../ui/ShinyText";
+import useTheme from "~/context/themeContext";
+import { useEffect } from "react";
 
-export default function Header({
-  setTheme,
-  theme,
-}: {
-  setTheme: React.Dispatch<React.SetStateAction<"dark" | "light">>;
-  theme: any;
-}) {
+export default function Header() {
+  const { theme, setTheme } = useTheme();
+
+  useEffect(() => {
+    document.body.classList.add(theme);
+  }, []);
+
+  useEffect(() => {
+    document.body.classList.replace(theme === "dark" ? "dark" : "light", theme);
+    console.log(
+      document.body.classList.replace(
+        theme === "dark" ? "light" : "dark",
+        theme,
+      ),
+    );
+  }, [theme]);
+
   return (
     <header className="z-1000 min-w-max rounded-full bg-(--sect-bg) flex gap-4 p-3 *:bg-(--sect-bg) *:border-t *:border-t-gray-400/10 *:shadow-(--xl-shadow) *:rounded-full fixed top-8 left-1/2 shadow-(--xs-shadow) -translate-x-1/2">
       <h1 className="font-bold text-lg leading-[normal] cursor-pointer p-4 px-5 md:px-8 flex items-center tracking-wide">
-        Study Room
+        <ShinyText
+          text="Study Room"
+          speed={2.5}
+          delay={0.3}
+          color={theme === "light" ? "#1b1b1b" : "#bbbbbb"}
+          shineColor={
+            theme === "light" ? "hsl(0, 0%, 50%)" : "hsl(0, 0%, 100%)"
+          }
+          spread={150}
+          direction="left"
+          yoyo={false}
+          className=""
+          pauseOnHover={false}
+          disabled={false}
+        />
       </h1>
 
-      <div className="flex gap-3 items-center content-center *:p-3 *:px-5 p-1 px-2 *:rounded-full *:transition-colors duration-300 *:hover:bg-gray-400/25">
+      <div className="flex gap-3 items-center content-center *:p-3 *:px-5 p-1 px-2 *:rounded-full *:transition-colors duration-300 *:hover:bg-gray-400/25 in-[.dark]:*:hover:bg-zinc-800/75">
         <Link to="">Statistics</Link>
         <Link to="">Focus Timer</Link>
       </div>
 
-      <div className="flex gap-3 p-2 *:bg-(--items-bg)  *:rounded-full [&_button]:cursor-pointer [&_button]:hover:bg-gray-400/25 in-[.dark]:[&_button]:hover:bg-gray-300/75 [&_button]:transition-colors duration-300">
+      <div className="flex gap-3 p-2 *:bg-zinc-100 *:in-[.dark]:bg-zinc-900/65 *:rounded-full [&_button]:cursor-pointer [&_button]:hover:bg-gray-400/25 in-[.dark]:[&_button]:hover:bg-zinc-800/75 [&_button]:transition-colors duration-300">
         <div className="search isolate *:rounded-full rounded-full relative">
           <input
             type="text"

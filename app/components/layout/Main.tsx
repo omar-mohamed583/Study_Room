@@ -1,13 +1,14 @@
 import { useLayoutEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, Navigate, useNavigate } from "react-router";
 import type DefaultMainSecType from "~/types/defaultMain";
 import type SubjectTypes from "~/types/subjectTypes";
 import type TaskItemType from "~/types/taskItemTypes";
 import { fakeData } from "~/api/fakeapi";
+import Button from "../ui/Button";
 
 export default function DefaultMain() {
   return (
-    <main className="grid grid-cols-2 gap-4 max-w-300 mx-auto px-4 md:px-8">
+    <main className="relative grid grid-cols-2 gap-8 max-w-330 mx-auto px-4 md:px-8">
       <section className="flex flex-col gap-12 bg-(--sect-bg) p-3 rounded-[25px]">
         <DefaultMainSection sectionTitle="Today Tasks">
           {fakeData.TASK.map((task) => (
@@ -39,7 +40,7 @@ export default function DefaultMain() {
         <DefaultMainSection
           shrinkable={false}
           alignContentBetween
-          bgImage="../../assets/download.jpg"
+          bgImage="../../assets/hope.jpg"
         >
           <div className="px-3">
             <h2 className="font-medium text-3xl text-white leading-[normal] text-center">
@@ -49,9 +50,47 @@ export default function DefaultMain() {
           </div>
 
           <div className="px-3">
-            <h4 className="text-xl text-center leading-[normal] text-white">
+            <h4 className="text-2xl text-center leading-[normal] text-white mb-5 text-shadow-lg text-shadow-black">
               What Do You Want To Do ?
             </h4>
+
+            <div className="flex justify-center gap-6 gap-y-4 flex-wrap">
+              {[
+                {
+                  name: "Start new task",
+                  variation: "bg-(--accent-100) text-white",
+                  toLocation: "/tasks/new",
+                },
+                {
+                  name: "Set new exam",
+                  variation: "bg-(--btns-bg)",
+                  toLocation: "/exam/new",
+                },
+                {
+                  name: "Start focus timer",
+                  variation: "bg-(--accent-200) text-white",
+                  toLocation: "/focus-timer",
+                },
+                {
+                  name: "See calendar",
+                  variation: "bg-(--btns-bg)",
+                  toLocation: "/calendar",
+                },
+                {
+                  name: "See your progress",
+                  variation: "bg-(--accent-100) text-white",
+                  toLocation: "/dashboard",
+                },
+              ].map((btn) => (
+                <Button
+                  key={btn.name}
+                  className={btn.variation + " text-[.9rem] px-4 hover:bg-[]"}
+                  navigation={{to: btn.toLocation}}
+                >
+                  {btn.name}
+                </Button>
+              ))}
+            </div>
           </div>
         </DefaultMainSection>
 
@@ -132,7 +171,7 @@ function DefaultMainSection({
       )}
 
       <main
-        className="h-full show transition-[opacity,scale,height] duration-400 [&.show]:scale-y-100 origin-top [&.show_*]:opacity-100 not-[&.show_*]:opacity-0 not-[&.show]:scale-y-90 will-change-[height] overflow-auto scrollbar-none"
+        className="show transition-[opacity,scale,height] duration-400 [&.show]:scale-y-100 origin-top [&.show_*]:opacity-100 not-[&.show_*]:opacity-0 not-[&.show]:scale-y-90 will-change-[height] overflow-auto scrollbar-none overscroll-contain"
         ref={bgImage ? null : mainRef}
         style={{
           height: `${height}px`,
@@ -202,7 +241,7 @@ function TaskItem({ id, title, subject }: TaskItemType) {
         </button>
         <button
           aria-label="Start Focus Timer For This Task"
-          onClick={() => navigate(`/tasks?id=${id}`)}
+          onClick={() => navigate(`/tasks/${id}`)}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
