@@ -2,13 +2,13 @@ import { useEffect, useRef } from 'react';
 import { Renderer, Program, Mesh, Triangle } from 'ogl';
 import './GradientWaves.css';
 
-const hexToRgb = hex => {
+const hexToRgb = (hex: any) => {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   if (!result) return [1, 1, 1];
   return [parseInt(result[1], 16) / 255, parseInt(result[2], 16) / 255, parseInt(result[3], 16) / 255];
 };
 
-const detailToSteps = detail => {
+const detailToSteps = (detail: any) => {
   if (detail === 'low') return 40.0;
   if (detail === 'high') return 110.0;
   return 70.0;
@@ -151,7 +151,7 @@ const GradientWaves = ({
   grainIntensity = 0.05,
   className = ''
 }) => {
-  const containerRef = useRef(null);
+  const containerRef = useRef<null | HTMLDivElement>(null);
   const enableMouseRef = useRef(mouseInteraction);
 
   useEffect(() => {
@@ -226,7 +226,7 @@ const GradientWaves = ({
     const currentMouse = [0.5, 0.5];
     const targetMouse = [0.5, 0.5];
 
-    const onPointerMove = e => {
+    const onPointerMove = (e: any) => {
       const rect = canvas.getBoundingClientRect();
       targetMouse[0] = (e.clientX - rect.left) / rect.width;
       targetMouse[1] = 1.0 - (e.clientY - rect.top) / rect.height;
@@ -243,7 +243,7 @@ const GradientWaves = ({
     let isPageVisible = !document.hidden;
     const t0 = performance.now();
 
-    const loop = t => {
+    const loop = (t: any) => {
       program.uniforms.iTime.value = (t - t0) * 0.001;
       const tx = enableMouseRef.current ? targetMouse[0] : 0.5;
       const ty = enableMouseRef.current ? targetMouse[1] : 0.5;
@@ -362,7 +362,12 @@ const GradientWaves = ({
     parallaxStrength
   ]);
 
-  return <div ref={containerRef} className={`gradient-waves-container ${className}`.trim()} />;
+  return (
+    <div
+      ref={containerRef}
+      className={`gradient-waves-container ${className}`.trim()}
+    />
+  );
 };
 
 export default GradientWaves;

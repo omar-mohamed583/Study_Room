@@ -1,13 +1,14 @@
 import ShinyText from "../ui/ShinyText";
 import useTheme from "~/context/themeContext";
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 import { Link } from "react-router";
 
 export default function Header() {
   const { theme, setTheme } = useTheme();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     document.body.classList.add(theme);
+    document.body.style.paddingBlock = "9rem";
   }, []);
 
   useEffect(() => {

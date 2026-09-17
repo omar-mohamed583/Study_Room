@@ -36,7 +36,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body className="relative bg-(--body-gray) text-(--text-primary) py-36 overflow-x-hidden min-h-screen">
+      <body className="relative bg-(--body-gray) text-(--text-primary) overflow-x-hidden min-h-screen">
         {children}
         <ScrollRestoration />
         <Scripts />

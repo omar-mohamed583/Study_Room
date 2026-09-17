@@ -4,7 +4,6 @@ import {
   redirect,
   RouterContextProvider,
   useNavigate,
-  type Params,
 } from "react-router";
 import type DefaultMainSecType from "~/types/defaultMain";
 import type SubjectTypes from "~/types/subjectTypes";
@@ -133,7 +132,7 @@ function DefaultMainSection({
     mainRef.current.style.height = "fit-content";
     maximumHeightValue.current = mainRef.current.getBoundingClientRect().height;
     setHeight(maximumHeightValue?.current);
-  }, []);
+  }, [window.innerWidth]);
 
   return (
     <section
