@@ -28,6 +28,8 @@ export default function Login() {
 
   const [action, setAction] = useState<"login" | "register">("login");
 
+  const [seePass, setSeePass] = useState<boolean>(false);
+
   const nameContRef = useRef<null | HTMLDivElement>(null);
 
   const submitErrorRef = useRef<null | HTMLParagraphElement>(null);
@@ -36,6 +38,7 @@ export default function Login() {
 
   useEffect(() => {
     document.body.classList.add("dark");
+    document.body.style.paddingBlock = "0px";
   }, []);
 
   function handleChangeAction() {
@@ -154,14 +157,14 @@ export default function Login() {
 
       <form
         onSubmit={handleFormSubmission}
-        className="grid relative z-10 gap-6 bg-black/15 min-h-[50vh] p-5 py-7 sm:p-8 rounded-3xl backdrop-blur-lg w-[min(28rem,90vw)] border border-white/10"
+        className="grid relative z-10 gap-4 bg-black/15 min-h-[50vh] p-5 py-7 sm:p-8 rounded-3xl backdrop-blur-lg w-[min(28rem,90vw)] border border-white/10"
       >
         <legend className="text-2xl font-black text-center mb-5">
           {actionObj[`${action}`]}
         </legend>
 
         <p
-          className="submit-error text-red-400 font-bold text-center"
+          className="submit-error text-red-400 font-bold text-center mb-3"
           ref={submitErrorRef}
         ></p>
 
@@ -188,11 +191,27 @@ export default function Login() {
                 htmlFor="name"
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400
               pointer-events-none transition-all
-              peer-focus:top-0.5 peer-focus:text-xs peer-focus:left-2.5
-              peer-not-placeholder-shown:left-2.5
-              peer-not-placeholder-shown:text-xs
-              peer-not-placeholder-shown:-top-0.5"
+              peer-focus:-top-0.5 peer-focus:scale-80 peer-focus:left-0
+              peer-not-placeholder-shown:left-0
+              peer-not-placeholder-shown:scale-80
+              peer-not-placeholder-shown:-top-0.5 flex gap-2 items-center content-center"
               >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="17"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="lucide lucide-type"
+                >
+                  <path d="M12 4v16" />
+                  <path d="M4 7V5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2" />
+                  <path d="M9 20h6" />
+                </svg>
                 Username
               </label>
             </div>
@@ -221,11 +240,32 @@ export default function Login() {
                 htmlFor="email"
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400
               pointer-events-none transition-all
-              peer-focus:top-0.5 peer-focus:text-xs peer-focus:left-2.5
-              peer-not-placeholder-shown:left-2.5
-              peer-not-placeholder-shown:text-xs
-              peer-not-placeholder-shown:-top-0.5"
+              peer-focus:-top-0.5 peer-focus:scale-80 peer-focus:left-0
+              peer-not-placeholder-shown:left-0
+              peer-not-placeholder-shown:scale-80
+              peer-not-placeholder-shown:-top-0.5 flex gap-2 items-center content-center"
               >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="17"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="lucide lucide-mail"
+                >
+                  <path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" />
+                  <rect
+                    x="2"
+                    y="4"
+                    width="20"
+                    height="16"
+                    rx="2"
+                  />
+                </svg>
                 Email
               </label>
             </div>
@@ -240,7 +280,7 @@ export default function Login() {
             <div className="relative">
               <input
                 id="password"
-                type="password"
+                type={seePass ? "text" : "password"}
                 minLength={6}
                 aria-autocomplete="list"
                 autoComplete="current-password"
@@ -255,13 +295,84 @@ export default function Login() {
                 htmlFor="password"
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400
               pointer-events-none transition-all
-              peer-focus:top-0.5 peer-focus:text-xs peer-focus:left-2.5
-              peer-not-placeholder-shown:left-2.5
-              peer-not-placeholder-shown:text-xs
-              peer-not-placeholder-shown:-top-0.5"
+              peer-focus:-top-0.5 peer-focus:scale-80 peer-focus:left-0
+              peer-not-placeholder-shown:left-0
+              peer-not-placeholder-shown:scale-80
+              peer-not-placeholder-shown:-top-0.5 flex gap-2 items-center content-center"
               >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="17"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="lucide lucide-lock-keyhole"
+                >
+                  <circle
+                    cx="12"
+                    cy="16"
+                    r="1"
+                  />
+                  <rect
+                    x="3"
+                    y="10"
+                    width="18"
+                    height="12"
+                    rx="2"
+                  />
+                  <path d="M7 10V7a5 5 0 0 1 10 0v3" />
+                </svg>
                 Password
               </label>
+              <button
+                type="button"
+                className={`cursor-pointer absolute right-1.5 top-1/2 -translate-y-1/2 grid *:[grid-area:stack] *:[grid-template-areas:'stack'] ${seePass ? "[&>svg:first-child]:opacity-0" : "[&>svg:last-child]:opacity-0"} *:transition-opacity duration-75`}
+                onClick={() => setSeePass((prev) => !prev)}
+              >
+                {/* Opened Eye */}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="lucide lucide-eye"
+                >
+                  <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="3"
+                  />
+                </svg>
+
+                {/* Closed Eye */}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="lucide lucide-eye-off"
+                >
+                  <path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49" />
+                  <path d="M14.084 14.158a3 3 0 0 1-4.242-4.242" />
+                  <path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143" />
+                  <path d="m2 2 20 20" />
+                </svg>
+              </button>
             </div>
             <span
               className={`email-error text-[13px] text-red-500 font-medium ${!error.password && "opacity-0"} transition-opacity`}
@@ -272,7 +383,7 @@ export default function Login() {
         </div>
 
         <div
-          className={`flex ${action === "login" ? "flex-col" : "flex-col-reverse"} gap-1 [&>button]:cursor-pointer [&>button]:p-2 *:rounded-xl *:w-full [&>button]:hover:brightness-70 *:transition-all duration-200`}
+          className={`flex ${action === "login" ? "flex-col" : "flex-col-reverse"} gap-1 [&>button]:cursor-pointer [&>button]:p-2 *:rounded-xl *:w-full [&>button]:hover:brightness-70 *:transition-all duration-200 *:disabled:brightness-50 *:disabled:hover:brightness-50 *:disabled:cursor-auto`}
         >
           <button
             className="bg-(--accent-200)"
@@ -299,7 +410,7 @@ export default function Login() {
       </form>
 
       <div
-        className={`loading h-screen w-screen fixed top-0 left-0 bg-black/80 place-content-center place-items-center z-999 backdrop-blur-2xl invisible opacity-0 ${(loading || isLoading) && "opacity-100 visible"} duration-75 transition-opacity`}
+        className={`loading h-screen w-screen fixed top-0 left-0 bg-black/80 place-content-center place-items-center z-999 backdrop-blur-2xl ${(loading || isLoading) ? "visible opacity-100" : "invisible opacity-0"} duration-75 transition-opacity`}
       >
         <div className="flex flex-col items-center gap-2 tracking-wider text-sm">
           <ThinkingOrb

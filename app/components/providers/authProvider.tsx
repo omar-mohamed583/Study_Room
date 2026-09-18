@@ -9,10 +9,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const [user, setUser] = useState(null);
 
-  const [isLoading, setLoading] = useState(true);
+  const [isLoading, setLoading] = useState(false);
 
   useEffect(() => {
     async function loadUser() {
+      setLoading(true);
       if (!jwt) {
         setLoading(false);
         return;
@@ -29,6 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null);
 
         return { error };
+
       } finally {
         setLoading(false);
       }
@@ -43,6 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     password: string | number,
   ) {
     try {
+      setLoading(true)
       const data = await apiFetch("/auth/local/register", {
         method: "POST",
         body: JSON.stringify({
@@ -61,11 +64,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (e) {
       console.log("Error: ", e);
       return { error: e };
+
+    } finally {
+      setLoading(false);
     }
   }
 
   async function login(identifier: string, password: string | number) {
     try {
+      setLoading(true);
       const data = await apiFetch("/auth/local", {
         method: "POST",
         body: JSON.stringify({
@@ -81,8 +88,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return data.user;
     } catch (e: any) {
       console.log("Error: ", e);
-
       return { error : e }
+
+    } finally {
+      setLoading(false);
     }
   }
 

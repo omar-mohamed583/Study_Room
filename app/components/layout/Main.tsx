@@ -10,7 +10,6 @@ import type SubjectTypes from "~/types/subjectTypes";
 import type TaskItemType from "~/types/taskItemTypes";
 import { fakeData } from "~/api/fakeapi";
 import Button from "../ui/Button";
-import { userContext } from "~/context/userContext";
 import Header from "./Header";
 
 export default function DefaultMain() {
@@ -132,6 +131,11 @@ function DefaultMainSection({
     mainRef.current.style.height = "fit-content";
     maximumHeightValue.current = mainRef.current.getBoundingClientRect().height;
     setHeight(maximumHeightValue?.current);
+
+    return () => {
+      console.log(mainRef?.current?.getBoundingClientRect().height);
+      setHeight(mainRef?.current?.getBoundingClientRect().height);
+    };
   }, [window.innerWidth]);
 
   return (
@@ -159,23 +163,39 @@ function DefaultMainSection({
               {/* Shrink Svg */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                height="19px"
-                viewBox="0 -960 960 960"
-                width="19px"
-                className="rotate-45 ml-0.5 mt-0.5 fill-(--text-primary)"
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="lucide lucide-minimize-2"
               >
-                <path d="m296-80-56-56 240-240 240 240-56 56-184-184L296-80Zm184-504L240-824l56-56 184 184 184-184 56 56-240 240Z" />
+                <path d="m14 10 7-7" />
+                <path d="M20 10h-6V4" />
+                <path d="m3 21 7-7" />
+                <path d="M4 14h6v6" />
               </svg>
 
               {/* Expand Svg */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                height="24px"
-                viewBox="0 -960 960 960"
-                width="24px"
-                className="fill-(--text-primary)"
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="lucide lucide-maximize-2"
               >
-                <path d="M200-200v-240h80v160h160v80H200Zm480-320v-160H520v-80h240v240h-80Z" />
+                <path d="M15 3h6v6" />
+                <path d="m21 3-7 7" />
+                <path d="m3 21 7-7" />
+                <path d="M9 21H3v-6" />
               </svg>
             </button>
           )}
@@ -220,35 +240,58 @@ function TaskItem({ id, title, subject }: TaskItemType) {
         <h3 className="indent-4 text-2xl font-semibold">{title}</h3>
       </div>
 
-      <div className="flex gap-2 flex-wrap *:aspect-square *:rounded-md *:w-9 *:bg-(--accent-200) justify-end *:cursor-pointer *:shadow-[0px_3px_4px_0px_rgba(0_0_0/0.56)] *:fill-white *:text-(--contrast-text) *:place-content-center *:grid *:hover:brightness-75">
+      <div className="flex gap-2 flex-wrap *:aspect-square *:rounded-md *:w-9 *:bg-(--accent-200) justify-end *:cursor-pointer *:shadow-[0px_3px_4px_0px_rgba(0_0_0/0.56)] *:fill-white *:stroke-white *:text-(--contrast-text) *:place-content-center *:grid *:hover:brightness-75">
         <button>
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            height="24px"
-            viewBox="0 -960 960 960"
-            width="24px"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="lucide lucide-pencil"
           >
-            <path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z" />
+            <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
+            <path d="m15 5 4 4" />
           </svg>
         </button>
         <button>
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            height="24px"
-            viewBox="0 -960 960 960"
-            width="24px"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="lucide lucide-trash"
           >
-            <path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z" />
+            <path d="M10 11v6" />
+            <path d="M14 11v6" />
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+            <path d="M3 6h18" />
+            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
           </svg>
         </button>
         <button aria-label="Mark Task As Completed">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            height="24px"
-            viewBox="0 -960 960 960"
-            width="24px"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="lucide lucide-check"
           >
-            <path d="M268-240 42-466l57-56 170 170 56 56-57 56Zm226 0L268-466l56-57 170 170 368-368 56 57-424 424Zm0-226-57-56 198-198 57 56-198 198Z" />
+            <path d="M20 6 9 17l-5-5" />
           </svg>
         </button>
         <button
@@ -257,11 +300,16 @@ function TaskItem({ id, title, subject }: TaskItemType) {
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            height="24px"
-            viewBox="0 -960 960 960"
-            width="24px"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="lucide lucide-play"
           >
-            <path d="M320-200v-560l440 280-440 280Zm80-280Zm0 134 210-134-210-134v268Z" />
+            <path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z" />
           </svg>
         </button>
       </div>
@@ -315,6 +363,6 @@ type MiddlewareArgs = {
 
 async function authMiddleware() {
   const jwt = localStorage?.getItem("jwt");
-  console.log(jwt)
+  console.log(jwt);
   if (!jwt) throw redirect("/login");
 }
