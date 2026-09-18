@@ -1,16 +1,16 @@
-import { useEffect, useRef, useState, useActionState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router";
 import { ThinkingOrb } from "thinking-orbs";
 import { useAuth } from "~/components/providers/authProvider";
 import GradientWaves from "~/components/ui/GradientWaves";
-import useTheme from "~/context/themeContext";
 
 export default function Login() {
+  const navigate = useNavigate();
+
   const actionObj = {
     login: "Welcome Back",
     register: "Create an Account",
   };
-
-
 
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -30,12 +30,10 @@ export default function Login() {
 
   const nameContRef = useRef<null | HTMLDivElement>(null);
 
-  const { theme } = useTheme();
-
   const { register, login, isLoading } = useAuth();
 
   useEffect(() => {
-    document.body.classList.add(theme);
+    document.body.classList.add('dark');
   }, []);
 
   function handleChangeAction() {
@@ -81,39 +79,43 @@ export default function Login() {
         setError((prev) => ({ ...prev, email: false, password: true }));
 
       } else {
-        setLoading(true);
         setError({ name: false, email: false, password: false });
 
         login(email, password);
+        console.log("LOGIN-IN");
+
+        return navigate("/");
       }
 
     // Handle Register Logic Here
     } else {
 
-      if (!data.get("email") && !data.get("password") && !data.get("name")) {
+      if (!data.get("email") && !data.get("password") && !String(data.get("name")).trim()) {
         setError({
           name: true,
           email: true,
           password: true,
         });
 
-      } else if (!data.get("name")) {
-        setError((prev) => ({ ...prev, name: true }));
+      } else if (!String(data.get("name")).trim()) {
+        setError(() => ({ name: true, email: false, password: false }));
 
       } else if (
         !data.get("email") ||
         !emailRegex.test(String(data.get("email")))
       ) {
-        setError((prev) => ({ ...prev, email: true }));
+        setError(() => ({ name: false, email: true, password: false }));
 
       } else if (!data.get("password")) {
         setError(() => ({ name: false, email: false, password: true }));
 
       } else {
-        setLoading(true);
         setError({ name: false, email: false, password: false });
 
         register(name, email, password);
+        console.log("REGISTERING")
+
+        return navigate("/");
       }
     }
   }
@@ -145,13 +147,13 @@ export default function Login() {
 
       <form
         onSubmit={handleFormSubmission}
-        className="grid relative z-10 gap-6 bg-black/15 min-h-[50vh] p-5 py-7 sm:p-8 rounded-3xl backdrop-blur-lg w-[min(28rem,80vw)] border border-white/10"
+        className="grid relative z-10 gap-6 bg-black/15 min-h-[50vh] p-5 py-7 sm:p-8 rounded-3xl backdrop-blur-lg w-[min(28rem,90vw)] border border-white/10"
       >
         <legend className="text-2xl font-black text-center mb-5">
           {actionObj[`${action}`]}
         </legend>
 
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-3">
           <div
             ref={nameContRef}
             className="hidden not-[.hidden]:flex flex-col gap-1.5"
@@ -174,7 +176,7 @@ export default function Login() {
                 htmlFor="name"
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400
               pointer-events-none transition-all
-              peer-focus:-top-0.5 peer-focus:text-xs peer-focus:left-2.5
+              peer-focus:top-0.5 peer-focus:text-xs peer-focus:left-2.5
               peer-not-placeholder-shown:left-2.5
               peer-not-placeholder-shown:text-xs
               peer-not-placeholder-shown:-top-0.5"
@@ -183,7 +185,7 @@ export default function Login() {
               </label>
             </div>
             <span
-              className={`email-error text-[13px] text-red-500 font-medium ${!error.email && "opacity-0"} transition-opacity`}
+              className={`text-[13px] text-red-500 font-medium ${!error.name && "opacity-0"} transition-opacity`}
             >
               Invalid username
             </span>
@@ -207,7 +209,7 @@ export default function Login() {
                 htmlFor="email"
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400
               pointer-events-none transition-all
-              peer-focus:-top-0.5 peer-focus:text-xs peer-focus:left-2.5
+              peer-focus:top-0.5 peer-focus:text-xs peer-focus:left-2.5
               peer-not-placeholder-shown:left-2.5
               peer-not-placeholder-shown:text-xs
               peer-not-placeholder-shown:-top-0.5"
@@ -241,7 +243,7 @@ export default function Login() {
                 htmlFor="password"
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400
               pointer-events-none transition-all
-              peer-focus:-top-0.5 peer-focus:text-xs peer-focus:left-2.5
+              peer-focus:top-0.5 peer-focus:text-xs peer-focus:left-2.5
               peer-not-placeholder-shown:left-2.5
               peer-not-placeholder-shown:text-xs
               peer-not-placeholder-shown:-top-0.5"
@@ -262,6 +264,7 @@ export default function Login() {
         >
           <button
             className="bg-(--accent-200)"
+            disabled={isLoading}
             type={action === "login" ? "submit" : "button"}
             onClick={action === "login" ? () => null : handleChangeAction}
           >
@@ -274,6 +277,7 @@ export default function Login() {
           </div>
           <button
             className="bg-black"
+            disabled={isLoading}
             type={action === "register" ? "submit" : "button"}
             onClick={action === "register" ? () => null : handleChangeAction}
           >
