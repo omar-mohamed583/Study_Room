@@ -9,6 +9,7 @@ export default function Header() {
   useLayoutEffect(() => {
     document.body.classList.add(theme);
     document.body.style.paddingBlock = "9rem";
+    document.body.style.overflow = "auto";
   }, []);
 
   useEffect(() => {

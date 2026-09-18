@@ -30,10 +30,12 @@ export default function Login() {
 
   const nameContRef = useRef<null | HTMLDivElement>(null);
 
+  const submitErrorRef = useRef<null | HTMLParagraphElement>(null);
+
   const { register, login, isLoading } = useAuth();
 
   useEffect(() => {
-    document.body.classList.add('dark');
+    document.body.classList.add("dark");
   }, []);
 
   function handleChangeAction() {
@@ -45,12 +47,13 @@ export default function Login() {
       nameContRef?.current?.classList.toggle("hidden", action === "register");
 
       setError({ name: false, email: false, password: false });
+      if (submitErrorRef?.current) submitErrorRef.current.textContent = "";
     }, 500);
 
     setTimeout(() => setLoading(false), 1000);
   }
 
-  function handleFormSubmission(e: any) {
+  async function handleFormSubmission(e: any) {
     e.preventDefault();
 
     const data = new FormData(e.target);
@@ -61,61 +64,65 @@ export default function Login() {
 
     // Handle login logic
     if (action === "login") {
-
       if (!data.get("email") && !data.get("password")) {
         setError((prev) => ({
           ...prev,
           email: true,
           password: true,
         }));
-
       } else if (
         !data.get("email") ||
         !emailRegex.test(String(data.get("email")))
       ) {
         setError((prev) => ({ ...prev, email: true }));
-
       } else if (!data.get("password")) {
         setError((prev) => ({ ...prev, email: false, password: true }));
-
       } else {
         setError({ name: false, email: false, password: false });
 
-        login(email, password);
-        console.log("LOGIN-IN");
+        const loginUser = await login(email, password);
 
-        return navigate("/");
+        if (loginUser?.error) {
+          if (!submitErrorRef?.current) return;
+
+          submitErrorRef.current.textContent = loginUser.error;
+        } else {
+          navigate("/");
+        }
       }
-
-    // Handle Register Logic Here
+      // Handle Register Logic Here
     } else {
-
-      if (!data.get("email") && !data.get("password") && !String(data.get("name")).trim()) {
+      if (
+        !data.get("email") &&
+        !data.get("password") &&
+        !String(data.get("name")).trim()
+      ) {
         setError({
           name: true,
           email: true,
           password: true,
         });
-
       } else if (!String(data.get("name")).trim()) {
         setError(() => ({ name: true, email: false, password: false }));
-
       } else if (
         !data.get("email") ||
         !emailRegex.test(String(data.get("email")))
       ) {
         setError(() => ({ name: false, email: true, password: false }));
-
       } else if (!data.get("password")) {
         setError(() => ({ name: false, email: false, password: true }));
-
       } else {
         setError({ name: false, email: false, password: false });
 
-        register(name, email, password);
-        console.log("REGISTERING")
+        const registerUser = await register(name, email, password);
 
-        return navigate("/");
+        if (registerUser?.error) {
+          if (!submitErrorRef?.current) return;
+
+          submitErrorRef.current.textContent = registerUser.error;
+        } else {
+          navigate("/");
+        }
       }
     }
   }
@@ -152,6 +159,11 @@ export default function Login() {
         <legend className="text-2xl font-black text-center mb-5">
           {actionObj[`${action}`]}
         </legend>
+
+        <p
+          className="submit-error text-red-400 font-bold text-center"
+          ref={submitErrorRef}
+        ></p>
 
         <div className="flex flex-col gap-3">
           <div

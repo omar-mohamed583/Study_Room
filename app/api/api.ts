@@ -9,6 +9,7 @@ export async function apiFetch(endpoint: string, options: any = {}) {
   };
 
   if (token) {
+    console.log("Found Token!!")
     headers.Authorization = `Bearer ${token}`;
   }
 

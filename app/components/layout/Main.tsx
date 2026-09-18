@@ -313,9 +313,8 @@ type MiddlewareArgs = {
   context: Readonly<RouterContextProvider>;
 };
 
-async function authMiddleware({ request, context }: MiddlewareArgs) {
-  const user = localStorage?.getItem("user");
-  if (!user) throw redirect("/login");
-
-  context.set(userContext, user);
+async function authMiddleware() {
+  const jwt = localStorage?.getItem("jwt");
+  console.log(jwt)
+  if (!jwt) throw redirect("/login");
 }

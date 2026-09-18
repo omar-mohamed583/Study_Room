@@ -1,3 +1,4 @@
+import { useLayoutEffect } from "react";
 import { Link } from "react-router";
 import Particles from "~/components/ui/Particles";
 import WarpText from "~/components/ui/WarpText";
@@ -5,6 +6,11 @@ import useTheme from "~/context/themeContext";
 
 export default function NotFound() {
   const { theme } = useTheme();
+
+  useLayoutEffect(() => {
+    document.body.style.overflow = "hidden";
+  }, []);
+
   return (
     <main className="mt-5 grid content-center *:text-center justify-center min-h-full">
       <Particles

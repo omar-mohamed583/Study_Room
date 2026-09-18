@@ -27,6 +27,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem("jwt");
         setJwt(null);
         setUser(null);
+
+        return { error };
       } finally {
         setLoading(false);
       }
@@ -77,10 +79,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(data.user);
 
       return data.user;
-    } catch (e) {
+    } catch (e: any) {
       console.log("Error: ", e);
 
-      return { error: e };
+      return { error : e }
     }
   }
 
