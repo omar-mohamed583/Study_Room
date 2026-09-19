@@ -189,6 +189,6 @@ body.dark {
 }
 
 .menu {
-  border-radius: 8px;
-  box-shadow: 0 0 10px 3px;
+  border-radius: 14px;
+  overflow: hidden;
 }
