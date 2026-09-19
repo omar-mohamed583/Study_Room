@@ -1,4 +1,9 @@
-import { useContext, useEffect, useState, type ReactNode } from "react";
+import {
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
 import { apiFetch } from "~/api/api";
 import { AuthContext } from "~/context/authContext";
 
@@ -12,6 +17,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setLoading] = useState(false);
 
   useEffect(() => {
+    const controller = new AbortController();
     async function loadUser() {
       setLoading(true);
       if (!jwt) {
@@ -20,14 +26,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       try {
-        const currentUser = await apiFetch("/users/me");
+        const currentUser = await apiFetch("/users/me", { signal: controller.signal });
         setUser(currentUser);
-      } catch (error) {
+
+      } catch (error: any) {
         console.error("Failed to load user:", error);
 
-        localStorage.removeItem("jwt");
-        setJwt(null);
-        setUser(null);
+        if (error.name === "AbortError") return;
+
+        if (error?.status === 401 || error?.status === 403) {
+          localStorage.removeItem("jwt");
+          setJwt(null);
+          setUser(null);
+        }
 
         return { error };
 
@@ -37,6 +48,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     loadUser();
+
+    return () => { controller.abort(); console.log("aborted")}
   }, [jwt]);
 
   async function register(
@@ -45,7 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     password: string | number,
   ) {
     try {
-      setLoading(true)
+      setLoading(true);
       const data = await apiFetch("/auth/local/register", {
         method: "POST",
         body: JSON.stringify({
@@ -64,7 +77,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (e) {
       console.log("Error: ", e);
       return { error: e };
-
     } finally {
       setLoading(false);
     }
@@ -88,8 +100,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return data.user;
     } catch (e: any) {
       console.log("Error: ", e);
-      return { error : e }
-
+      return { error: String(e).replace(/identifier/, "email") };
     } finally {
       setLoading(false);
     }

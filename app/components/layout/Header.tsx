@@ -1,14 +1,15 @@
 import ShinyText from "../ui/ShinyText";
 import useTheme from "~/context/themeContext";
-import { useEffect, useLayoutEffect } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { Link } from "react-router";
 
 export default function Header() {
   const { theme, setTheme } = useTheme();
 
+  const [openMenu, setOpenMenu] = useState(false);
+
   useLayoutEffect(() => {
     document.body.classList.add(theme);
-    document.body.style.paddingBlock = "9rem";
     document.body.style.overflow = "auto";
   }, []);
 
@@ -23,7 +24,7 @@ export default function Header() {
   }, [theme]);
 
   return (
-    <header className="z-1000 min-w-max rounded-full bg-[hsl(from_var(--sect-bg)_h_s_l_/.6)] backdrop-blur-2xl flex gap-4 p-3 *:bg-(--body-gray) *:border-t *:border-t-gray-400/10 *:shadow-(--xl-shadow) *:rounded-full fixed top-8 left-1/2 shadow-(--xs-shadow) -translate-x-1/2">
+    <header className="w-fit rounded-full bg-[hsl(from_var(--sect-bg)_h_s_l_/.6)] backdrop-blur-2xl flex gap-4 p-3 *:bg-(--body-gray) *:border-t *:border-t-gray-400/10 *:shadow-(--xl-shadow) *:rounded-full shadow-(--xs-shadow) mx-auto my-6">
       <h1 className="font-bold text-lg leading-[normal] cursor-pointer p-4 px-5 md:px-8 flex items-center tracking-wide">
         <ShinyText
           text="Study Room"
@@ -126,7 +127,10 @@ export default function Header() {
           </svg>
         </button>
 
-        <button className="w-10 h-10 grid place-content-center">
+        <button
+          className="w-10 h-10 grid place-content-center [anchor-name:--anc]"
+          onClick={() => setOpenMenu((prev) => !prev)}
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -147,6 +151,14 @@ export default function Header() {
             />
           </svg>
         </button>
+      </div>
+      <div className="menu absolute top-[anchor(bottom)] right-3 [position-anchor:--anc] z-100000">
+        <ul className="*:p-2 cursor-pointer">
+          <li>Account</li>
+          <li>Setting</li>
+          <li>Dashboard</li>
+          <li>Logout</li>
+        </ul>
       </div>
     </header>
   );

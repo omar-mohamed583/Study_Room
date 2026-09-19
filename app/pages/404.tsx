@@ -12,7 +12,7 @@ export default function NotFound() {
   }, []);
 
   return (
-    <main className="mt-5 grid content-center *:text-center justify-center min-h-full">
+    <main className="mt-27 grid content-center *:text-center justify-center min-h-full">
       <Particles
         particleColors={[ theme === "dark" ? "#fff" : "#838383"]}
         particleCount={800}

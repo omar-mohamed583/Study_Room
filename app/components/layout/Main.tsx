@@ -364,5 +364,11 @@ type MiddlewareArgs = {
 async function authMiddleware() {
   const jwt = localStorage?.getItem("jwt");
   console.log(jwt);
+
+  if (!localStorage) return setTimeout(() => {
+    const jwt = localStorage.getItem("jwt");
+    if (!jwt) throw redirect("/login");
+  }, 10);
+
   if (!jwt) throw redirect("/login");
 }
