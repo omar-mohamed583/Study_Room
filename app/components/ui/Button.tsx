@@ -4,17 +4,17 @@ import { useNavigate } from "react-router";
 export default function Button({
   children,
   className,
-  navigation,
+  navigation = { to: "" },
 }: {
   children: ReactNode;
   className: string;
-  navigation: { to: string };
+  navigation?: { to: string };
 }) {
   const navigate = useNavigate();
   return (
     <button
       className={`p-2 rounded-xl cursor-pointer ${className}`}
-      onClick={navigation.to ? () => navigate(navigation.to) : () => ""}
+      onClick={navigation?.to ? () => navigate(navigation.to) : () => ""}
     >
       {children}
     </button>

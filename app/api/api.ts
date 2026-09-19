@@ -8,7 +8,6 @@ export async function apiFetch(endpoint: string, options: any = {}) {
     ...options.headers,
   };
 
-  if (endpoint === "/users/me" ) headers.signal = options.signal;
 
   if (token) {
     console.log("Found Token!!")

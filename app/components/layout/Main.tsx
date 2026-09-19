@@ -1,18 +1,178 @@
-import { useLayoutEffect, useRef, useState } from "react";
-import {
-  Link,
-  redirect,
-  RouterContextProvider,
-  useNavigate,
-} from "react-router";
+import { Suspense, useLayoutEffect, useRef, useState } from "react";
+import { Link, redirect, useNavigate } from "react-router";
 import type DefaultMainSecType from "~/types/defaultMain";
 import type SubjectTypes from "~/types/subjectTypes";
 import type TaskItemType from "~/types/taskItemTypes";
 import { fakeData } from "~/api/fakeapi";
 import Button from "../ui/Button";
 import Header from "./Header";
+import { useAuth } from "../providers/authProvider";
+import LoadingComponent from "../ui/LoadingComponent";
 
 export default function DefaultMain() {
+  const { user } = useAuth();
+  console.log(user)
+
+  const btns = [
+    {
+      svg: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="lucide lucide-list-todo preview-icon"
+        >
+          <path d="M13 5h8" />
+          <path d="M13 12h8" />
+          <path d="M13 19h8" />
+          <path d="m3 17 2 2 4-4" />
+          <rect
+            x="3"
+            y="4"
+            width="6"
+            height="6"
+            rx="1"
+          />
+        </svg>
+      ),
+      name: "Start new task",
+      variation: "bg-(--accent-100) text-white",
+      toLocation: "/tasks/new",
+    },
+    {
+      svg: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="lucide lucide-clipboard-check preview-icon"
+        >
+          <rect
+            width="8"
+            height="4"
+            x="8"
+            y="2"
+            rx="1"
+            ry="1"
+          />
+          <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+          <path d="m9 14 2 2 4-4" />
+        </svg>
+      ),
+      name: "Set new exam",
+      variation: "bg-(--btns-bg) text-black",
+      toLocation: "/exam/new",
+    },
+    {
+      svg: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="lucide lucide-timer preview-icon"
+        >
+          <line
+            x1="10"
+            x2="14"
+            y1="2"
+            y2="2"
+          />
+          <line
+            x1="12"
+            x2="15"
+            y1="14"
+            y2="11"
+          />
+          <circle
+            cx="12"
+            cy="14"
+            r="8"
+          />
+        </svg>
+      ),
+      name: "Start focus timer",
+      variation: "bg-(--accent-200) text-white",
+      toLocation: "/focus-timer",
+    },
+    {
+      svg: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="lucide lucide-calendar-days preview-icon"
+        >
+          <path d="M8 2v3" />
+          <path d="M16 2v3" />
+          <rect
+            x="3"
+            y="3"
+            width="18"
+            height="18"
+            rx="2"
+          />
+          <path d="M3 9h18" />
+          <path d="M8 13h.01" />
+          <path d="M12 13h.01" />
+          <path d="M16 13h.01" />
+          <path d="M8 17h.01" />
+          <path d="M12 17h.01" />
+          <path d="M16 17h.01" />
+        </svg>
+      ),
+      name: "See calendar",
+      variation: "bg-(--btns-bg) text-black",
+      toLocation: "/calendar",
+    },
+    {
+      svg: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="lucide lucide-chart-no-axes-column-increasing preview-icon"
+        >
+          <path d="M5 21v-6" />
+          <path d="M12 21V9" />
+          <path d="M19 21V3" />
+        </svg>
+      ),
+      name: "See your progress",
+      variation: "bg-(--accent-100) text-white",
+      toLocation: "/dashboard",
+    },
+  ];
+
   return (
     <>
       <Header />
@@ -50,12 +210,14 @@ export default function DefaultMain() {
             alignContentBetween
             bgImage="../../assets/hope.jpg"
           >
-            <div className="px-3">
-              <h2 className="font-medium text-3xl text-white leading-[normal] text-center">
-                Have A Good Day,<br></br>
-                {fakeData.NAME} 👋
-              </h2>
-            </div>
+            <Suspense fallback={<LoadingComponent loading={user} />} >
+              <div className="px-3">
+                <h2 className="font-medium text-3xl text-white leading-[normal] text-center">
+                  Have A Good Day,<br></br>
+                  {user?.username} 👋
+                </h2>
+              </div>
+            </Suspense>
 
             <div className="px-3">
               <h4 className="text-2xl text-center leading-[normal] text-white mb-5 text-shadow-lg text-shadow-black">
@@ -63,165 +225,7 @@ export default function DefaultMain() {
               </h4>
 
               <div className="flex justify-center gap-6 gap-y-4 flex-wrap">
-                {[
-                  {
-                    svg: (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="lucide lucide-list-todo preview-icon"
-                      >
-                        <path d="M13 5h8" />
-                        <path d="M13 12h8" />
-                        <path d="M13 19h8" />
-                        <path d="m3 17 2 2 4-4" />
-                        <rect
-                          x="3"
-                          y="4"
-                          width="6"
-                          height="6"
-                          rx="1"
-                        />
-                      </svg>
-                    ),
-                    name: "Start new task",
-                    variation: "bg-(--accent-100) text-white",
-                    toLocation: "/tasks/new",
-                  },
-                  {
-                    svg: (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="lucide lucide-clipboard-check preview-icon"
-                      >
-                        <rect
-                          width="8"
-                          height="4"
-                          x="8"
-                          y="2"
-                          rx="1"
-                          ry="1"
-                        />
-                        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
-                        <path d="m9 14 2 2 4-4" />
-                      </svg>
-                    ),
-                    name: "Set new exam",
-                    variation: "bg-(--btns-bg) text-black",
-                    toLocation: "/exam/new",
-                  },
-                  {
-                    svg: (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="lucide lucide-timer preview-icon"
-                      >
-                        <line
-                          x1="10"
-                          x2="14"
-                          y1="2"
-                          y2="2"
-                        />
-                        <line
-                          x1="12"
-                          x2="15"
-                          y1="14"
-                          y2="11"
-                        />
-                        <circle
-                          cx="12"
-                          cy="14"
-                          r="8"
-                        />
-                      </svg>
-                    ),
-                    name: "Start focus timer",
-                    variation: "bg-(--accent-200) text-white",
-                    toLocation: "/focus-timer",
-                  },
-                  {
-                    svg: (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="lucide lucide-calendar-days preview-icon"
-                      >
-                        <path d="M8 2v3" />
-                        <path d="M16 2v3" />
-                        <rect
-                          x="3"
-                          y="3"
-                          width="18"
-                          height="18"
-                          rx="2"
-                        />
-                        <path d="M3 9h18" />
-                        <path d="M8 13h.01" />
-                        <path d="M12 13h.01" />
-                        <path d="M16 13h.01" />
-                        <path d="M8 17h.01" />
-                        <path d="M12 17h.01" />
-                        <path d="M16 17h.01" />
-                      </svg>
-                    ),
-                    name: "See calendar",
-                    variation: "bg-(--btns-bg) text-black",
-                    toLocation: "/calendar",
-                  },
-                  {
-                    svg: (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="lucide lucide-chart-no-axes-column-increasing preview-icon"
-                      >
-                        <path d="M5 21v-6" />
-                        <path d="M12 21V9" />
-                        <path d="M19 21V3" />
-                      </svg>
-                    ),
-                    name: "See your progress",
-                    variation: "bg-(--accent-100) text-white",
-                    toLocation: "/dashboard",
-                  },
-                ].map((btn) => (
+                {btns.map((btn) => (
                   <Button
                     key={btn.name}
                     className={

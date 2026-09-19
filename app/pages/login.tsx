@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { ThinkingOrb } from "thinking-orbs";
 import { useAuth } from "~/components/providers/authProvider";
 import GradientWaves from "~/components/ui/GradientWaves";
+import LoadingComponent from "~/components/ui/LoadingComponent";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -409,17 +409,7 @@ export default function Login() {
         </div>
       </form>
 
-      <div
-        className={`loading h-screen w-screen fixed top-0 left-0 bg-black/80 place-content-center place-items-center z-999 backdrop-blur-2xl ${(loading || isLoading) ? "visible opacity-100" : "invisible opacity-0"} duration-75 transition-opacity`}
-      >
-        <div className="flex flex-col items-center gap-2 tracking-wider text-sm">
-          <ThinkingOrb
-            state="solving"
-            size={64}
-          />
-          Hang Tight...
-        </div>
-      </div>
+      <LoadingComponent loading={!(loading || isLoading)} />
     </main>
   );
 }

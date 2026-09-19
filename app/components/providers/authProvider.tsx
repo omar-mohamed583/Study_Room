@@ -18,9 +18,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const controller = new AbortController();
+
     async function loadUser() {
       setLoading(true);
       if (!jwt) {
+        console.log("no JWT")
         setLoading(false);
         return;
       }
@@ -32,7 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch (error: any) {
         console.error("Failed to load user:", error);
 
-        if (error.name === "AbortError") return;
+        if (error.name === "AbortError") return console.log("Aborted From If Condition");
 
         if (error?.status === 401 || error?.status === 403) {
           localStorage.removeItem("jwt");

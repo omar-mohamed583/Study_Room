@@ -419,7 +419,7 @@ function ContainerListItem({
   items,
   heading,
 }: {
-  items: { name: string; svg: React.JSX.Element; toLocation: string }[];
+  items: { id: string, name: string; svg: React.JSX.Element; toLocation: string }[];
   heading: string;
 }) {
   return (
@@ -431,7 +431,7 @@ function ContainerListItem({
       </div>
       <ul className="*:py-3 *:px-4 *:min-w-50 cursor-pointer *:hover:bg-zinc-400/20 *:font-medium *:transition-colors *:duration-200 *:text-[15px]">
         {items.map((item) => (
-          <li>
+          <li key={item.id}>
             <Link
               to={item.toLocation}
               className="flex items-center content-center justify-between"
