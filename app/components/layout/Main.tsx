@@ -5,13 +5,15 @@ import type SubjectTypes from "~/types/subjectTypes";
 import type TaskItemType from "~/types/taskItemTypes";
 import { fakeData } from "~/api/fakeapi";
 import Button from "../ui/Button";
-import Header from "./Header";
+import Header, { playSound } from "./Header";
 import { useAuth } from "../providers/authProvider";
 import LoadingComponent from "../ui/LoadingComponent";
 
 export default function DefaultMain() {
   const { user } = useAuth();
   console.log(user)
+
+  useLayoutEffect(() => {document.body.style.paddingBottom = "3em"})
 
   const btns = [
     {
@@ -293,6 +295,7 @@ function DefaultMainSection({
               aria-label="Shrink/Expand Section"
               className="*:transition-opacity duration-300 in-[.show]:[&>svg:first-child]:opacity-100 in-[.show]:[&>svg:last-child]:opacity-0 cursor-pointer grid not-[.show_&]:[&>svg:first-child]:opacity-0 [grid-template-areas:'stack'] *:[grid-area:stack]"
               onClick={() => {
+                playSound(mainRef?.current?.classList.contains('show') ? "collapse" : "expand")
                 mainRef?.current?.classList.toggle("show");
                 mainRef?.current?.closest("section")?.classList.toggle("show");
                 setHeight(height === 0 ? maximumHeightValue.current : 0);

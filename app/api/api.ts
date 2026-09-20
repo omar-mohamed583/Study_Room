@@ -22,7 +22,9 @@ export async function apiFetch(endpoint: string, options: any = {}) {
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data?.error?.message || "Something went wrong");
+    console.error(data?.error?.message || "Something went wrong");
+
+    return { error: data?.error?.message };
   }
 
   return data;

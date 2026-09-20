@@ -2,11 +2,22 @@ import ShinyText from "../ui/ShinyText";
 import useTheme from "~/context/themeContext";
 import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
+import { createUISFX, type CueName } from "uisfx";
+
+export const playSound = (sound: CueName) => {
+  const ui = createUISFX({
+    pack: "minimal",
+    volume: 0.25,
+  });
+
+  ui.play(sound);
+};
 
 export default function Header() {
   const { theme, setTheme } = useTheme();
 
   const [openMenu, setOpenMenu] = useState(false);
+
 
   useLayoutEffect(() => {
     document.body.classList.add(theme);
@@ -287,8 +298,18 @@ export default function Header() {
       </h1>
 
       <div className="flex gap-3 items-center content-center *:p-3 *:px-5 p-1 px-2 *:rounded-full *:transition-colors duration-300 *:hover:bg-gray-400/25 in-[.dark]:*:hover:bg-zinc-800/80">
-        <Link to="">Statistics</Link>
-        <Link to="">Focus Timer</Link>
+        <Link
+          to=""
+          onClick={() => playSound("forward")}
+        >
+          Statistics
+        </Link>
+        <Link
+          to=""
+          onClick={() => playSound("forward")}
+        >
+          Focus Timer
+        </Link>
       </div>
 
       <div className="flex gap-3 p-2 *:bg-zinc-50 *:in-[.dark]:bg-zinc-800 *:backdrop-blur-3xl *:rounded-full [&_button]:cursor-pointer [&_button]:hover:bg-gray-400/25 in-[.dark]:[&_button]:hover:bg-zinc-700/75 [&_button]:transition-colors duration-300 z-1000">
@@ -328,7 +349,10 @@ export default function Header() {
 
         <button
           className="grid [grid-template-areas:'stack'] *:[grid-area:stack] items-center content-center in-[.dark]:[&>*:last-child]:opacity-100 in-[.dark]:[&>*:first-child]:opacity-0 [&>*:last-child]:opacity-0 w-10 h-10 place-content-center"
-          onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+          onClick={() => {
+            playSound(theme === "dark" ? "toggle-off" : "toggle-on");
+            setTheme(theme === "light" ? "dark" : "light");
+          }}
         >
           {/* Moon */}
           <svg
@@ -372,7 +396,10 @@ export default function Header() {
 
         <button
           className="w-10 h-10 grid place-content-center [anchor-name:--anc]"
-          onClick={() => setOpenMenu((prev) => !prev)}
+          onClick={() => {
+            playSound(openMenu ? "close" : "open");
+            setOpenMenu((prev) => !prev);
+          }}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -399,7 +426,7 @@ export default function Header() {
       <div
         className={`menu transition-[opacity,scale] duration-300 ${openMenu ? "pointer-events-auto opacity-100 scale-100" : "pointer-events-none opacity-0 scale-95 origin-top-right"} absolute top-[calc(anchor(bottom)+6px)] right-[anchor(right)] [position-anchor:--anc] z-100000 border-gray-400/10 border shadow-xl`}
       >
-        <ul className="min-w-56 py-2">
+        <ul className="min-w-58 py-2">
           <ContainerListItem
             heading="Personal"
             items={PERSONAL_ITEMS}
@@ -419,7 +446,12 @@ function ContainerListItem({
   items,
   heading,
 }: {
-  items: { id: string, name: string; svg: React.JSX.Element; toLocation: string }[];
+  items: {
+    id: string;
+    name: string;
+    svg: React.JSX.Element;
+    toLocation: string;
+  }[];
   heading: string;
 }) {
   return (

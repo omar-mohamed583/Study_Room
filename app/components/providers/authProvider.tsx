@@ -70,6 +70,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }),
       });
 
+      if (data?.error) return { error: data?.error };
+
       localStorage.setItem("jwt", data.jwt);
 
       setJwt(data.jwt);

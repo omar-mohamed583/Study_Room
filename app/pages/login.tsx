@@ -30,9 +30,9 @@ export default function Login() {
 
   const [seePass, setSeePass] = useState<boolean>(false);
 
-  const nameContRef = useRef<null | HTMLDivElement>(null);
+  const [submitError, setSubmitError] = useState<string | { error: string }>("");
 
-  const submitErrorRef = useRef<null | HTMLParagraphElement>(null);
+  const nameContRef = useRef<null | HTMLDivElement>(null);
 
   const { register, login, isLoading } = useAuth();
 
@@ -50,7 +50,7 @@ export default function Login() {
       nameContRef?.current?.classList.toggle("hidden", action === "register");
 
       setError({ name: false, email: false, password: false });
-      if (submitErrorRef?.current) submitErrorRef.current.textContent = "";
+      setSubmitError("")
     }, 500);
 
     setTimeout(() => setLoading(false), 1000);
@@ -86,9 +86,11 @@ export default function Login() {
         const loginUser = await login(email, password);
 
         if (loginUser?.error) {
-          if (!submitErrorRef?.current) return;
+          setSubmitError(loginUser.error);
+          setTimeout(() => {
+            setSubmitError("");
+          }, 2000);
 
-          submitErrorRef.current.textContent = loginUser.error;
         } else {
           navigate("/");
         }
@@ -120,9 +122,10 @@ export default function Login() {
         const registerUser = await register(name, email, password);
 
         if (registerUser?.error) {
-          if (!submitErrorRef?.current) return;
-
-          submitErrorRef.current.textContent = registerUser.error;
+          setSubmitError(registerUser.error);
+          setTimeout(() => {
+            setSubmitError("");
+          }, 2000);
         } else {
           navigate("/");
         }
@@ -155,18 +158,19 @@ export default function Login() {
         grainIntensity={0.05}
       />
 
+      <p
+        className={`absolute [position-anchor:--anc] bottom-[calc(anchor(top)-16px)] left-[anchor(left)] w-[anchor-size(width)] -z-10 pb-7 pt-3 rounded-t-3xl submit-error text-red-400 font-bold text-center bg-red-500/15 backdrop-blur-xl transition-[translate,opacity] duration-200 ${submitError ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"}`}
+      >
+        { typeof submitError === "string" ? submitError : submitError.error}
+      </p>
+
       <form
         onSubmit={handleFormSubmission}
-        className="grid relative z-10 gap-4 bg-black/15 min-h-[50vh] p-5 py-7 sm:p-8 rounded-3xl backdrop-blur-lg w-[min(28rem,90vw)] border border-white/10"
+        className="grid relative [anchor-name:--anc] z-10 gap-4 bg-black/15 min-h-[50vh] p-5 py-7 sm:p-8 rounded-3xl backdrop-blur-lg w-[min(28rem,90vw)] border border-white/10 isolation-auto"
       >
         <legend className="text-2xl font-black text-center mb-5">
           {actionObj[`${action}`]}
         </legend>
-
-        <p
-          className="submit-error text-red-400 font-bold text-center mb-3"
-          ref={submitErrorRef}
-        ></p>
 
         <div className="flex flex-col gap-3">
           <div

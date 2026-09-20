@@ -1,5 +1,6 @@
 import { useLayoutEffect } from "react";
 import { Link } from "react-router";
+import Button from "~/components/ui/Button";
 import Particles from "~/components/ui/Particles";
 import WarpText from "~/components/ui/WarpText";
 import useTheme from "~/context/themeContext";
@@ -14,7 +15,7 @@ export default function NotFound() {
   return (
     <main className="mt-27 grid content-center *:text-center justify-center min-h-full">
       <Particles
-        particleColors={[ theme === "dark" ? "#fff" : "#838383"]}
+        particleColors={[theme === "dark" ? "#fff" : "#838383"]}
         particleCount={800}
         particleSpread={10}
         speed={0.3}
@@ -65,12 +66,25 @@ export default function NotFound() {
       <p className="-mt-20">
         Sorry, we didn't find the page that you are looking for.
       </p>
-      <Link
-        to="/"
-        className="mx-auto underline max-w-fit hover:text-blue-500 p-1 underline-offset-1 mt-0"
-      >
-        Return Home
-      </Link>
+
+      <Button className="bg-black text-white transition-colors duration-300 hover:bg-zinc-800 flex gap-2 content-center items-center justify-center" navigation={{to: "/"}}>
+        Return To Home
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="lucide lucide-move-right preview-icon"
+        >
+          <path d="M18 8L22 12L18 16" />
+          <path d="M2 12H22" />
+        </svg>
+      </Button>
     </main>
   );
 }
