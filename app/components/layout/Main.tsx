@@ -5,15 +5,19 @@ import type SubjectTypes from "~/types/subjectTypes";
 import type TaskItemType from "~/types/taskItemTypes";
 import { fakeData } from "~/api/fakeapi";
 import Button from "../ui/Button";
-import Header, { playSound } from "./Header";
+import Header from "./Header";
 import { useAuth } from "../providers/authProvider";
 import LoadingComponent from "../ui/LoadingComponent";
+import Particles from "../ui/Particles";
+import useTheme from "~/context/themeContext";
 
 export default function DefaultMain() {
   const { user } = useAuth();
-  console.log(user)
+  console.log(user);
 
-  useLayoutEffect(() => {document.body.style.paddingBottom = "3em"})
+  useLayoutEffect(() => {
+    document.body.style.paddingBottom = "3em";
+  });
 
   const btns = [
     {
@@ -178,7 +182,7 @@ export default function DefaultMain() {
   return (
     <>
       <Header />
-      <main className="relative grid grid-cols-2 gap-8 max-w-330 mx-auto px-4 md:px-8">
+      <main className="relative grid grid-cols-2 gap-8 max-w-325 mx-auto px-4 md:px-8">
         <section className="flex flex-col gap-12 bg-(--sect-bg) p-4 rounded-[25px]">
           <DefaultMainSection sectionTitle="Today Tasks">
             {fakeData.TASK.map((task) => (
@@ -212,9 +216,9 @@ export default function DefaultMain() {
             alignContentBetween
             bgImage="../../assets/hope.jpg"
           >
-            <Suspense fallback={<LoadingComponent loading={user} />} >
+            <Suspense fallback={<LoadingComponent loading={user} />}>
               <div className="px-3">
-                <h2 className="font-medium text-3xl text-white leading-[normal] text-center">
+                <h2 className="font-medium text-3xl text-white leading-[normal] text-center capitalize">
                   Have A Good Day,<br></br>
                   {user?.username} 👋
                 </h2>
@@ -260,6 +264,7 @@ function DefaultMainSection({
   bgImage = "",
   alignContentBetween = false,
 }: DefaultMainSecType) {
+  const {theme} = useTheme();
   const mainRef = useRef<null | HTMLDivElement>(null);
   const maximumHeightValue = useRef(0);
 
@@ -280,22 +285,21 @@ function DefaultMainSection({
 
   return (
     <section
-      className={`show rounded-[17px] border border-(--border-clr) overflow-hidden ${bgImage && "bg-image"}`}
+      className={`relative show rounded-[17px] border border-(--border-clr) overflow-hidden ${bgImage && "bg-image"}`}
       style={{
         maxHeight: "fit-content",
       }}
     >
       {sectionTitle && (
-        <header className="p-5 flex justify-between items-center content-center border-b border-b-(--border-clr) transition-colors not-[.show_&]:border-b-transparent">
+        <header className="p-5 py-7 flex justify-between items-center content-center transition-colors not-[.show_&]:border-b-transparent">
           <h2 className="text-xl leading-[normal] font-medium">
             {sectionTitle}
           </h2>
           {shrinkable && (
             <button
               aria-label="Shrink/Expand Section"
-              className="*:transition-opacity duration-300 in-[.show]:[&>svg:first-child]:opacity-100 in-[.show]:[&>svg:last-child]:opacity-0 cursor-pointer grid not-[.show_&]:[&>svg:first-child]:opacity-0 [grid-template-areas:'stack'] *:[grid-area:stack]"
+              className="*:transition-opacity duration-300 in-[.show]:[&>svg:first-child]:opacity-100 in-[.show]:[&>svg:last-child]:opacity-0 cursor-pointer grid not-[.show_&]:[&>svg:first-child]:opacity-0 [grid-template-areas:'stack'] *:[grid-area:stack] rounded-xl border border-gray-400/20 p-1"
               onClick={() => {
-                playSound(mainRef?.current?.classList.contains('show') ? "collapse" : "expand")
                 mainRef?.current?.classList.toggle("show");
                 mainRef?.current?.closest("section")?.classList.toggle("show");
                 setHeight(height === 0 ? maximumHeightValue.current : 0);
@@ -376,17 +380,19 @@ function TaskItem({ id, title, subject }: TaskItemType) {
       className="bg-(--items-bg) grid grid-cols-[1.3fr_.7fr] py-4 px-3 has-[+div]:border-b border-(--secondary-gray) items-center content-center"
       aria-label={`${title} (Today task)`}
     >
-      <div className="grid gap-4 *:leading-[normal]">
-        <span className="text-(--text-secondary)">{subject} /</span>
-        <h3 className="indent-4 text-2xl font-semibold">{title}</h3>
+      <div className="grid gap-2 *:leading-[normal]">
+        <span className="text-(--text-secondary) bulleted capitalize">
+          {subject} /
+        </span>
+        <h3 className="indent-4 text-2xl font-semibold capitalize">{title}</h3>
       </div>
 
-      <div className="flex gap-2 flex-wrap *:aspect-square *:rounded-md *:w-9 *:bg-(--accent-200) justify-end *:cursor-pointer *:shadow-[0px_3px_4px_0px_rgba(0_0_0/0.56)] *:fill-white *:stroke-white *:text-(--contrast-text) *:place-content-center *:grid *:hover:brightness-75">
-        <button>
+      <div className="flex gap-2 flex-wrap justify-end *:cursor-pointer *:place-content-center *:grid *:hover:brightness-75">
+        <button aria-label="Edit Task">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
+            width="18"
+            height="18"
             viewBox="0 0 24 24"
             fill="none"
             stroke="white"
@@ -399,11 +405,11 @@ function TaskItem({ id, title, subject }: TaskItemType) {
             <path d="m15 5 4 4" />
           </svg>
         </button>
-        <button>
+        <button aria-label="Delete Task">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
+            width="18"
+            height="18"
             viewBox="0 0 24 24"
             fill="none"
             stroke="white"
@@ -422,8 +428,8 @@ function TaskItem({ id, title, subject }: TaskItemType) {
         <button aria-label="Mark Task As Completed">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
+            width="18"
+            height="18"
             viewBox="0 0 24 24"
             fill="none"
             stroke="white"
@@ -441,8 +447,8 @@ function TaskItem({ id, title, subject }: TaskItemType) {
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
+            width="18"
+            height="18"
             viewBox="0 0 24 24"
             fill="none"
             strokeWidth="2"

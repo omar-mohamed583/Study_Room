@@ -1,5 +1,4 @@
 import { useLayoutEffect } from "react";
-import { Link } from "react-router";
 import Button from "~/components/ui/Button";
 import Particles from "~/components/ui/Particles";
 import WarpText from "~/components/ui/WarpText";
@@ -9,6 +8,7 @@ export default function NotFound() {
   const { theme } = useTheme();
 
   useLayoutEffect(() => {
+    !document.body.classList.contains(theme) && document.body.classList.add(theme)
     document.body.style.overflow = "hidden";
   }, []);
 

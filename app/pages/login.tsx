@@ -84,12 +84,13 @@ export default function Login() {
         setError({ name: false, email: false, password: false });
 
         const loginUser = await login(email, password);
-
+        console.log(loginUser)
         if (loginUser?.error) {
-          setSubmitError(loginUser.error);
+          setSubmitError(loginUser?.error);
+
           setTimeout(() => {
             setSubmitError("");
-          }, 2000);
+          }, 3000);
 
         } else {
           navigate("/");
@@ -120,12 +121,13 @@ export default function Login() {
         setError({ name: false, email: false, password: false });
 
         const registerUser = await register(name, email, password);
+        console.log(registerUser);
 
         if (registerUser?.error) {
           setSubmitError(registerUser.error);
           setTimeout(() => {
             setSubmitError("");
-          }, 2000);
+          }, 3000);
         } else {
           navigate("/");
         }
@@ -161,7 +163,7 @@ export default function Login() {
       <p
         className={`absolute [position-anchor:--anc] bottom-[calc(anchor(top)-16px)] left-[anchor(left)] w-[anchor-size(width)] -z-10 pb-7 pt-3 rounded-t-3xl submit-error text-red-400 font-bold text-center bg-red-500/15 backdrop-blur-xl transition-[translate,opacity] duration-200 ${submitError ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"}`}
       >
-        { typeof submitError === "string" ? submitError : submitError.error}
+        {typeof submitError === "string" ? submitError : submitError.error}
       </p>
 
       <form
@@ -189,16 +191,16 @@ export default function Login() {
                 title="Please enter username"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="peer focus:outline-none p-2 border-b border-b-white w-full text-[15px]"
+                className={`peer focus:outline-none p-2 border-b  w-full text-[15px] ${error.name ? "border-b-red-500" : "border-b-white"}`}
               />
               <label
                 htmlFor="name"
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400
+                className={`absolute left-3 top-1/2 -translate-y-1/2 text-sm ${error.name ? "text-red-500" : "text-gray-400"}
               pointer-events-none transition-all
               peer-focus:-top-0.5 peer-focus:scale-80 peer-focus:left-0
               peer-not-placeholder-shown:left-0
               peer-not-placeholder-shown:scale-80
-              peer-not-placeholder-shown:-top-0.5 flex gap-2 items-center content-center"
+              peer-not-placeholder-shown:-top-0.5 flex gap-2 items-center content-center`}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -238,16 +240,16 @@ export default function Login() {
                 title="Please enter your email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="peer focus:outline-none p-2 border-b border-b-white w-full text-[15px]"
+                className={`peer focus:outline-none p-2 border-b  w-full text-[15px] ${error.email ? "border-b-red-500" : "border-b-white"}`}
               />
               <label
                 htmlFor="email"
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400
+                className={`absolute left-3 top-1/2 -translate-y-1/2 text-sm ${error.email ? "text-red-500" : "text-gray-400"}
               pointer-events-none transition-all
               peer-focus:-top-0.5 peer-focus:scale-80 peer-focus:left-0
               peer-not-placeholder-shown:left-0
               peer-not-placeholder-shown:scale-80
-              peer-not-placeholder-shown:-top-0.5 flex gap-2 items-center content-center"
+              peer-not-placeholder-shown:-top-0.5 flex gap-2 items-center content-center`}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -293,16 +295,16 @@ export default function Login() {
                 name="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="peer focus:outline-none p-2 border-b border-b-white w-full text-[15px]"
+                className={`peer focus:outline-none p-2 border-b  w-full text-[15px] ${error.password ? "border-b-red-500" : "border-b-white"}`}
               />
               <label
                 htmlFor="password"
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400
+                className={`absolute left-3 top-1/2 -translate-y-1/2 text-sm ${error.password ? "text-red-500" : "text-gray-400"}
               pointer-events-none transition-all
               peer-focus:-top-0.5 peer-focus:scale-80 peer-focus:left-0
               peer-not-placeholder-shown:left-0
               peer-not-placeholder-shown:scale-80
-              peer-not-placeholder-shown:-top-0.5 flex gap-2 items-center content-center"
+              peer-not-placeholder-shown:-top-0.5 flex gap-2 items-center content-center`}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

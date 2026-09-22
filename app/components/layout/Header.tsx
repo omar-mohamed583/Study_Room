@@ -2,22 +2,11 @@ import ShinyText from "../ui/ShinyText";
 import useTheme from "~/context/themeContext";
 import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
-import { createUISFX, type CueName } from "uisfx";
-
-export const playSound = (sound: CueName) => {
-  const ui = createUISFX({
-    pack: "minimal",
-    volume: 0.25,
-  });
-
-  ui.play(sound);
-};
 
 export default function Header() {
   const { theme, setTheme } = useTheme();
 
   const [openMenu, setOpenMenu] = useState(false);
-
 
   useLayoutEffect(() => {
     document.body.classList.add(theme);
@@ -117,6 +106,35 @@ export default function Header() {
           </svg>
         ),
         toLocation: "/dashboard",
+      },
+      {
+        id: crypto.randomUUID(),
+        name: "Subjects",
+        svg: (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="lucide lucide-library-big preview-icon"
+          >
+            <rect
+              width="8"
+              height="18"
+              x="3"
+              y="3"
+              rx="1"
+            />
+            <path d="M7 3v18" />
+            <path d="M20.4 18.9c.2.5-.1 1.1-.6 1.3l-1.9.7c-.5.2-1.1-.1-1.3-.6L11.1 5.1c-.2-.5.1-1.1.6-1.3l1.9-.7c.5-.2 1.1.1 1.3.6Z" />
+          </svg>
+        ),
+        toLocation: "/subjects",
       },
       {
         id: crypto.randomUUID(),
@@ -298,18 +316,8 @@ export default function Header() {
       </h1>
 
       <div className="flex gap-3 items-center content-center *:p-3 *:px-5 p-1 px-2 *:rounded-full *:transition-colors duration-300 *:hover:bg-gray-400/25 in-[.dark]:*:hover:bg-zinc-800/80">
-        <Link
-          to=""
-          onClick={() => playSound("forward")}
-        >
-          Statistics
-        </Link>
-        <Link
-          to=""
-          onClick={() => playSound("forward")}
-        >
-          Focus Timer
-        </Link>
+        <Link to="">Statistics</Link>
+        <Link to="">Focus Timer</Link>
       </div>
 
       <div className="flex gap-3 p-2 *:bg-zinc-50 *:in-[.dark]:bg-zinc-800 *:backdrop-blur-3xl *:rounded-full [&_button]:cursor-pointer [&_button]:hover:bg-gray-400/25 in-[.dark]:[&_button]:hover:bg-zinc-700/75 [&_button]:transition-colors duration-300 z-1000">
@@ -350,7 +358,6 @@ export default function Header() {
         <button
           className="grid [grid-template-areas:'stack'] *:[grid-area:stack] items-center content-center in-[.dark]:[&>*:last-child]:opacity-100 in-[.dark]:[&>*:first-child]:opacity-0 [&>*:last-child]:opacity-0 w-10 h-10 place-content-center"
           onClick={() => {
-            playSound(theme === "dark" ? "toggle-off" : "toggle-on");
             setTheme(theme === "light" ? "dark" : "light");
           }}
         >
@@ -397,7 +404,6 @@ export default function Header() {
         <button
           className="w-10 h-10 grid place-content-center [anchor-name:--anc]"
           onClick={() => {
-            playSound(openMenu ? "close" : "open");
             setOpenMenu((prev) => !prev);
           }}
         >
@@ -424,7 +430,7 @@ export default function Header() {
       </div>
 
       <div
-        className={`menu transition-[opacity,scale] duration-300 ${openMenu ? "pointer-events-auto opacity-100 scale-100" : "pointer-events-none opacity-0 scale-95 origin-top-right"} absolute top-[calc(anchor(bottom)+6px)] right-[anchor(right)] [position-anchor:--anc] z-100000 border-gray-400/10 border shadow-xl`}
+        className={`menu transition-[opacity,scale] duration-300 ${openMenu ? "pointer-events-auto opacity-100 scale-100" : "pointer-events-none opacity-0 scale-95"} origin-top-right absolute top-[calc(anchor(bottom)+6px)] right-[anchor(right)] [position-anchor:--anc] z-100000 shadow-(--text-primary)/20 border-gray-400/10 border shadow-[0_0_10px_3px_var(--tw-shadow)]`}
       >
         <ul className="min-w-58 py-2">
           <ContainerListItem
@@ -456,7 +462,7 @@ function ContainerListItem({
 }) {
   return (
     <li className="pt-2">
-      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-(--pale-text) px-">
+      <div className="flex items-center gap-2 text-xs font-semibold lowercase tracking-widest text-(--pale-text) px-">
         <span className="h-px flex-1 bg-current/30"></span>
         <span>{heading}</span>
         <span className="h-px flex-1 bg-current/30"></span>

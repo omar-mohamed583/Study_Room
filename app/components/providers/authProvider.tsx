@@ -1,13 +1,11 @@
-import {
-  useContext,
-  useEffect,
-  useState,
-  type ReactNode,
-} from "react";
+import { useContext, useEffect, useState, type ReactNode } from "react";
+import { redirect, useNavigate } from "react-router";
 import { apiFetch } from "~/api/api";
 import { AuthContext } from "~/context/authContext";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const navigate = useNavigate();
+
   const [jwt, setJwt] = useState(() => {
     return localStorage.getItem("jwt");
   });
@@ -22,24 +20,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async function loadUser() {
       setLoading(true);
       if (!jwt) {
-        console.log("no JWT")
+        console.log("no JWT");
         setLoading(false);
         return;
       }
 
       try {
-        const currentUser = await apiFetch("/users/me", { signal: controller.signal });
+        const currentUser = await apiFetch("/users/me", {
+          signal: controller.signal,
+        });
         setUser(currentUser);
 
       } catch (error: any) {
         console.error("Failed to load user:", error);
 
-        if (error.name === "AbortError") return console.log("Aborted From If Condition");
+        if (error.name === "AbortError")
+          return console.log("Aborted From If Condition");
 
         if (error?.status === 401 || error?.status === 403) {
           localStorage.removeItem("jwt");
           setJwt(null);
           setUser(null);
+
+          navigate("/login");
         }
 
         return { error };
@@ -51,7 +54,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     loadUser();
 
-    return () => { controller.abort(); console.log("aborted")}
+    return () => {
+      controller.abort();
+      console.log("aborted");
+    };
   }, [jwt]);
 
   async function register(
@@ -70,23 +76,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }),
       });
 
-      if (data?.error) return { error: data?.error };
-
       localStorage.setItem("jwt", data.jwt);
 
       setJwt(data.jwt);
       setUser(data.user);
 
       return data.user;
-    } catch (e) {
+
+    } catch (e: any) {
       console.log("Error: ", e);
-      return { error: e };
+      return { error: String(e) };
+
     } finally {
       setLoading(false);
     }
   }
 
-  async function login(identifier: string, password: string | number) {
+  async function login(identifier: string, password: string) {
     try {
       setLoading(true);
       const data = await apiFetch("/auth/local", {
@@ -96,15 +102,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           password,
         }),
       });
+
       localStorage.setItem("jwt", data.jwt);
 
       setJwt(data.jwt);
       setUser(data.user);
 
       return data.user;
+
     } catch (e: any) {
       console.log("Error: ", e);
       return { error: String(e).replace(/identifier/, "email") };
+
     } finally {
       setLoading(false);
     }
