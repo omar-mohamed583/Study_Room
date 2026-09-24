@@ -30,7 +30,9 @@ export default function Login() {
 
   const [seePass, setSeePass] = useState<boolean>(false);
 
-  const [submitError, setSubmitError] = useState<string | { error: string }>("");
+  const [submitError, setSubmitError] = useState<string | { error: string }>(
+    "",
+  );
 
   const nameContRef = useRef<null | HTMLDivElement>(null);
 
@@ -50,7 +52,7 @@ export default function Login() {
       nameContRef?.current?.classList.toggle("hidden", action === "register");
 
       setError({ name: false, email: false, password: false });
-      setSubmitError("")
+      setSubmitError("");
     }, 500);
 
     setTimeout(() => setLoading(false), 1000);
@@ -84,14 +86,13 @@ export default function Login() {
         setError({ name: false, email: false, password: false });
 
         const loginUser = await login(email, password);
-        console.log(loginUser)
+        console.log(loginUser);
         if (loginUser?.error) {
           setSubmitError(loginUser?.error);
 
           setTimeout(() => {
             setSubmitError("");
           }, 3000);
-
         } else {
           navigate("/");
         }
@@ -146,16 +147,16 @@ export default function Login() {
         waveScale={0.6}
         waveRatio={0.9}
         swell={35}
-        turbulence={20}
+        turbulence={22}
         tilt={1.11}
         zoom={1.1}
         height={5.5}
-        fogDepth={15}
+        fogDepth={17}
         detail="high"
         brightness={1}
         opacity={1}
         mouseInteraction={false}
-        parallaxStrength={0.8}
+        parallaxStrength={0.9}
         grain
         grainIntensity={0.05}
       />
@@ -191,7 +192,7 @@ export default function Login() {
                 title="Please enter username"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className={`peer focus:outline-none p-2 border-b  w-full text-[15px] ${error.name ? "border-b-red-500" : "border-b-white"}`}
+                className={`peer focus:outline-none p-2 border-b  w-full text-[15px] ${error.name ? "border-b-red-500" : "border-b-gray-400"}`}
               />
               <label
                 htmlFor="name"
@@ -202,22 +203,7 @@ export default function Login() {
               peer-not-placeholder-shown:scale-80
               peer-not-placeholder-shown:-top-0.5 flex gap-2 items-center content-center`}
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="17"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="lucide lucide-type"
-                >
-                  <path d="M12 4v16" />
-                  <path d="M4 7V5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2" />
-                  <path d="M9 20h6" />
-                </svg>
+
                 Username
               </label>
             </div>
@@ -240,7 +226,7 @@ export default function Login() {
                 title="Please enter your email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className={`peer focus:outline-none p-2 border-b  w-full text-[15px] ${error.email ? "border-b-red-500" : "border-b-white"}`}
+                className={`peer focus:outline-none p-2 border-b  w-full text-[15px] ${error.email ? "border-b-red-500" : "border-b-gray-400"}`}
               />
               <label
                 htmlFor="email"
@@ -251,32 +237,12 @@ export default function Login() {
               peer-not-placeholder-shown:scale-80
               peer-not-placeholder-shown:-top-0.5 flex gap-2 items-center content-center`}
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="17"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="lucide lucide-mail"
-                >
-                  <path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" />
-                  <rect
-                    x="2"
-                    y="4"
-                    width="20"
-                    height="16"
-                    rx="2"
-                  />
-                </svg>
+
                 Email
               </label>
             </div>
             <span
-              className={`email-error text-[13px] text-red-500 font-medium ${!error.email && "opacity-0"} transition-opacity`}
+              className={`max-w-fit email-error text-[13px] text-red-500 font-medium ${!error.email && "opacity-0"} transition-opacity`}
             >
               Invalid email
             </span>
@@ -295,7 +261,7 @@ export default function Login() {
                 name="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className={`peer focus:outline-none p-2 border-b  w-full text-[15px] ${error.password ? "border-b-red-500" : "border-b-white"}`}
+                className={`peer focus:outline-none p-2 border-b  w-full text-[15px] ${error.password ? "border-b-red-500" : "border-b-gray-400"}`}
               />
               <label
                 htmlFor="password"
@@ -306,37 +272,12 @@ export default function Login() {
               peer-not-placeholder-shown:scale-80
               peer-not-placeholder-shown:-top-0.5 flex gap-2 items-center content-center`}
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="17"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="lucide lucide-lock-keyhole"
-                >
-                  <circle
-                    cx="12"
-                    cy="16"
-                    r="1"
-                  />
-                  <rect
-                    x="3"
-                    y="10"
-                    width="18"
-                    height="12"
-                    rx="2"
-                  />
-                  <path d="M7 10V7a5 5 0 0 1 10 0v3" />
-                </svg>
+
                 Password
               </label>
               <button
                 type="button"
-                className={`cursor-pointer absolute right-1.5 top-1/2 -translate-y-1/2 grid *:[grid-area:stack] *:[grid-template-areas:'stack'] ${seePass ? "[&>svg:first-child]:opacity-0" : "[&>svg:last-child]:opacity-0"} *:transition-opacity duration-75`}
+                className={`cursor-pointer absolute right-1.5 top-1/2 -translate-y-1/2 grid *:[grid-area:stack] *:[grid-template-areas:'stack'] ${seePass ? "[&>svg:first-child]:opacity-0" : "[&>svg:last-child]:opacity-0"} *:transition-opacity duration-75 *:stroke-gray-400`}
                 onClick={() => setSeePass((prev) => !prev)}
               >
                 {/* Opened Eye */}
@@ -380,11 +321,20 @@ export default function Login() {
                 </svg>
               </button>
             </div>
-            <span
-              className={`email-error text-[13px] text-red-500 font-medium ${!error.password && "opacity-0"} transition-opacity`}
-            >
-              Invalid password, must be 6 characters
-            </span>
+
+            <div className="flex justify-between gap-3">
+              <span
+                className={`password-error text-[13px] text-red-500 font-medium ${!error.password && "opacity-0"} transition-opacity`}
+              >
+                Invalid password, must be 6 characters
+              </span>
+
+              <button className="text-xs leading-[normal] cursor-pointer text-gray-300"
+              type="button"
+              onClick={() => navigate("/login/forget-password")}>
+                Forget Password?
+              </button>
+            </div>
           </div>
         </div>
 
