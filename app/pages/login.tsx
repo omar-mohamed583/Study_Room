@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "~/components/providers/authProvider";
 import GradientWaves from "~/components/ui/GradientWaves";
+import InputComponent, { useInputStates } from "~/components/ui/inputField";
 import LoadingComponent from "~/components/ui/LoadingComponent";
 
 export default function Login() {
@@ -14,21 +15,21 @@ export default function Login() {
 
   const [loading, setLoading] = useState<boolean>(false);
 
-  const [email, setEmail] = useState<string>("");
-
-  const [password, setPassword] = useState<string>("");
-
-  const [name, setName] = useState<string>("");
-
-  const [error, setError] = useState({
-    name: false,
-    email: false,
-    password: false,
-  });
+  const [name, setName, nameError, setNameError, , nameRef] = useInputStates();
+  const [email, setEmail, emailError, setEmailError, , emailRef] =
+    useInputStates();
+  const [
+    password,
+    setPassword,
+    passwordError,
+    setPasswordError,
+    ,
+    passwordRef,
+    seePassword,
+    setSeePassword,
+  ] = useInputStates();
 
   const [action, setAction] = useState<"login" | "register">("login");
-
-  const [seePass, setSeePass] = useState<boolean>(false);
 
   const [submitError, setSubmitError] = useState<string | { error: string }>(
     "",
@@ -51,7 +52,9 @@ export default function Login() {
 
       nameContRef?.current?.classList.toggle("hidden", action === "register");
 
-      setError({ name: false, email: false, password: false });
+      setNameError(false);
+      setEmailError(false);
+      setPasswordError(false);
       setSubmitError("");
     }, 500);
 
@@ -70,23 +73,23 @@ export default function Login() {
     // Handle login logic
     if (action === "login") {
       if (!data.get("email") && !data.get("password")) {
-        setError((prev) => ({
-          ...prev,
-          email: true,
-          password: true,
-        }));
+        setEmailError(true);
+        setPasswordError(true);
       } else if (
         !data.get("email") ||
         !emailRegex.test(String(data.get("email")))
       ) {
-        setError((prev) => ({ ...prev, email: true }));
+        setEmailError(true);
       } else if (!data.get("password")) {
-        setError((prev) => ({ ...prev, email: false, password: true }));
+        setEmailError(false);
+        setPasswordError(true);
       } else {
-        setError({ name: false, email: false, password: false });
+        setEmailError(false);
+        setPasswordError(false);
 
         const loginUser = await login(email, password);
         console.log(loginUser);
+
         if (loginUser?.error) {
           setSubmitError(loginUser?.error);
 
@@ -104,22 +107,28 @@ export default function Login() {
         !data.get("password") &&
         !String(data.get("name")).trim()
       ) {
-        setError({
-          name: true,
-          email: true,
-          password: true,
-        });
+        setNameError(true);
+        setEmailError(true);
+        setPasswordError(true);
       } else if (!String(data.get("name")).trim()) {
-        setError(() => ({ name: true, email: false, password: false }));
+        setNameError(true);
+        setEmailError(false);
+        setPasswordError(false);
       } else if (
         !data.get("email") ||
         !emailRegex.test(String(data.get("email")))
       ) {
-        setError(() => ({ name: false, email: true, password: false }));
+        setNameError(false);
+        setEmailError(true);
+        setPasswordError(false);
       } else if (!data.get("password")) {
-        setError(() => ({ name: false, email: false, password: true }));
+        setNameError(false);
+        setEmailError(false);
+        setPasswordError(true);
       } else {
-        setError({ name: false, email: false, password: false });
+        setNameError(false);
+        setEmailError(false);
+        setPasswordError(false);
 
         const registerUser = await register(name, email, password);
         console.log(registerUser);
@@ -180,158 +189,45 @@ export default function Login() {
             ref={nameContRef}
             className="hidden not-[.hidden]:flex flex-col gap-1.5"
           >
-            <div className="relative">
-              <input
-                id="name"
-                aria-autocomplete="list"
-                type="name"
-                autoComplete="name"
-                placeholder=" "
-                minLength={2}
-                name="name"
-                title="Please enter username"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className={`peer focus:outline-none p-2 border-b  w-full text-[15px] ${error.name ? "border-b-red-500" : "border-b-gray-400"}`}
-              />
-              <label
-                htmlFor="name"
-                className={`absolute left-3 top-1/2 -translate-y-1/2 text-sm ${error.name ? "text-red-500" : "text-gray-400"}
-              pointer-events-none transition-all
-              peer-focus:-top-0.5 peer-focus:scale-80 peer-focus:left-0
-              peer-not-placeholder-shown:left-0
-              peer-not-placeholder-shown:scale-80
-              peer-not-placeholder-shown:-top-0.5 flex gap-2 items-center content-center`}
-              >
-
-                Username
-              </label>
-            </div>
-            <span
-              className={`text-[13px] text-red-500 font-medium ${!error.name && "opacity-0"} transition-opacity`}
-            >
-              Invalid username
-            </span>
+            <InputComponent
+              type="name"
+              errorText="Invalid username"
+              title="Please enter username"
+              minLength={2}
+              ref={nameRef}
+              value={name}
+              error={nameError}
+              onChange={(e) => setName(e.target.value)}
+            />
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <div className="relative">
-              <input
-                id="email"
-                aria-autocomplete="list"
-                type="email"
-                autoComplete="email"
-                placeholder=" "
-                name="email"
-                title="Please enter your email address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className={`peer focus:outline-none p-2 border-b  w-full text-[15px] ${error.email ? "border-b-red-500" : "border-b-gray-400"}`}
-              />
-              <label
-                htmlFor="email"
-                className={`absolute left-3 top-1/2 -translate-y-1/2 text-sm ${error.email ? "text-red-500" : "text-gray-400"}
-              pointer-events-none transition-all
-              peer-focus:-top-0.5 peer-focus:scale-80 peer-focus:left-0
-              peer-not-placeholder-shown:left-0
-              peer-not-placeholder-shown:scale-80
-              peer-not-placeholder-shown:-top-0.5 flex gap-2 items-center content-center`}
-              >
-
-                Email
-              </label>
-            </div>
-            <span
-              className={`max-w-fit email-error text-[13px] text-red-500 font-medium ${!error.email && "opacity-0"} transition-opacity`}
-            >
-              Invalid email
-            </span>
-          </div>
+          <InputComponent
+            type="email"
+            ref={emailRef}
+            value={email}
+            error={emailError}
+            onChange={(e) => setEmail(e.target.value)}
+          />
 
           <div className="flex flex-col gap-1.5">
-            <div className="relative">
-              <input
-                id="password"
-                type={seePass ? "text" : "password"}
-                minLength={6}
-                aria-autocomplete="list"
-                autoComplete="current-password"
-                placeholder=" "
-                title="Please enter your password"
-                name="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={`peer focus:outline-none p-2 border-b  w-full text-[15px] ${error.password ? "border-b-red-500" : "border-b-gray-400"}`}
-              />
-              <label
-                htmlFor="password"
-                className={`absolute left-3 top-1/2 -translate-y-1/2 text-sm ${error.password ? "text-red-500" : "text-gray-400"}
-              pointer-events-none transition-all
-              peer-focus:-top-0.5 peer-focus:scale-80 peer-focus:left-0
-              peer-not-placeholder-shown:left-0
-              peer-not-placeholder-shown:scale-80
-              peer-not-placeholder-shown:-top-0.5 flex gap-2 items-center content-center`}
-              >
+            <InputComponent
+              type="password"
+              errorText="Invalid password, must be 6 characters"
+              minLength={6}
+              ref={passwordRef}
+              seePassword={seePassword}
+              setSeePassword={setSeePassword}
+              value={password}
+              error={passwordError}
+              onChange={(e) => setPassword(e.target.value)}
+            />
 
-                Password
-              </label>
+            <div className="flex justify-end">
               <button
+                className="text-xs leading-[normal] cursor-pointer text-gray-300"
                 type="button"
-                className={`cursor-pointer absolute right-1.5 top-1/2 -translate-y-1/2 grid *:[grid-area:stack] *:[grid-template-areas:'stack'] ${seePass ? "[&>svg:first-child]:opacity-0" : "[&>svg:last-child]:opacity-0"} *:transition-opacity duration-75 *:stroke-gray-400`}
-                onClick={() => setSeePass((prev) => !prev)}
+                onClick={() => navigate("/login/forget-password")}
               >
-                {/* Opened Eye */}
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="22"
-                  height="22"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="lucide lucide-eye"
-                >
-                  <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
-                  <circle
-                    cx="12"
-                    cy="12"
-                    r="3"
-                  />
-                </svg>
-
-                {/* Closed Eye */}
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="22"
-                  height="22"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="lucide lucide-eye-off"
-                >
-                  <path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49" />
-                  <path d="M14.084 14.158a3 3 0 0 1-4.242-4.242" />
-                  <path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143" />
-                  <path d="m2 2 20 20" />
-                </svg>
-              </button>
-            </div>
-
-            <div className="flex justify-between gap-3">
-              <span
-                className={`password-error text-[13px] text-red-500 font-medium ${!error.password && "opacity-0"} transition-opacity`}
-              >
-                Invalid password, must be 6 characters
-              </span>
-
-              <button className="text-xs leading-[normal] cursor-pointer text-gray-300"
-              type="button"
-              onClick={() => navigate("/login/forget-password")}>
                 Forget Password?
               </button>
             </div>

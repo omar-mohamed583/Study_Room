@@ -1,40 +1,42 @@
-import { useState } from "react";
-import useStepper, {
-  StepperContext,
-  type Step,
-} from "~/context/stepperContext";
+import {
+  useState,
+  type Dispatch,
+  type ReactNode,
+  type SetStateAction,
+} from "react";
 import Button from "./Button";
-import { useNavigate } from "react-router";
 
+type Step = {
+  id: string;
+  title: string;
+  content: ReactNode;
+};
 interface StepperProps {
   stepsArray: Step[];
-  validSteps: Set<number>;
+  validSteps: number[];
+  setValidSteps: Dispatch<SetStateAction<number[]>>;
+  validationFunction: (name: string) => Promise<boolean>;
 }
 
-export default function Stepper({ stepsArray, validSteps }: StepperProps) {
-  const [loading, setLoading] = useState<boolean>(false);
+export default function Stepper({
+  stepsArray,
+  validSteps,
+  setValidSteps,
+  validationFunction,
+}: StepperProps) {
   const [activeStep, setActiveStep] = useState<number>(1);
+  const [disabled, setDisabled] = useState<boolean>(false);
 
-  return (
-    <StepperContext
-      value={{
-        activeStep,
-        setActiveStep,
-        setLoading,
-        stepsArray,
-        loading,
-        validSteps,
-      }}
-    >
-      <StepperContent />
-    </StepperContext>
-  );
-}
-
-function StepperContent() {
-  const { stepsArray, activeStep, validSteps, setActiveStep } = useStepper();
   const titles = stepsArray.map((step) => step.title);
-  const navigate = useNavigate();
+
+  async function goToNextStep(type: string) {
+    const isValid = await validationFunction(type);
+    if (isValid) {
+      setValidSteps((prev) => [...prev, activeStep]);
+      setActiveStep((prev) => prev + 1);
+    }
+    setDisabled(false);
+  }
 
   return (
     <div className="grid grid-rows-[auto_1fr] gap-12">
@@ -48,11 +50,11 @@ function StepperContent() {
               type="button"
             >
               <span
-                className={`grid transition-colors duration-400 place-content-center text-center rounded-[50%] size-6 sm:size-7 text-sm leading-[normal] shadow-[0_2px_10px_2px_var(--tw-shadow-color)] ${activeStep === currentStep ? "bg-(--accent-200) shadow-blue-400/30" : validSteps.has(currentStep) ? "bg-emerald-400" : !validSteps.has(currentStep) && activeStep <= currentStep ? "bg-blue-900" : "bg-red-500 shadow-red-400/30"} aspect-square`}
+                className={`grid transition-colors text-gray-300 duration-400 place-content-center text-center rounded-[50%] size-6 sm:size-7 text-sm leading-[normal] shadow-[0_2px_10px_2px_var(--tw-shadow-color)] ${activeStep === currentStep ? "bg-(--accent-200) shadow-blue-400/30" : validSteps.includes(currentStep) ? "bg-emerald-400" : "bg-blue-900"} aspect-square`}
               >
                 {currentStep}
               </span>
-              <span className="text-xs md:text-[1rem] leading-[normal]">
+              <span className="text-xs md:text-[1rem] leading-[normal] text-zinc-300">
                 {title}
               </span>
             </button>
@@ -64,11 +66,17 @@ function StepperContent() {
           if (idx + 1 === activeStep) return step.content;
         })}
       </div>
-      <div className="flex justify-between *:text-sm *:leading-[normal] md:*:text-[1rem] *:rounded-[6px]">
+      <div className="flex justify-between *:text-sm *:leading-[normal] md:*:text-[1rem] *:rounded-[6px] *:p-2 *:px-3 *:sm:p-2.5 *:sm:px-3.5">
         {activeStep === 2 && (
           <Button
-            className="bg-zinc-500 px-5 hover:brightness-75 transition-[filter] duration-300 flex items-center content-center gap-2"
+            disabled={disabled}
+            className="bg-zinc-500 hover:brightness-75 transition-[filter] duration-300 flex items-center content-center gap-2"
             type="button"
+            onClick={() => {
+              setDisabled(true)
+              goToNextStep("otp resend");
+              setTimeout(() => setDisabled(false), 60000)
+            }}
           >
             Resend
             <svg
@@ -93,14 +101,18 @@ function StepperContent() {
         )}
 
         <Button
-          className="bg-(--accent-100) px-5 py-3 hover:brightness-75 transition-[filter] duration-300 ms-auto flex items-center content-center gap-2"
-          type={activeStep === stepsArray.length ? "submit" : "button"}
+          className="bg-(--accent-100) hover:brightness-75 transition-[filter] duration-300 ms-auto flex items-center content-center gap-2"
+          type={"button"}
+          disabled={disabled}
           onClick={
             activeStep === 1
-              ? () => setActiveStep(2)
+              ? () => {
+                  setDisabled(true);
+                  goToNextStep("email");
+                }
               : activeStep === 2
-                ? () => null
-                : () => null
+                ? () => goToNextStep("otp verify")
+                : () => goToNextStep("password")
           }
         >
           {activeStep === 1

@@ -22,8 +22,6 @@ export async function apiFetch(endpoint: string, options: any = {}, isRetry: boo
     headers.Authorization = `Bearer ${token}`;
   }
 
-  console.warn(headers);
-
   const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     headers,

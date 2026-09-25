@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState, type ReactNode } from "react";
-import { redirect, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { apiFetch } from "~/api/api";
 import { AuthContext } from "~/context/authContext";
 
@@ -13,6 +13,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState(null);
 
   const [isLoading, setLoading] = useState(false);
+
+  const [resetPassSuccess, setResetPassSuccess] = useState<boolean>(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -30,7 +32,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           signal: controller.signal,
         });
         setUser(currentUser);
-
       } catch (error: any) {
         console.error("Failed to load user:", error);
 
@@ -46,7 +47,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         return { error };
-
       } finally {
         setLoading(false);
       }
@@ -65,8 +65,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     email: string,
     password: string | number,
   ) {
+    setLoading(true);
     try {
-      setLoading(true);
       const data = await apiFetch("/auth/local/register", {
         method: "POST",
         body: JSON.stringify({
@@ -82,19 +82,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(data.user);
 
       return data.user;
-
     } catch (e: any) {
       console.log("Error: ", e);
       return { error: String(e) };
-
     } finally {
       setLoading(false);
     }
   }
 
   async function login(identifier: string, password: string) {
+    setLoading(true);
     try {
-      setLoading(true);
       const data = await apiFetch("/auth/local", {
         method: "POST",
         body: JSON.stringify({
@@ -109,11 +107,87 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(data.user);
 
       return data.user;
-
     } catch (e: any) {
       console.log("Error: ", e);
       return { error: String(e).replace(/identifier/, "email") };
+    } finally {
+      setLoading(false);
+    }
+  }
 
+  async function requestOtp(email: string) {
+    setLoading(true);
+    try {
+      const otp = await apiFetch("/password-otp/send", {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      });
+
+      return otp;
+    } catch (e) {
+      console.warn(e);
+      return { error: e };
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function verifyOtp(email: string, otp: string) {
+    setLoading(true);
+    try {
+      const otpVerification = await apiFetch("/password-otp/verify", {
+        method: "POST",
+        body: JSON.stringify({ email, otp }),
+      });
+
+      return otpVerification;
+    } catch (e) {
+      console.warn(e);
+
+      return { error: e };
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function resetPassword(
+    resetToken: string,
+    newPassword: string,
+    newPassConfirmation: string,
+  ) {
+    setLoading(true);
+    try {
+      const passwordReset = await apiFetch("/password-otp/reset-password", {
+        method: "POST",
+        body: JSON.stringify({
+          resetToken,
+          password: newPassword,
+          passwordConfirmation: newPassConfirmation,
+        }),
+      });
+
+      return passwordReset;
+    } catch (e) {
+      console.warn(e);
+      return { error: e };
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function resendOtp(email: string) {
+    setLoading(true);
+
+    try {
+      const data = await apiFetch("/password-otp/resend", {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      });
+
+      return data;
+    } catch (e) {
+      console.warn(e);
+      return { error: e };
     } finally {
       setLoading(false);
     }
@@ -135,6 +209,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated: !!jwt && !!user,
         register,
         login,
+        requestOtp,
+        verifyOtp,
+        resetPassword,
+        resendOtp,
+        resetPassSuccess,
+        setResetPassSuccess,
         logout,
       }}
     >
