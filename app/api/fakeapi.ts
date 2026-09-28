@@ -1,5 +1,3 @@
-import { useMemo } from "react";
-
 type TaskObj = {
   id: string;
   title: string;
@@ -10,24 +8,27 @@ type SubjectObj = {
   id: string;
   creationDate: Date;
   title: string;
-  tasksCount: Number;
-  completed: Number;
-  timeSpent: Number;
+  tasksCount: number;
+  completedTasks: number;
+  timeSpent: number;
 };
 
 export type Data = {
-  NAME: string;
   TASK: TaskObj[];
   SUBJECT: SubjectObj[];
 };
 
 export const fakeData: Data = {
-  NAME: "Omar",
   TASK: [
     {
       id: crypto.randomUUID(),
       title: "Do Homework",
       subject: "Arabic",
+    },
+    {
+      id: crypto.randomUUID(),
+      title: "Revise Last Lesson Is Main Book",
+      subject: "Cyber Security",
     },
     {
       id: crypto.randomUUID(),
@@ -46,7 +47,7 @@ export const fakeData: Data = {
       creationDate: new Date(),
       title: "Maths",
       tasksCount: 15,
-      completed: 8,
+      completedTasks: 8,
       timeSpent: 2,
     },
     {
@@ -54,7 +55,7 @@ export const fakeData: Data = {
       creationDate: new Date(),
       title: "Arabic",
       tasksCount: 7,
-      completed: 3,
+      completedTasks: 3,
       timeSpent: 1,
     },
     {
@@ -62,7 +63,7 @@ export const fakeData: Data = {
       creationDate: new Date(),
       title: "English",
       tasksCount: 10,
-      completed: 5,
+      completedTasks: 5,
       timeSpent: 3,
     },
     {
@@ -70,7 +71,7 @@ export const fakeData: Data = {
       creationDate: new Date(),
       title: "Mechanics",
       tasksCount: 2,
-      completed: 1,
+      completedTasks: 1,
       timeSpent: 1,
     },
   ],

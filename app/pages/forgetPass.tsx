@@ -5,6 +5,7 @@ import {
   type MetaFunction,
 } from "react-router";
 import { useAuth } from "~/components/providers/authProvider";
+import Button from "~/components/ui/Button";
 import GradientWaves from "~/components/ui/GradientWaves";
 import InputComponent, { useInputStates } from "~/components/ui/inputField";
 import LoadingComponent from "~/components/ui/LoadingComponent";
@@ -186,8 +187,10 @@ export default function ForgetPassword() {
         setPasswordError(true);
         setConfirmPassError(true);
         break;
-      default:
-        console.log("Not Found Type");
+      case "get":
+        return [emailError, passwordError, otpError, confirmPassError].some(
+          (val) => val,
+        );
     }
   }
 
@@ -202,7 +205,6 @@ export default function ForgetPassword() {
         }
 
         const otpMessage = await requestOtp(email);
-        console.warn(otpMessage);
 
         if (otpMessage?.error) {
           setSubmitError(otpMessage.error);
@@ -215,7 +217,6 @@ export default function ForgetPassword() {
 
       case "otp resend": {
         const otpResendMessage = await resendOtp(email);
-        console.warn(otpResendMessage);
 
         if (otpResendMessage?.error) {
           setSubmitError(otpResendMessage.error);
@@ -233,7 +234,6 @@ export default function ForgetPassword() {
         }
 
         const verifiedOtp = await verifyOtp(email, otp);
-        console.warn(verifiedOtp);
 
         if (verifiedOtp?.error) {
           setSubmitError(verifiedOtp.error);
@@ -243,7 +243,6 @@ export default function ForgetPassword() {
         }
 
         setResetToken(verifiedOtp.resetToken);
-        console.warn(resetToken);
         return true;
       }
 
@@ -260,14 +259,11 @@ export default function ForgetPassword() {
           return false;
         }
 
-        console.log(resetToken);
         const changeResult = await resetPassword(
           resetToken,
           password,
           confirmPass,
         );
-
-        console.warn(changeResult);
 
         if (changeResult?.error) {
           setSubmitError(changeResult.error);
@@ -280,17 +276,16 @@ export default function ForgetPassword() {
       }
 
       default:
-        console.log("Not Found Type");
         return false;
     }
   }
 
   return (
-    <main className="grid place-content-center min-h-screen">
+    <main className="grid place-content-center min-h-screen relative">
       <GradientWaves
-        horizonColor="#0032e6"
-        waveColor="#ff7452"
-        crestColor="#FFFFFF"
+        horizonColor={"#0032e6"}
+        waveColor={"#ff7452"}
+        crestColor={"#FFFFFF"}
         speed={0.4}
         amplitude={2.5}
         waveScale={0.6}
@@ -309,6 +304,27 @@ export default function ForgetPassword() {
         grain
         grainIntensity={0.05}
       />
+
+      <Button
+        className="z-10 fixed inset-s-8 inset-bs-10 hover:bg-zinc-400/20"
+        onClick={() => navigate("/login")}
+        aria-label="Back to login"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="lucide lucide-chevron-left preview-icon"
+        >
+          <path d="m15 18-6-6 6-6" />
+        </svg>
+      </Button>
 
       <p
         className={`absolute [position-anchor:--anc] bottom-[calc(anchor(top)-16px)] left-[anchor(left)] w-[anchor-size(width)] -z-10 pb-7 pt-3 rounded-t-3xl submit-error text-red-400 font-bold text-center bg-red-500/15 backdrop-blur-xl transition-[translate,opacity] duration-200 ${submitError ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"}`}

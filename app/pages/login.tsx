@@ -209,7 +209,7 @@ export default function Login() {
             onChange={(e) => setEmail(e.target.value)}
           />
 
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col">
             <InputComponent
               type="password"
               errorText="Invalid password, must be 6 characters"
@@ -222,7 +222,7 @@ export default function Login() {
               onChange={(e) => setPassword(e.target.value)}
             />
 
-            <div className="flex justify-end">
+            <div className="ms-auto max-w-fit">
               <button
                 className="text-xs leading-[normal] cursor-pointer text-gray-300"
                 type="button"

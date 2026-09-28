@@ -1,6 +1,6 @@
 import ShinyText from "../ui/ShinyText";
 import useTheme from "~/context/themeContext";
-import { useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router";
 
 export default function Header() {
@@ -268,32 +268,29 @@ export default function Header() {
         ),
         toLocation: "/focus-timer",
       },
-      {
-        id: crypto.randomUUID(),
-        name: "Progress",
-        svg: (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="lucide lucide-chart-no-axes-column-increasing preview-icon"
-          >
-            {" "}
-            <path d="M5 21v-6" /> <path d="M12 21V9" />{" "}
-            <path d="M19 21V3" />{" "}
-          </svg>
-        ),
-        toLocation: "/progress",
-      },
     ],
     [],
   );
+
+  const menuRef = useRef<null | HTMLDivElement>(null);
+
+  function toggleMenu(e: any) {
+    if (!menuRef.current) return;
+
+    if (
+      e.target !== menuRef.current &&
+      !e.target.closest(".menu") &&
+      openMenu
+    ) {
+      setOpenMenu(false);
+    }
+  }
+
+  useEffect(() => {
+    document.addEventListener("click", toggleMenu);
+
+    return () => document.removeEventListener("click", toggleMenu);
+  });
 
   return (
     <header className="w-fit rounded-full bg-[hsl(from_var(--sect-bg)_h_s_l_/.6)] backdrop-blur-2xl flex gap-4 p-3 *:bg-(--body-gray) *:border-t *:border-t-gray-400/10 *:shadow-(--xl-shadow) *:rounded-full shadow-(--xs-shadow) mx-auto my-6 z-10000 relative">
@@ -431,6 +428,7 @@ export default function Header() {
 
       <div
         className={`menu transition-[opacity,scale] duration-300 ${openMenu ? "pointer-events-auto opacity-100 scale-100" : "pointer-events-none opacity-0 scale-95"} origin-top-right absolute top-[calc(anchor(bottom)+6px)] right-[anchor(right)] [position-anchor:--anc] z-100000 shadow-(--text-primary)/20 border-gray-400/10 border shadow-[0_0_10px_3px_var(--tw-shadow)]`}
+        ref={menuRef}
       >
         <ul className="min-w-58 py-2">
           <ContainerListItem
@@ -462,12 +460,12 @@ function ContainerListItem({
 }) {
   return (
     <li className="pt-2">
-      <div className="flex items-center gap-2 text-xs font-semibold lowercase tracking-widest text-(--pale-text) px-">
+      <div className="flex items-center gap-2 text-xs font-semibold lowercase tracking-widest text-(--pale-text)">
         <span className="h-px flex-1 bg-current/30"></span>
         <span>{heading}</span>
         <span className="h-px flex-1 bg-current/30"></span>
       </div>
-      <ul className="*:py-3 *:px-4 *:min-w-50 cursor-pointer *:hover:bg-zinc-400/20 *:font-medium *:transition-colors *:duration-200 *:text-[15px]">
+      <ul className="[&_a]:py-3 [&_a]:px-4 *:min-w-50 cursor-pointer *:hover:bg-zinc-400/20 *:font-medium *:transition-colors *:duration-300 *:text-[15px]">
         {items.map((item) => (
           <li key={item.id}>
             <Link

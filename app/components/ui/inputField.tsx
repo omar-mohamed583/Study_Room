@@ -55,11 +55,15 @@ export default function InputComponent({
           type={
             type === "otp" || type === "name"
               ? "text"
-              : type === "password" || type === "confirm password"
-                ? "password"
-                : type === "email"
-                  ? "email"
-                  : "text"
+              : type === "password"
+                ? seePassword
+                  ? "text"
+                  : "password"
+                : type === "confirm password"
+                  ? "password"
+                  : type === "email"
+                    ? "email"
+                    : "text"
           }
           autoComplete={AUTOCOMPLETE_MAP[type] ?? type}
           placeholder=" "
