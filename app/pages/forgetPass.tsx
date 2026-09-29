@@ -14,7 +14,8 @@ import Stepper from "~/components/ui/stepper";
 export const links: LinksFunction = () => [
   {
     rel: "icon",
-    href: "../assets/logo.svg",
+    as: "image",
+    href:"../assets/logo.svg",
   },
 ];
 

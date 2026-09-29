@@ -11,6 +11,11 @@ html {
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
+  scrollbar-width: thin;
+}
+
+body::-webkit-scrollbar-corner {
+  background: #000;
 }
 
 input:autofill, input:-webkit-autofill, input:-internal-autofill-selected {

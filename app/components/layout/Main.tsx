@@ -1,5 +1,11 @@
 import { Suspense, useLayoutEffect, useState } from "react";
-import { Link, redirect, useNavigate } from "react-router";
+import {
+  Link,
+  redirect,
+  useNavigate,
+  type LinksFunction,
+  type MetaFunction,
+} from "react-router";
 import type DefaultMainSecType from "~/types/defaultMain";
 import type SubjectTypes from "~/types/subjectTypes";
 import type TaskItemType from "~/types/taskItemTypes";
@@ -10,14 +16,30 @@ import { useAuth } from "../providers/authProvider";
 import LoadingComponent from "../ui/LoadingComponent";
 import { twMerge } from "cn";
 
+export const links: LinksFunction = () => [
+  {
+    rel: "icon",
+    as: "image",
+    href: "../assets/logo.svg",
+  },
+];
 
+export const meta: MetaFunction = () => [
+  {
+    title: "Study Planner - Main Page",
+  },
+  {
+    name: "",
+    content: "",
+  },
+];
 
 export default function DefaultMain() {
   const { user } = useAuth();
 
   useLayoutEffect(() => {
     document.body.style.paddingBottom = "3em";
-  }, []); // empty deps — this only needs to run once, not on every render
+  }, []);
 
   const btns = [
     {
@@ -184,7 +206,7 @@ export default function DefaultMain() {
       <Header />
       <main className="relative grid grid-cols-2 gap-8 max-w-325 mx-auto px-4 md:px-8">
         <section className="flex flex-col gap-12 bg-(--sect-bg) p-4 rounded-[25px]">
-          <DefaultMainSection sectionTitle="Today Tasks">
+          <DefaultMainSection sectionTitle="Today Tasks" to="/tasks/today">
             {fakeData.TASK.map((task) => (
               <TaskItem
                 id={task.id}
@@ -196,9 +218,8 @@ export default function DefaultMain() {
           </DefaultMainSection>
         </section>
 
-        <section className="flex flex-col gap-12 bg-(--sect-bg) p-4 rounded-[25px]">
+        <section className="grid grid-rows-subgrid gap-12 bg-(--sect-bg) p-4 rounded-[25px]">
           <DefaultMainSection
-            shrinkable={false}
             alignContentBetween
             bgImage="../../assets/hope.jpg"
           >
@@ -236,13 +257,8 @@ export default function DefaultMain() {
         </section>
 
         <section className="flex flex-col gap-12 bg-(--sect-bg) p-4 rounded-[25px] [grid-area:2/1/3/3]">
-          <DefaultMainSection sectionTitle="Subjects">
-            {
-              <SubjectItem
-                subjects={fakeData.SUBJECT}
-                stripped
-              />
-            }
+          <DefaultMainSection sectionTitle="Subjects" to="/subjects/">
+            {<SubjectItem subjects={fakeData.SUBJECT} />}
           </DefaultMainSection>
         </section>
       </main>
@@ -254,8 +270,9 @@ function DefaultMainSection({
   children,
   sectionTitle = "",
   className,
-  shrinkable = true,
+  shrinkable = false,
   bgImage = "",
+  to = "",
   alignContentBetween = false,
 }: DefaultMainSecType) {
   const [expanded, setExpanded] = useState(true);
@@ -327,7 +344,7 @@ function DefaultMainSection({
       >
         <div className="overflow-hidden min-h-0">
           <main
-            className="overflow-auto scrollbar-none overscroll-contain p-2"
+            className="overflow-auto scrollbar-none p-2"
             style={{
               alignContent: alignContentBetween ? "space-between" : undefined,
               display: alignContentBetween ? "grid" : undefined,
@@ -342,7 +359,7 @@ function DefaultMainSection({
 
       {sectionTitle && (
         <Link
-          to={""}
+          to={to}
           className="block p-2 text-white text-center px-6 bg-(--accent-300)"
         >
           See more...
@@ -360,7 +377,7 @@ function TaskItem({ id, title, subject }: TaskItemType) {
       className="grid grid-cols-[1.1fr_.9fr] p-3 has-[+div]:border-b border-(--secondary-gray) items-center content-center"
       aria-label={`${title} (Today task)`}
     >
-      <div className="grid gap-1 *:leading-[normal]">
+      <div className="grid *:leading-[normal]">
         <span
           className="[color:var(--text-secondary)] [font-size:var(--sm-text)] bulleted capitalize tracking-wide cursor-pointer truncate w-fit max-w-full"
           onClick={() => navigate(`/subject/${subject}`)}
@@ -368,17 +385,17 @@ function TaskItem({ id, title, subject }: TaskItemType) {
           {subject}
         </span>
         <h3
-          className="text-[17px] font-semibold capitalize truncate cursor-pointer max-w-full w-fit"
+          className="text-[18px] mt-1 font-semibold capitalize truncate cursor-pointer max-w-full w-fit"
           onClick={() => navigate(`/tasks/${id}`)}
         >
           {title}
         </h3>
-        <span className="[color:var(--text-secondary)] [font-size:var(--sm-text)]">
+        <span className="[color:var(--text-secondary)] [font-size:11px]">
           Due 4:00 PM
         </span>
       </div>
 
-      <div className="flex gap-1 flex-wrap justify-end *:cursor-pointer *:place-content-center *:not-[button:last-child]:grid *:not-[&_button:last-child]:hover:bg-zinc-400/20 in-[.dark]:*:not-[&_button:last-child]:hover:bg-zinc-400/20 *:rounded-lg *:p-2 items-center content-center **:transition-colors duration-200">
+      <div className="flex gap-1 flex-wrap justify-end *:cursor-pointer *:place-content-center *:not-[button:last-child]:grid *:not-[&_button:last-child]:hover:bg-zinc-400/20 in-[.dark]:*:not-[&_button:last-child]:hover:bg-zinc-400/20 *:rounded-lg *:p-2 items-center content-center **:transition-colors duration-200 justify-items-center">
         <button
           aria-label="Edit Task"
           className="stroke-(--text-secondary) hover:stroke-yellow-400"
@@ -462,32 +479,55 @@ function TaskItem({ id, title, subject }: TaskItemType) {
   );
 }
 
-function SubjectItem({ subjects, stripped }: SubjectTypes) {
+function SubjectItem({ subjects }: SubjectTypes) {
   return (
     <table className="w-full">
-      <thead className="**:p-2">
-        <tr className="*:text-(--text-secondary)">
+      <thead>
+        <tr className="*:text-(--text-secondary) **:p-2.5 bg-zinc-400/10">
           <td>Subject</td>
           <td className="text-center">Tasks</td>
           <td className="text-center">Completed</td>
           <td className="text-center">Progress</td>
+          <td className="text-center">Time Spent</td>
+          <td></td>
         </tr>
       </thead>
-      <tbody className="**:p-1 *:not-[tr:last-child]:border-b border-b-zinc-400">
+      <tbody className="*:not-[tr:last-child]:border-b border-b-zinc-400">
         {subjects.map((subject) => (
-          <tr>
+          <tr
+            className="*:p-2"
+            key={subject.id}
+          >
             <td className="grid p-1">
               <h3>{subject.title}</h3>
-              <span className="[color:var(--text-secondary)] [font-size:13px]">
+              <span className="[color:var(--text-secondary)] [font-size:11px]">
                 {subject.creationDate.toDateString()}
               </span>
             </td>
             <td className="text-center">{subject.tasksCount}</td>
             <td className="text-center">{subject.completedTasks}</td>
             <td className="text-center">
-              {Math.trunc(subject.tasksCount / subject.completedTasks)}%
+              {(subject.completedTasks / subject.tasksCount * 100).toFixed(0)}%
             </td>
-            <td>{subject.title}</td>
+            <td className="text-center">{subject.timeSpent}h</td>
+            <td>
+              <Link to={`/${subject.title}`}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="lucide lucide-chevron-right preview-icon"
+                >
+                  <path d="m9 18 6-6-6-6" />
+                </svg>
+              </Link>
+            </td>
           </tr>
         ))}
       </tbody>

@@ -6,6 +6,7 @@ export default interface DefaultMainSecType {
   sectionTitle?: string,
   shrinkable?: boolean,
   bgImage?: string,
+  to?: string,
   ref?: RefObject<HTMLElement | null>
   alignContentBetween?: boolean,
 }

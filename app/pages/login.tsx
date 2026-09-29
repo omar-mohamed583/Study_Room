@@ -1,9 +1,28 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, type LinksFunction, type MetaFunction } from "react-router";
 import { useAuth } from "~/components/providers/authProvider";
 import GradientWaves from "~/components/ui/GradientWaves";
 import InputComponent, { useInputStates } from "~/components/ui/inputField";
 import LoadingComponent from "~/components/ui/LoadingComponent";
+
+export const links: LinksFunction = () => [
+  {
+    rel: "icon",
+    as: "image",
+    href: "../assets/logo.svg",
+  },
+];
+
+export const meta: MetaFunction = () => [
+  {
+    title: "Study Planner - Login Page",
+  },
+  {
+    name: "",
+    content: "",
+  },
+];
+
 
 export default function Login() {
   const navigate = useNavigate();

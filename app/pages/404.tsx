@@ -1,8 +1,28 @@
 import { useLayoutEffect } from "react";
+import type { LinksFunction, MetaFunction } from "react-router";
 import Button from "~/components/ui/Button";
 import Particles from "~/components/ui/Particles";
 import WarpText from "~/components/ui/WarpText";
 import useTheme from "~/context/themeContext";
+
+export const links: LinksFunction = () => [
+  {
+    rel: "icon",
+    as: "image",
+    href: "../assets/logo.svg",
+  },
+];
+
+export const meta: MetaFunction = () => [
+  {
+    title: "Study Planner - Not Found Page",
+  },
+  {
+    name: "",
+    content: "",
+  },
+];
+
 
 export default function NotFound() {
   const { theme } = useTheme();

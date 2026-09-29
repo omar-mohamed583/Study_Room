@@ -1,6 +1,5 @@
 export default interface SubjectTypes {
   subjects: Subject[],
-  stripped: boolean,
 }
 
 export type Subject = {
