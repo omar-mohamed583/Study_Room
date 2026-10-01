@@ -14,10 +14,6 @@ html {
   scrollbar-width: thin;
 }
 
-body::-webkit-scrollbar-corner {
-  background: #000;
-}
-
 input:autofill, input:-webkit-autofill, input:-internal-autofill-selected {
   background-color: transparent !important;
   -webkit-text-fill-color: var(--text-primary);
@@ -27,6 +23,10 @@ input:autofill, input:-webkit-autofill, input:-internal-autofill-selected {
 
 * {
   font-variant-numeric: tabular-nums;
+}
+
+body {
+  background-image: var(--body-bg);
 }
 
 :root {
@@ -41,6 +41,11 @@ input:autofill, input:-webkit-autofill, input:-internal-autofill-selected {
   --contrast-text: hsl(0, 0%, 100%);
   --sect-bg: hsl(0, 0%, 100%);
   --body-gray: hsl(0, 0%, 92%);
+  --stripping-color: #EAEAEA;
+  --body-bg:
+    linear-gradient(to right bottom,
+    hsl(0, 2%, 85%),
+      var(--stripping-color));
   --secondary-gray: hsl(0, 0%, 74%);
   --border-clr: hsla(0, 0%, 74%, 0.85);
   --background: oklch(1 0 0);
@@ -82,7 +87,9 @@ body.dark {
   --accent-200: hsl(227, 100%, 45%);
   --accent-300: hsl(17, 83%, 56%);
   --text-primary: hsl(0, 0%, 100%);
+  --body-bg: linear-gradient(to right bottom, var(--body-gray), #151313);
   --text-secondary: hsl(0, 0%, 61%);
+  --stripping-color: #201D1D;
   --pale-text: hsl(0, 0%, 61%);
   --contrast-text: hsl(0, 0%, 0%);
   --sect-bg: hsl(0, 0%, 0%);
@@ -196,3 +203,4 @@ body.dark {
   border-radius: 14px;
   overflow: hidden;
 }
+

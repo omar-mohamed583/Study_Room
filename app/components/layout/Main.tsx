@@ -15,12 +15,13 @@ import Header from "./Header";
 import { useAuth } from "../providers/authProvider";
 import LoadingComponent from "../ui/LoadingComponent";
 import { twMerge } from "cn";
+import SmallParticles from "../ui/smallParticles";
 
 export const links: LinksFunction = () => [
   {
     rel: "icon",
     as: "image",
-    href: "../assets/logo.svg",
+    href: "../../assets/logo.svg",
   },
 ];
 
@@ -115,30 +116,15 @@ export default function DefaultMain() {
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="lucide lucide-timer preview-icon"
+          className="lucide lucide-plus preview-icon"
         >
-          <line
-            x1="10"
-            x2="14"
-            y1="2"
-            y2="2"
-          />
-          <line
-            x1="12"
-            x2="15"
-            y1="14"
-            y2="11"
-          />
-          <circle
-            cx="12"
-            cy="14"
-            r="8"
-          />
+          <path d="M5 12h14" />
+          <path d="M12 5v14" />
         </svg>
       ),
-      name: "Start focus timer",
+      name: "Create new subject",
       variation: "bg-(--accent-200) text-white",
-      toLocation: "/focus-timer",
+      toLocation: "/subject/new",
     },
     {
       svg: (
@@ -204,9 +190,28 @@ export default function DefaultMain() {
   return (
     <>
       <Header />
-      <main className="relative grid grid-cols-2 gap-8 max-w-325 mx-auto px-4 md:px-8">
-        <section className="flex flex-col gap-12 bg-(--sect-bg) p-4 rounded-[25px]">
-          <DefaultMainSection sectionTitle="Today Tasks" to="/tasks/today">
+      <main className="relative grid grid-cols-2 gap-8 max-w-325 mx-auto px-4 md:px-8 *:grid *:gap-12 *:bg-(--sect-bg) *:p-3 *:rounded-[25px] *:overflow-auto max-[1010px]:grid-cols-1">
+        <section>
+          <DefaultMainSection
+            sectionTitleLogo={
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="lucide lucide-shell preview-icon"
+              >
+                <path d="M14 11a2 2 0 1 1-4 0 4 4 0 0 1 8 0 6 6 0 0 1-12 0 8 8 0 0 1 16 0 10 10 0 1 1-20 0 11.93 11.93 0 0 1 2.42-7.22 2 2 0 1 1 3.16 2.44" />
+              </svg>
+            }
+            sectionTitle="Today Tasks"
+            to="/tasks/today"
+          >
             {fakeData.TASK.map((task) => (
               <TaskItem
                 id={task.id}
@@ -217,11 +222,39 @@ export default function DefaultMain() {
             ))}
           </DefaultMainSection>
         </section>
-
-        <section className="grid grid-rows-subgrid gap-12 bg-(--sect-bg) p-4 rounded-[25px]">
+        <section>
           <DefaultMainSection
+            sectionTitle="Upcoming Deadlines"
+            to="/calendar"
+            sectionTitleLogo={
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="lucide lucide-clock-arrow-up preview-icon"
+              >
+                <path d="M12 6v6l1.56.78" />
+                <path d="M13.227 21.925a10 10 0 1 1 8.767-9.588" />
+                <path d="m14 18 4-4 4 4" />
+                <path d="M18 22v-8" />
+              </svg>
+            }
+          >
+            ffff
+          </DefaultMainSection>
+        </section>
+
+        <section className="min-[1011px]:[grid-area:1/2/2/3] max-[1010px]:row-1 min-h-120 relative">
+          <SmallParticles />
+          <DefaultMainSection
+            className="border-0"
             alignContentBetween
-            bgImage="../../assets/hope.jpg"
           >
             <Suspense fallback={<LoadingComponent loading={user?.username} />}>
               <div className="px-3">
@@ -232,8 +265,8 @@ export default function DefaultMain() {
               </div>
             </Suspense>
 
-            <div className="px-3">
-              <h4 className="text-2xl text-center leading-[normal] text-white mb-5 text-shadow-lg text-shadow-black">
+            <div className="px-3 pb-10">
+              <h4 className="text-2xl text-center leading-[normal] text-white mb-5 text-shadow-lg text-shadow-blue-800/40">
                 What Do You Want To Do ?
               </h4>
 
@@ -255,10 +288,135 @@ export default function DefaultMain() {
             </div>
           </DefaultMainSection>
         </section>
+        <section>
+          <DefaultMainSection
+            sectionTitle="Focus Timer"
+            to="/focus-timer"
+            sectionTitleLogo={
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="lucide lucide-timer preview-icon"
+              >
+                <line
+                  x1="10"
+                  x2="14"
+                  y1="2"
+                  y2="2"
+                />
+                <line
+                  x1="12"
+                  x2="15"
+                  y1="14"
+                  y2="11"
+                />
+                <circle
+                  cx="12"
+                  cy="14"
+                  r="8"
+                />
+              </svg>
+            }
+          >
+            ffff
+          </DefaultMainSection>
+        </section>
 
-        <section className="flex flex-col gap-12 bg-(--sect-bg) p-4 rounded-[25px] [grid-area:2/1/3/3]">
-          <DefaultMainSection sectionTitle="Subjects" to="/subjects/">
+        <section className="min-[1011px]:[grid-area:3/1/4/3]">
+          <DefaultMainSection
+            sectionTitle="Subjects"
+            to="/subject"
+            sectionTitleLogo={
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="lucide lucide-lambda preview-icon"
+              >
+                <path d="M11.38 10 5 20" />
+                <path d="M19 18a2 2 0 01-2 2c-4.87-.003-5.052-16-10-16a2 2 0 00-2 2" />
+              </svg>
+            }
+          >
             {<SubjectItem subjects={fakeData.SUBJECT} />}
+          </DefaultMainSection>
+        </section>
+        <section>
+          <DefaultMainSection
+            sectionTitle="Calendar"
+            to="/calendar"
+            sectionTitleLogo={
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="lucide lucide-calendar-days preview-icon"
+              >
+                <path d="M8 2v3" />
+                <path d="M16 2v3" />
+                <rect
+                  x="3"
+                  y="3"
+                  width="18"
+                  height="18"
+                  rx="2"
+                />
+                <path d="M3 9h18" />
+                <path d="M8 13h.01" />
+                <path d="M12 13h.01" />
+                <path d="M16 13h.01" />
+                <path d="M8 17h.01" />
+                <path d="M12 17h.01" />
+                <path d="M16 17h.01" />
+              </svg>
+            }
+          >
+            hh
+          </DefaultMainSection>
+        </section>
+        <section>
+          <DefaultMainSection
+            sectionTitle="Progress"
+            to="/dashboard"
+            sectionTitleLogo={
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="lucide lucide-chart-no-axes-column-increasing preview-icon"
+              >
+                <path d="M5 21v-6" />
+                <path d="M12 21V9" />
+                <path d="M19 21V3" />
+              </svg>
+            }
+          >
+            hh
           </DefaultMainSection>
         </section>
       </main>
@@ -269,98 +427,42 @@ export default function DefaultMain() {
 function DefaultMainSection({
   children,
   sectionTitle = "",
+  sectionTitleLogo = null,
   className,
-  shrinkable = false,
-  bgImage = "",
   to = "",
   alignContentBetween = false,
 }: DefaultMainSecType) {
-  const [expanded, setExpanded] = useState(true);
-
   return (
     <section
       className={twMerge(
-        `relative rounded-[17px] border border-zinc-400/50 overflow-hidden ${bgImage && "bg-image"} ${className}`,
+        `relative rounded-[17px] grid border border-zinc-400/50 overflow-hidden ${className}`,
       )}
     >
       {sectionTitle && (
         <header className="p-4 flex justify-between items-center content-center transition-colors">
-          <h2 className="text-xl leading-[normal] font-medium">
+          <h2 className="text-xl flex gap-2 items-center leading-[normal] font-medium">
+            {sectionTitleLogo}
             {sectionTitle}
           </h2>
-          {shrinkable && (
-            <button
-              type="button"
-              aria-label="Shrink/Expand Section"
-              aria-expanded={expanded}
-              onClick={() => setExpanded((v) => !v)}
-              className="cursor-pointer grid [grid-template-areas:'stack'] *:[grid-area:stack] rounded-xl border border-zinc-400 in-[.dark]:border-zinc-400/50 p-1.5 hover:border-black in-[.dark]:hover:border-zinc-400"
-            >
-              {/* Shrink Svg */}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className={`lucide lucide-minimize-2 transition-opacity duration-300 ${expanded ? "opacity-100" : "opacity-0"}`}
-              >
-                <path d="m14 10 7-7" />
-                <path d="M20 10h-6V4" />
-                <path d="m3 21 7-7" />
-                <path d="M4 14h6v6" />
-              </svg>
-
-              {/* Expand Svg */}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className={`lucide lucide-maximize-2 transition-opacity duration-300 ${expanded ? "opacity-0" : "opacity-100"}`}
-              >
-                <path d="M15 3h6v6" />
-                <path d="m21 3-7 7" />
-                <path d="m3 21 7-7" />
-                <path d="M9 21H3v-6" />
-              </svg>
-            </button>
-          )}
         </header>
       )}
 
-      <div
-        className="grid transition-[grid-template-rows] duration-300 ease-out"
-        style={{ gridTemplateRows: shrinkable && !expanded ? "0fr" : "1fr" }}
+      <main
+        className="overflow-y-auto scrollbar-none p-2"
+        style={{
+          alignContent: alignContentBetween ? "space-between" : undefined,
+          display: alignContentBetween ? "grid" : undefined,
+          paddingBlock: alignContentBetween ? "2.5rem" : undefined,
+          gap: "5rem",
+        }}
       >
-        <div className="overflow-hidden min-h-0">
-          <main
-            className="overflow-auto scrollbar-none p-2"
-            style={{
-              alignContent: alignContentBetween ? "space-between" : undefined,
-              display: alignContentBetween ? "grid" : undefined,
-              paddingBlock: alignContentBetween ? "2.5rem" : undefined,
-              gap: "5rem",
-            }}
-          >
-            {children}
-          </main>
-        </div>
-      </div>
+        {children}
+      </main>
 
       {sectionTitle && (
         <Link
-          to={to}
-          className="block p-2 text-white text-center px-6 bg-(--accent-300)"
+          to={to.toLowerCase()}
+          className="block p-2 hover:bg-[hsl(from_var(--accent-300)_h_s_calc(l+6))] transition-colors duration-200 text-white text-center px-6 bg-(--accent-300)"
         >
           See more...
         </Link>
@@ -472,7 +574,7 @@ function TaskItem({ id, title, subject }: TaskItemType) {
           >
             <path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z" />
           </svg>
-          Start
+          <span className="hidden md:inline-block">Start</span>
         </button>
       </div>
     </div>
@@ -481,9 +583,9 @@ function TaskItem({ id, title, subject }: TaskItemType) {
 
 function SubjectItem({ subjects }: SubjectTypes) {
   return (
-    <table className="w-full">
+    <table className="w-full min-w-max">
       <thead>
-        <tr className="*:text-(--text-secondary) **:p-2.5 bg-zinc-400/10">
+        <tr className="*:text-(--text-secondary) *:font-semibold *:text-[15px] **:p-4 bg-(--stripping-color) border-b border-b-zinc-500">
           <td>Subject</td>
           <td className="text-center">Tasks</td>
           <td className="text-center">Completed</td>
@@ -492,26 +594,29 @@ function SubjectItem({ subjects }: SubjectTypes) {
           <td></td>
         </tr>
       </thead>
-      <tbody className="*:not-[tr:last-child]:border-b border-b-zinc-400">
+      <tbody className="*:not-[tr:last-child]:border-b border-b-zinc-400 *:even:bg-(--stripping-color)">
         {subjects.map((subject) => (
           <tr
             className="*:p-2"
             key={subject.id}
           >
             <td className="grid p-1">
-              <h3>{subject.title}</h3>
+              <h3 className="font-medium text-[18px]">{subject.title}</h3>
               <span className="[color:var(--text-secondary)] [font-size:11px]">
                 {subject.creationDate.toDateString()}
               </span>
             </td>
-            <td className="text-center">{subject.tasksCount}</td>
-            <td className="text-center">{subject.completedTasks}</td>
-            <td className="text-center">
-              {(subject.completedTasks / subject.tasksCount * 100).toFixed(0)}%
+            <td className="text-center font-medium">{subject.tasksCount}</td>
+            <td className="text-center font-medium">
+              {subject.completedTasks}
             </td>
-            <td className="text-center">{subject.timeSpent}h</td>
+            <td className="text-center font-medium">
+              {((subject.completedTasks / subject.tasksCount) * 100).toFixed(0)}
+              %
+            </td>
+            <td className="text-center font-medium">{subject.timeSpent}h</td>
             <td>
-              <Link to={`/${subject.title}`}>
+              <Link to={`/subject/${subject.title.toLowerCase()}`}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="20"

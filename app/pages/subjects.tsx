@@ -1,5 +1,5 @@
-export default function subjects() {
+export default function Subject() {
   return <main>
-    <h1>Subjects</h1>
+    <h1>Subject</h1>
   </main>;
 }

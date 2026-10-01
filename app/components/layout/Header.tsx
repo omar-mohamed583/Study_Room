@@ -1,12 +1,24 @@
 import ShinyText from "../ui/ShinyText";
 import useTheme from "~/context/themeContext";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import { Link } from "react-router";
 
 export default function Header() {
   const { theme, setTheme } = useTheme();
 
   const [openMenu, setOpenMenu] = useState(false);
+  const [openMenuBurger, setOpenMenuBurger] = useState(false);
+
+  const menuBurgerRef = useRef<null | HTMLDivElement>(null);
+
+  const [isPending, startTransition] = useTransition();
 
   useLayoutEffect(() => {
     document.body.classList.add(theme);
@@ -286,8 +298,23 @@ export default function Header() {
     }
   }
 
+  function toggleMenuBurger(e: any) {
+    if (!menuBurgerRef.current) return;
+
+    if (
+      e.target !== menuBurgerRef.current &&
+      !e.target.closest(".menu-burger") &&
+      openMenuBurger
+    ) {
+      setOpenMenuBurger(false);
+    }
+  }
+
   useEffect(() => {
-    document.addEventListener("click", toggleMenu);
+    document.addEventListener("click", (e) => {
+      toggleMenu(e);
+      toggleMenuBurger(e);
+    });
 
     return () => document.removeEventListener("click", toggleMenu);
   });
@@ -298,7 +325,7 @@ export default function Header() {
         <ShinyText
           text="Study Room"
           speed={2.5}
-          delay={0.3}
+          delay={0.2}
           color={theme === "light" ? "#1b1b1b" : "#bbbbbb"}
           shineColor={
             theme === "light" ? "hsl(0, 0%, 50%)" : "hsl(0, 0%, 100%)"
@@ -312,64 +339,120 @@ export default function Header() {
         />
       </h1>
 
-      <div className="flex gap-3 items-center content-center *:p-3 *:px-5 p-1 px-2 *:rounded-full *:transition-colors duration-300 *:hover:bg-gray-400/25 in-[.dark]:*:hover:bg-zinc-800/80">
+      <div className="flex gap-3 items-center content-center *:p-3 *:px-5 p-1 px-2 *:rounded-full *:transition-colors duration-300 *:hover:bg-gray-400/25 in-[.dark]:*:hover:bg-zinc-800/80 max-[870px]:hidden">
         <Link to="">Statistics</Link>
         <Link to="">Focus Timer</Link>
       </div>
 
-      <div className="flex gap-3 p-2 *:bg-zinc-50 *:in-[.dark]:bg-zinc-800 *:backdrop-blur-3xl *:rounded-full [&_button]:cursor-pointer [&_button]:hover:bg-gray-400/25 in-[.dark]:[&_button]:hover:bg-zinc-700/75 [&_button]:transition-colors duration-300 z-1000">
-        <div className="search isolate *:rounded-full rounded-full relative z-1000">
-          <input
-            type="text"
-            id="search"
-            className="bg-transparent ring-3 ring-transparent focus:ring-(--items-bg) border-0 focus-visible:ring-(--items-bg) pl-10 p-2 outline-0"
-            placeholder=" "
-          />
-          <label
-            htmlFor="search"
-            className="text-(--pale-text) absolute top-1/2 left-2.5 -translate-y-1/2 pointer-events-none items-center content-center flex gap-1.5"
+      <div className="flex gap-3 p-2 *:not-[&>div:first-child]:bg-zinc-50 *:not-[&>div:first-child]:in-[.dark]:bg-zinc-800 *:not-[&>div:first-child]:backdrop-blur-3xl *:not-[&>div:first-child]:rounded-full [&_button,&_a]:cursor-pointer [&_button,&_a]:hover:bg-gray-400/25 in-[.dark]:[&_button,&_a]:hover:bg-zinc-700/75 [&_button,&_a]:transition-colors max-[870px]:gap-6 duration-300 z-1000">
+        <div
+          className={`menu-burger max-[870px]:flex-col max-[870px]:absolute [position-anchor:--menu] top-[calc(anchor(bottom)+10px)] rounded-xl bg-(--body-gray) right-[anchor(right)] flex gap-3 *:bg-zinc-50 *:in-[.dark]:bg-zinc-800 *:backdrop-blur-3xl *:rounded-full [&_button]:cursor-pointer [&_button]:hover:bg-gray-400/25 in-[.dark]:[&_button]:hover:bg-zinc-700/75 [&_button]:transition-colors duration-200 z-1000 max-[870px]:p-4 max-[870px]:border border-zinc-400/35 in-[.dark]:border-zinc-400/20 transition-[opacity,scale] ${openMenuBurger ? "pointer-events-auto opacity-100 scale-100" : "pointer-events-none opacity-0 scale-95"} min-[870px]:opacity-100 min-[870px]:scale-100 origin-top-right`}
+          ref={menuBurgerRef}
+        >
+          <div className="isolate *:rounded-full rounded-full relative z-1000">
+            <input
+              type="text"
+              id="search"
+              className="bg-transparent ring-3 ring-transparent focus:ring-(--secondary-gray) border-0 focus-visible:ring-(--secondary-gray) pl-10 p-2 outline-0"
+              placeholder=" "
+            />
+            <label
+              htmlFor="search"
+              className="text-(--pale-text) absolute top-1/2 left-2.5 -translate-y-1/2 pointer-events-none items-center content-center flex gap-1.5"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="lucide lucide-search"
+              >
+                <path d="m21 21-4.34-4.34" />
+                <circle
+                  cx="11"
+                  cy="11"
+                  r="8"
+                />
+              </svg>
+              Search here...
+            </label>
+          </div>
+
+          <Link
+            to=""
+            className="p-2 text-center max-[870px]:block hidden"
           >
+            Dashboard
+          </Link>
+          <Link
+            to=""
+            className="p-2 text-center max-[870px]:block hidden"
+          >
+            Focus Timer
+          </Link>
+
+          <button
+            className="grid max-[870px]:[grid-template-areas:'nn_stack'] [grid-template-areas:'stack'] *:not-[&span]:[grid-area:stack] items-center content-center in-[.dark]:[&>svg:last-of-type]:opacity-100 in-[.dark]:[&>svg:first-of-type]:opacity-0 [&>svg:last-of-type]:opacity-0 max-[870px]:w-full max-[870px]:h-auto max-[870px]:p-2 max-[870px]:gap-2 w-10 h-10 place-content-center max-[870px]:ms-auto *:transition-none"
+            onClick={() => {
+              startTransition(() => {
+                setTheme(theme === "light" ? "dark" : "light");
+              });
+            }}
+          >
+            <span className="font-medium max-[870px]:inline-block hidden">
+              Toggle Theme
+            </span>
+            {/* Moon */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width="22"
-              height="22"
+              height="24px"
+              viewBox="0 -960 960 960"
+              width="24px"
+              className="fill-(--text-primary)"
+            >
+              <path d="M600-640 480-760l120-120 120 120-120 120Zm200 120-80-80 80-80 80 80-80 80ZM483-80q-84 0-157.5-32t-128-86.5Q143-253 111-326.5T79-484q0-146 93-257.5T409-880q-18 99 11 193.5T520-521q71 71 165.5 100T879-410q-26 144-138 237T483-80Zm0-80q88 0 163-44t118-121q-86-8-163-43.5T463-465q-61-61-97-138t-43-163q-77 43-120.5 118.5T159-484q0 135 94.5 229.5T483-160Zm-20-305Z" />
+            </svg>
+
+            {/* Sun */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="lucide lucide-search"
+              className="lucide lucide-sun"
             >
-              <path d="m21 21-4.34-4.34" />
               <circle
-                cx="11"
-                cy="11"
-                r="8"
+                cx="12"
+                cy="12"
+                r="4"
               />
+              <path d="M12 2v2" />
+              <path d="M12 20v2" />
+              <path d="m4.93 4.93 1.41 1.41" />
+              <path d="m17.66 17.66 1.41 1.41" />
+              <path d="M2 12h2" />
+              <path d="M20 12h2" />
+              <path d="m6.34 17.66-1.41 1.41" />
+              <path d="m19.07 4.93-1.41 1.41" />
             </svg>
-            Search here...
-          </label>
+          </button>
         </div>
 
         <button
-          className="grid [grid-template-areas:'stack'] *:[grid-area:stack] items-center content-center in-[.dark]:[&>*:last-child]:opacity-100 in-[.dark]:[&>*:first-child]:opacity-0 [&>*:last-child]:opacity-0 w-10 h-10 place-content-center"
-          onClick={() => {
-            setTheme(theme === "light" ? "dark" : "light");
-          }}
+          aria-label="Show/hide Menu"
+          className="grid w-10 h-10 min-[870px]:hidden place-content-center [anchor-name:--menu]"
+          onClick={() => setOpenMenuBurger((prev) => !prev)}
         >
-          {/* Moon */}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            height="24px"
-            viewBox="0 -960 960 960"
-            width="24px"
-            className="fill-(--text-primary)"
-          >
-            <path d="M600-640 480-760l120-120 120 120-120 120Zm200 120-80-80 80-80 80 80-80 80ZM483-80q-84 0-157.5-32t-128-86.5Q143-253 111-326.5T79-484q0-146 93-257.5T409-880q-18 99 11 193.5T520-521q71 71 165.5 100T879-410q-26 144-138 237T483-80Zm0-80q88 0 163-44t118-121q-86-8-163-43.5T463-465q-61-61-97-138t-43-163q-77 43-120.5 118.5T159-484q0 135 94.5 229.5T483-160Zm-20-305Z" />
-          </svg>
-
-          {/* Sun */}
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -380,21 +463,11 @@ export default function Header() {
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="lucide lucide-sun"
+            className="lucide lucide-menu preview-icon"
           >
-            <circle
-              cx="12"
-              cy="12"
-              r="4"
-            />
-            <path d="M12 2v2" />
-            <path d="M12 20v2" />
-            <path d="m4.93 4.93 1.41 1.41" />
-            <path d="m17.66 17.66 1.41 1.41" />
-            <path d="M2 12h2" />
-            <path d="M20 12h2" />
-            <path d="m6.34 17.66-1.41 1.41" />
-            <path d="m19.07 4.93-1.41 1.41" />
+            <path d="M4 5h16" />
+            <path d="M4 12h16" />
+            <path d="M4 19h16" />
           </svg>
         </button>
 
@@ -427,7 +500,7 @@ export default function Header() {
       </div>
 
       <div
-        className={`menu transition-[opacity,scale] duration-300 ${openMenu ? "pointer-events-auto opacity-100 scale-100" : "pointer-events-none opacity-0 scale-95"} origin-top-right absolute top-[calc(anchor(bottom)+6px)] right-[anchor(right)] [position-anchor:--anc] z-100000 shadow-(--text-primary)/20 border-gray-400/10 border shadow-[0_0_10px_3px_var(--tw-shadow)]`}
+        className={`menu transition-[opacity,scale] duration-200 ${openMenu ? "pointer-events-auto opacity-100 scale-100" : "pointer-events-none opacity-0 scale-95"} origin-top-right absolute top-[calc(anchor(bottom)+6px)] right-[anchor(right)] [position-anchor:--anc] z-100000 shadow-(--text-primary)/20 border-gray-400/10 border shadow-[0_0_10px_3px_var(--tw-shadow)]`}
         ref={menuRef}
       >
         <ul className="min-w-58 py-2">
