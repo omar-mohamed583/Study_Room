@@ -292,6 +292,8 @@ export default function Header() {
     if (
       e.target !== menuRef.current &&
       !e.target.closest(".menu") &&
+      !e.target.closest(".menu-toggler") &&
+      !e.target.classList.contains("menu-toggler") &&
       openMenu
     ) {
       setOpenMenu(false);
@@ -304,6 +306,8 @@ export default function Header() {
     if (
       e.target !== menuBurgerRef.current &&
       !e.target.closest(".menu-burger") &&
+      !e.target.closest(".menu-burger-toggler") &&
+      !e.target.classList.contains("menu-burger-toggler") &&
       openMenuBurger
     ) {
       setOpenMenuBurger(false);
@@ -316,7 +320,11 @@ export default function Header() {
       toggleMenuBurger(e);
     });
 
-    return () => document.removeEventListener("click", toggleMenu);
+    return () =>
+      document.addEventListener("click", (e) => {
+        toggleMenu(e);
+        toggleMenuBurger(e);
+      });
   });
 
   return (
@@ -344,9 +352,9 @@ export default function Header() {
         <Link to="">Focus Timer</Link>
       </div>
 
-      <div className="flex gap-3 p-2 *:not-[&>div:first-child]:bg-zinc-50 *:not-[&>div:first-child]:in-[.dark]:bg-zinc-800 *:not-[&>div:first-child]:backdrop-blur-3xl *:not-[&>div:first-child]:rounded-full [&_button,&_a]:cursor-pointer [&_button,&_a]:hover:bg-gray-400/25 in-[.dark]:[&_button,&_a]:hover:bg-zinc-700/75 [&_button,&_a]:transition-colors max-[870px]:gap-6 duration-300 z-1000">
+      <div className="flex gap-3 p-2 *:not-[&>div:first-child]:bg-zinc-50 *:not-[&>div:first-child]:in-[.dark]:bg-zinc-800 *:not-[&>div:first-child]:backdrop-blur-3xl *:not-[&>div:first-child]:rounded-full [&_button,&_a]:cursor-pointer [&_button,&_a]:hover:bg-gray-400/25 in-[.dark]:[&_button,&_a]:hover:bg-zinc-700/75 [&_button,&_a]:transition-colors duration-300 z-1000">
         <div
-          className={`menu-burger max-[870px]:flex-col max-[870px]:absolute [position-anchor:--menu] top-[calc(anchor(bottom)+10px)] rounded-xl bg-(--body-gray) right-[anchor(right)] flex gap-3 *:bg-zinc-50 *:in-[.dark]:bg-zinc-800 *:backdrop-blur-3xl *:rounded-full [&_button]:cursor-pointer [&_button]:hover:bg-gray-400/25 in-[.dark]:[&_button]:hover:bg-zinc-700/75 [&_button]:transition-colors duration-200 z-1000 max-[870px]:p-4 max-[870px]:border border-zinc-400/35 in-[.dark]:border-zinc-400/20 transition-[opacity,scale] ${openMenuBurger ? "pointer-events-auto opacity-100 scale-100" : "pointer-events-none opacity-0 scale-95"} min-[870px]:opacity-100 min-[870px]:scale-100 origin-top-right`}
+          className={`menu-burger max-[870px]:flex-col max-[870px]:absolute [position-anchor:--menu] top-[calc(anchor(bottom)+10px)] rounded-xl bg-(--body-gray) right-[anchor(right)] translate-x-12 min-[871px]:translate-x-0 flex gap-3 *:bg-zinc-50 *:in-[.dark]:bg-zinc-800 *:backdrop-blur-3xl *:rounded-full [&_button]:cursor-pointer [&_button]:hover:bg-gray-400/25 in-[.dark]:[&_button]:hover:bg-zinc-700/75 [&_button]:transition-colors duration-200 z-1000 max-[870px]:p-4 max-[870px]:border border-zinc-400/35 in-[.dark]:border-zinc-400/20 transition-[opacity,scale] ${openMenuBurger ? "pointer-events-auto opacity-100 scale-100" : "pointer-events-none opacity-0 scale-95"} min-[870px]:opacity-100 min-[870px]:scale-100 min-[870px]:pointer-events-auto origin-top-right`}
           ref={menuBurgerRef}
         >
           <div className="isolate *:rounded-full rounded-full relative z-1000">
@@ -450,7 +458,7 @@ export default function Header() {
 
         <button
           aria-label="Show/hide Menu"
-          className="grid w-10 h-10 min-[870px]:hidden place-content-center [anchor-name:--menu]"
+          className="grid w-10 h-10 min-[870px]:hidden place-content-center [anchor-name:--menu] menu-burger-toggler"
           onClick={() => setOpenMenuBurger((prev) => !prev)}
         >
           <svg
@@ -472,7 +480,7 @@ export default function Header() {
         </button>
 
         <button
-          className="w-10 h-10 grid place-content-center [anchor-name:--anc]"
+          className="menu-toggler w-10 h-10 grid place-content-center [anchor-name:--anc]"
           onClick={() => {
             setOpenMenu((prev) => !prev);
           }}
