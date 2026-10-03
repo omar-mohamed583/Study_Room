@@ -16,6 +16,7 @@ import SmallParticles from "../ui/smallParticles";
 import TaskItem from "../ui/TaskItem";
 import SubjectItem from "../ui/SubjectItem";
 import FocusTimer from "../ui/FocusTimer";
+import useTheme from "~/context/themeContext";
 
 export const links: LinksFunction = () => [
   {
@@ -37,6 +38,7 @@ export const meta: MetaFunction = () => [
 
 export default function DefaultMain() {
   const { user } = useAuth();
+  const { timerStates, setTimerStates } = useTheme();
 
   useLayoutEffect(() => {
     document.body.style.paddingBottom = "3em";
@@ -291,6 +293,7 @@ export default function DefaultMain() {
           <DefaultMainSection
             sectionTitle="Focus Timer"
             to="/focus-timer"
+            className="flex flex-wrap"
             sectionTitleLogo={
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -324,7 +327,9 @@ export default function DefaultMain() {
               </svg>
             }
           >
-            <FocusTimer />
+            <FocusTimer size="sm" />
+
+            <div className=""></div>
           </DefaultMainSection>
         </section>
 
