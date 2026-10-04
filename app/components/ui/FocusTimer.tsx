@@ -226,12 +226,12 @@ export default function FocusTimer({
                   ...prev,
                   {
                     id: crypto.randomUUID(),
-                    title: `Timer ${timerStates.timerState !== "paused" ? "started" : "paused"}`,
-                    description: `The ${timerStates.timerMode} timer was ${timerStates.timerState !== "paused" ? "started" : "paused"}.`,
+                    title: `Timer ${timerStates.timerState !== "running" ? "started" : "paused"}`,
+                    description: `The ${timerStates.timerMode} timer was ${timerStates.timerState !== "running" ? "started" : "paused"}.`,
                     icon:
-                      timerStates.timerState !== "paused" ? "success" : "alert",
+                      timerStates.timerState !== "running" ? "success" : "alert",
                     fuseColor:
-                      timerStates.timerState !== "paused" ? "#84CC16" : "",
+                      timerStates.timerState !== "running" ? "#84CC16" : "",
                   },
                 ]);
 

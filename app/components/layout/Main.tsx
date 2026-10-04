@@ -246,7 +246,9 @@ export default function DefaultMain() {
                 <path d="M18 22v-8" />
               </svg>
             }
-          ></DefaultMainSection>
+          >
+            {}
+          </DefaultMainSection>
         </section>
 
         <section className="min-[1011px]:[grid-area:1/2/2/3] max-[1010px]:row-1 min-h-120 relative">
