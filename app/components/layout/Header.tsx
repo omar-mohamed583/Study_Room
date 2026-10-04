@@ -392,16 +392,46 @@ export default function Header() {
           </div>
 
           <Link
-            to=""
-            className="p-2 text-center max-[870px]:block hidden"
+            to="/dashboard"
+            className="p-2 text-center max-[870px]:flex hidden items-center content-center gap-1 justify-center"
           >
             Dashboard
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="lucide lucide-move-up-right preview-icon"
+            >
+              <path d="M13 5H19V11" />
+              <path d="M19 5L5 19" />
+            </svg>
           </Link>
           <Link
-            to=""
-            className="p-2 text-center max-[870px]:block hidden"
+            to="/focus-timer"
+            className="p-2 text-center max-[870px]:flex hidden items-center content-center gap-1 justify-center"
           >
             Focus Timer
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="lucide lucide-move-up-right preview-icon"
+            >
+              <path d="M13 5H19V11" />
+              <path d="M19 5L5 19" />
+            </svg>
           </Link>
 
           <button

@@ -1,4 +1,4 @@
-import { Suspense, useLayoutEffect, useState } from "react";
+import { Suspense, useLayoutEffect } from "react";
 import {
   Link,
   redirect,
@@ -16,7 +16,6 @@ import SmallParticles from "../ui/smallParticles";
 import TaskItem from "../ui/TaskItem";
 import SubjectItem from "../ui/SubjectItem";
 import FocusTimer from "../ui/FocusTimer";
-import useTheme from "~/context/themeContext";
 
 export const links: LinksFunction = () => [
   {
@@ -38,7 +37,6 @@ export const meta: MetaFunction = () => [
 
 export default function DefaultMain() {
   const { user } = useAuth();
-  const { timerStates, setTimerStates } = useTheme();
 
   useLayoutEffect(() => {
     document.body.style.paddingBottom = "3em";
@@ -293,7 +291,6 @@ export default function DefaultMain() {
           <DefaultMainSection
             sectionTitle="Focus Timer"
             to="/focus-timer"
-            className="flex flex-wrap"
             sectionTitleLogo={
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -327,9 +324,44 @@ export default function DefaultMain() {
               </svg>
             }
           >
-            <FocusTimer size="sm" />
+            <div className="flex flex-wrap *:grow">
+              <FocusTimer
+                size="sm"
+                anchor
+              />
 
-            <div className=""></div>
+              <Button className="absolute rounded-full hover:bg-zinc-400/50 [position-anchor:--timer] top-[calc(anchor(top)-10px)] right-[calc(anchor(right)-15px)]">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="lucide lucide-settings preview-icon"
+                >
+                  <path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915" />
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="3"
+                  />
+                </svg>
+              </Button>
+
+              <p className="text-center pt-3 pb-1 text-[14px]">
+                For more settings and actions visit the{" "}
+                <Link
+                  to="/focus-timer"
+                  className="underline decoration-wavy visited:text-(--accent-200) hover:text-blue-500 transition-colors duration-300"
+                >
+                  Dedicated Focus Timer Page
+                </Link>
+              </p>
+            </div>
           </DefaultMainSection>
         </section>
 

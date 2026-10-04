@@ -211,10 +211,21 @@ body.dark {
   font-style: normal;
 
   .bg-div {
-    content: "";
     position: absolute;
+    display: block;
     inset: -10px;
     z-index: -10;
     border-radius: inherit;
+    anchor-name: --bg-div;
+    &.glow {
+      --_offset: 0px;
+      position: absolute;
+      position-anchor: --bg-div;
+      inset: calc(anchor(top) - var(--_offset)) calc(anchor(right) - var(--_offset)) calc(anchor(bottom) - var(--_offset)) calc(anchor(left) - var(--_offset));
+      filter: blur(10px);
+      z-index: -1;
+      border-radius: 50%;
+    }
   }
+
 }
