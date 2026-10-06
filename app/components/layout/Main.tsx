@@ -1,4 +1,4 @@
-import { Suspense, useLayoutEffect } from "react";
+import { Suspense, useLayoutEffect, useMemo } from "react";
 import {
   Link,
   redirect,
@@ -18,122 +18,7 @@ import SubjectItem from "../ui/SubjectItem";
 import FocusTimer from "../ui/FocusTimer";
 import UpcomingDeadlines from "../ui/UpcomingDeadlineComponent";
 import type { Exam, Task } from "~/types/deadlines";
-
-/** ISO string `days` from today at the given time, so the fake data stays fresh whenever you run it. */
-const at = (days: number, hour = 12, minute = 0) => {
-  const date = new Date();
-  date.setDate(date.getDate() + days);
-  date.setHours(hour, minute, 0, 0);
-  return date.toISOString();
-};
-
-export const fakeTasks: Task[] = [
-  // Overdue -> solid red tile
-  {
-    id: 1,
-    title: "submit chemistry lab report",
-    dueDate: at(-1, 18),
-    priority: "high",
-    estimatedDuration: 90,
-    completed: false,
-    subject: { id: 1, title: "chemistry" },
-  },
-  // Today -> solid orange tile
-  {
-    id: 2,
-    title: "finish calculus problem set",
-    dueDate: at(0, 23, 30),
-    priority: "medium",
-    estimatedDuration: 120,
-    completed: false,
-    subject: { id: 2, title: "calculus" },
-  },
-  // Tomorrow -> tinted orange tile
-  {
-    id: 3,
-    title: "read chapter 6 of operating systems",
-    dueDate: at(1, 9),
-    priority: "low",
-    estimatedDuration: 45,
-    completed: false,
-    subject: { id: 3, title: "operating systems" },
-  },
-  // In 4 days -> neutral tile, exactly 1 hour
-  {
-    id: 4,
-    title: "train the linear regression model",
-    dueDate: at(4, 16),
-    priority: "medium",
-    estimatedDuration: 60,
-    completed: false,
-    subject: { id: 4, title: "machine learning" },
-  },
-  // In 9 days -> no priority, no duration, no subject
-  {
-    id: 5,
-    title: "plan the group presentation",
-    dueDate: at(9, 14),
-    completed: false,
-  },
-  // In 16 days -> shows as "In 2 weeks"
-  {
-    id: 6,
-    title: "write the research paper outline",
-    dueDate: at(16, 10),
-    priority: "high",
-    estimatedDuration: 150,
-    completed: false,
-    subject: { id: 5, title: "english" },
-  },
-  // Should NOT appear: already completed
-  {
-    id: 7,
-    title: "hand in the physics worksheet",
-    dueDate: at(2, 11),
-    priority: "low",
-    completed: true,
-    subject: { id: 6, title: "physics" },
-  },
-  // Should NOT appear: no due date
-  {
-    id: 8,
-    title: "someday: organize my notes",
-    completed: false,
-  },
-];
-
-export const fakeExams: Exam[] = [
-  // In 2 days -> 3 topics
-  {
-    id: 1,
-    title: "calculus midterm",
-    examDate: at(2, 10),
-    subject: { id: 2, title: "calculus" },
-    exam_topics: [{ id: 1 }, { id: 2 }, { id: 3 }],
-  },
-  // In 6 days -> exactly 1 topic ("1 topic", not "1 topics")
-  {
-    id: 2,
-    title: "operating systems quiz",
-    examDate: at(6, 13, 30),
-    subject: { id: 3, title: "operating systems" },
-    exam_topics: [{ id: 4 }],
-  },
-  // In 3 weeks -> no topics, no subject
-  {
-    id: 3,
-    title: "machine learning final",
-    examDate: at(21, 9),
-  },
-  // Should NOT appear: exam already happened
-  {
-    id: 4,
-    title: "chemistry quiz 1",
-    examDate: at(-3, 10),
-    subject: { id: 1, title: "chemistry" },
-    exam_topics: [{ id: 5 }, { id: 6 }],
-  },
-];
+import MyPie, { type PieData } from "../ui/PieChart";
 
 export const links: LinksFunction = () => [
   {
@@ -154,6 +39,160 @@ export const meta: MetaFunction = () => [
 ];
 
 export default function DefaultMain() {
+  // Fake Data
+  const fakePieData = [
+    {
+      id: "Maths",
+      label: "Maths",
+      value: 2,
+      color: "hsl(200, 70%, 50%)",
+    },
+    {
+      id: "English",
+      label: "English",
+      value: 3,
+      color: "hsl(290, 70%, 50%)",
+    },
+    {
+      id: "Science",
+      label: "Science",
+      value: 1,
+      color: "hsl(43, 70%, 50%)",
+    },
+    {
+      id: "Programming",
+      label: "Programming",
+      value: 4,
+      color: "hsl(98, 70%, 50%)",
+    },
+    {
+      id: "Mechanics",
+      label: "Mechanics",
+      value: 4,
+      color: "hsl(165, 70%, 50%)",
+    },
+  ];
+  const at = (days: number, hour = 12, minute = 0) => {
+    const date = new Date();
+    date.setDate(date.getDate() + days);
+    date.setHours(hour, minute, 0, 0);
+    return date.toISOString();
+  };
+  const fakeTasks: Task[] = useMemo<Task[]>(
+    () => [
+      // Overdue -> solid red tile
+      {
+        id: 1,
+        title: "submit chemistry lab report",
+        dueDate: at(-1, 18),
+        priority: "high",
+        estimatedDuration: 90,
+        completed: false,
+        subject: { id: 1, title: "chemistry" },
+      },
+      // Today -> solid orange tile
+      {
+        id: 2,
+        title: "finish calculus problem set",
+        dueDate: at(0, 23, 30),
+        priority: "medium",
+        estimatedDuration: 120,
+        completed: false,
+        subject: { id: 2, title: "calculus" },
+      },
+      // Tomorrow -> tinted orange tile
+      {
+        id: 3,
+        title: "read chapter 6 of operating systems",
+        dueDate: at(1, 9),
+        priority: "low",
+        estimatedDuration: 45,
+        completed: false,
+        subject: { id: 3, title: "operating systems" },
+      },
+      // In 4 days -> neutral tile, exactly 1 hour
+      {
+        id: 4,
+        title: "train the linear regression model",
+        dueDate: at(4, 16),
+        priority: "medium",
+        estimatedDuration: 60,
+        completed: false,
+        subject: { id: 4, title: "machine learning" },
+      },
+      // In 9 days -> no priority, no duration, no subject
+      {
+        id: 5,
+        title: "plan the group presentation",
+        dueDate: at(9, 14),
+        completed: false,
+      },
+      // In 16 days -> shows as "In 2 weeks"
+      {
+        id: 6,
+        title: "write the research paper outline",
+        dueDate: at(16, 10),
+        priority: "high",
+        estimatedDuration: 150,
+        completed: false,
+        subject: { id: 5, title: "english" },
+      },
+      // Should NOT appear: already completed
+      {
+        id: 7,
+        title: "hand in the physics worksheet",
+        dueDate: at(2, 11),
+        priority: "low",
+        completed: true,
+        subject: { id: 6, title: "physics" },
+      },
+      // Should NOT appear: no due date
+      {
+        id: 8,
+        title: "someday: organize my notes",
+        completed: false,
+      },
+    ],
+    [],
+  );
+  const fakeExams: Exam[] = useMemo<Exam[]>(
+    () => [
+      // In 2 days -> 3 topics
+      {
+        id: 1,
+        title: "calculus midterm",
+        examDate: at(2, 10),
+        subject: { id: 2, title: "calculus" },
+        exam_topics: [{ id: 1 }, { id: 2 }, { id: 3 }],
+      },
+      // In 6 days -> exactly 1 topic ("1 topic", not "1 topics")
+      {
+        id: 2,
+        title: "operating systems quiz",
+        examDate: at(6, 13, 30),
+        subject: { id: 3, title: "operating systems" },
+        exam_topics: [{ id: 4 }],
+      },
+      // In 3 weeks -> no topics, no subject
+      {
+        id: 3,
+        title: "machine learning final",
+        examDate: at(21, 9),
+      },
+      // Should NOT appear: exam already happened
+      {
+        id: 4,
+        title: "chemistry quiz 1",
+        examDate: at(-3, 10),
+        subject: { id: 1, title: "chemistry" },
+        exam_topics: [{ id: 5 }, { id: 6 }],
+      },
+    ],
+    [],
+  );
+
+  // End Fake Data
+
   const { user } = useAuth();
 
   useLayoutEffect(() => {
@@ -308,7 +347,7 @@ export default function DefaultMain() {
   return (
     <>
       <Header />
-      <main className="relative grid grid-cols-2 gap-8 max-w-325 mx-auto px-4 md:px-8 *:grid *:gap-12 *:bg-(--sect-bg) *:p-3 *:rounded-[25px] *:overflow-auto max-[1010px]:grid-cols-1 *:shadow-[0_0_10px_0_var(--contrast-text)]">
+      <main className="relative grid grid-cols-2 gap-8 max-w-350 mx-auto px-4 md:px-8 *:grid *:gap-12 *:bg-(--sect-bg) *:p-3 *:rounded-[25px] *:overflow-auto max-[1010px]:grid-cols-1 *:shadow-[0_0_10px_0_var(--contrast-text)]">
         <section>
           <DefaultMainSection
             seeMore
@@ -342,31 +381,11 @@ export default function DefaultMain() {
           </DefaultMainSection>
         </section>
         <section>
-          {/* <DefaultMainSection
-            sectionTitle="Upcoming Deadlines"
-            to="/calendar"
-            sectionTitleLogo={
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="lucide lucide-clock-arrow-up preview-icon"
-              >
-                <path d="M12 6v6l1.56.78" />
-                <path d="M13.227 21.925a10 10 0 1 1 8.767-9.588" />
-                <path d="m14 18 4-4 4 4" />
-                <path d="M18 22v-8" />
-              </svg>
-            }
-          > */}
-            <UpcomingDeadlines exams={fakeExams} limit={4} tasks={fakeTasks} />
-          {/* </DefaultMainSection> */}
+          <UpcomingDeadlines
+            exams={fakeExams}
+            limit={4}
+            tasks={fakeTasks}
+          />
         </section>
 
         <section className="min-[1011px]:[grid-area:1/2/2/3] max-[1010px]:row-1 min-h-120 relative">
@@ -450,7 +469,7 @@ export default function DefaultMain() {
                 anchor
               />
 
-              <Button className="absolute rounded-full hover:bg-zinc-400/50 [position-anchor:--timer] top-[calc(anchor(top)-10px)] right-[calc(anchor(right)-15px)]">
+              <Button className="opacity-0 transition-opacity duration-300 in-[section:hover]:opacity-100 absolute rounded-full hover:bg-zinc-400/50 [position-anchor:--timer] top-[calc(anchor(top)-10px)] right-[calc(anchor(right)-15px)]">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="20"
@@ -472,7 +491,7 @@ export default function DefaultMain() {
                 </svg>
               </Button>
 
-              <p className="text-center pt-3 pb-1 text-[14px]">
+              <p className="text-center pt-8 pb-2 text-[14px]">
                 For more settings and actions visit the{" "}
                 <Link
                   to="/focus-timer"
@@ -572,7 +591,9 @@ export default function DefaultMain() {
               </svg>
             }
           >
-            hh
+            <div className="justify-self-center text-black">
+              <MyPie data={fakePieData} />
+            </div>
           </DefaultMainSection>
         </section>
       </main>
@@ -592,7 +613,7 @@ function DefaultMainSection({
   return (
     <section
       className={twMerge(
-        `relative rounded-[17px] grid border border-zinc-400/50 overflow-hidden ${className}`,
+        `relative rounded-[17px] grid content-stretch border border-zinc-400/50 overflow-hidden ${className}`,
       )}
     >
       {sectionTitle && (
@@ -619,7 +640,7 @@ function DefaultMainSection({
       {seeMore && (
         <Link
           to={to.toLowerCase()}
-          className="block p-2 hover:bg-[hsl(from_var(--accent-300)_h_s_calc(l+6))] transition-colors duration-200 text-white text-center px-6 bg-(--accent-300)"
+          className="block p-2 hover:bg-zinc-600 transition-colors duration-200 text-white text-center px-6 bg-zinc-500"
         >
           See more...
         </Link>

@@ -39,6 +39,7 @@ export default function FocusTimer({
     setToasts,
     showToast,
     setShowToast,
+    theme
   } = useTheme();
 
   let minutes = Math.trunc(
@@ -127,7 +128,7 @@ export default function FocusTimer({
 
   return (
     <>
-      <div className="p-3 py-5 isolate rounded-2xl grid justify-center gap-7">
+      <div className="p-3 py-5 isolate rounded-2xl grid justify-center gap-9">
         <div className="flex flex-col gap-2">
           <JellyRadio
             items={["Short Break", "Focus", "Long Break"]}
@@ -207,7 +208,7 @@ export default function FocusTimer({
             className="bg-div glow"
           />
 
-          <div className="flex flex-row-reverse gap-4 justify-center">
+          <div className="flex flex-row-reverse gap-5 justify-center">
             <Button
               className={`${timerStates.timerState === "running" ? "bg-red-600 hover:bg-red-800 [&_svg:first-child]:opacity-0" : timerStates.timerState === "paused" ? "bg-yellow-500 hover:bg-yellow-600 [&_svg:last-child]:opacity-0" : "bg-green-500 hover:bg-green-700 [&_svg:last-child]:opacity-0"} text-white p-2 rounded-full items-center justify-center gap-2 grid place-content-center place-items-center [grid-template-areas:'--stack'] *:[grid-area:--stack] `}
               aria-label="Start/Pause Timer"
@@ -229,7 +230,9 @@ export default function FocusTimer({
                     title: `Timer ${timerStates.timerState !== "running" ? "started" : "paused"}`,
                     description: `The ${timerStates.timerMode} timer was ${timerStates.timerState !== "running" ? "started" : "paused"}.`,
                     icon:
-                      timerStates.timerState !== "running" ? "success" : "alert",
+                      timerStates.timerState !== "running"
+                        ? "success"
+                        : "alert",
                     fuseColor:
                       timerStates.timerState !== "running" ? "#84CC16" : "",
                   },
@@ -362,15 +365,15 @@ export default function FocusTimer({
             description={toast.description}
             actionLabel={toast.actionBtnText || ""}
             onAction={toast.onAction || (() => null)}
-            background="#27272a"
-            color="#f5f5f5"
+            background={theme === "dark" ? "#27272a" : "hsl(240 4% 90% / 1)"}
+            color={theme === "dark" ? "#f5f5f5" : "#000"}
             fuseColor={toast?.fuseColor?.trim() ?? "#f5a524"}
             width={356}
             radius={12}
             slideMs={400}
-            settleBounce={0.2}
+            settleBounce={0.3}
             swipeDistance={40}
-            duration={3000}
+            duration={3500}
             fuse="bottom"
             pauseOnHover
             closeButton

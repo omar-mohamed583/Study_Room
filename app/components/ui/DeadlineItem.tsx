@@ -134,7 +134,7 @@ export default function DeadlineItem({ deadline }: { deadline: Deadline }) {
             </span>
           )}
           <span
-            className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${kindStyle.badge}`}
+            className={`shrink-0 rounded-full px-2 py-0.5 text-[12px] font-medium ${kindStyle.badge} items-center leading-[normal]`}
           >
             {kindStyle.label}
           </span>
@@ -167,7 +167,7 @@ export default function DeadlineItem({ deadline }: { deadline: Deadline }) {
       {/* Relative status */}
       <div className="flex shrink-0 items-center gap-1.5">
         <span
-          className={`text-sm font-medium whitespace-nowrap ${urgency.label}`}
+          className={`text-sm font-medium whitespace-nowrap text-(--text-secondary) ${urgency.label}`}
         >
           {status.label}
         </span>
