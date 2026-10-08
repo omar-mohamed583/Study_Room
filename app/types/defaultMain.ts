@@ -1,14 +1,12 @@
-import type { ReactNode, RefObject } from "react";
+import type { ReactNode } from "react";
 
 export default interface DefaultMainSecType {
-  className?: string;
+  sectionTitle?: string;
+  sectionDescription?: string;
   sectionTitleLogo?: ReactNode | null;
+  className?: string;
   children: ReactNode;
   seeMore?: boolean;
-  sectionTitle?: string;
-  shrinkable?: boolean;
-  bgImage?: string;
   to?: string;
-  ref?: RefObject<HTMLElement | null>;
   alignContentBetween?: boolean;
 }

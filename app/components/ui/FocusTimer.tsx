@@ -13,8 +13,6 @@ export const links: LinksFunction = () => [
 
 import type { TimerMode } from "~/types/customContextType";
 import type { LinksFunction } from "react-router";
-import SwipeToast from "./SwipeToast";
-import { getIcon } from "../providers/themeContextprovider";
 
 const TIMER_MODES: Record<
   TimerMode,
@@ -35,9 +33,7 @@ export default function FocusTimer({
   const {
     timerStates,
     setTimerStates,
-    toasts,
     setToasts,
-    showToast,
     setShowToast,
     theme
   } = useTheme();
@@ -334,51 +330,6 @@ export default function FocusTimer({
             </Button>
           </div>
         </div>
-      </div>
-
-      <div
-        style={{
-          display: "flex",
-          position: "fixed",
-          right: "1.5rem",
-          bottom: "1.5rem",
-          flexDirection: "column",
-          alignItems: "flex-end",
-          zIndex: 10000,
-          gap: 10,
-        }}
-      >
-        {toasts.map((toast) => (
-          <SwipeToast
-            key={toast.id}
-            open={showToast}
-            onClose={() => {
-              setToasts((prev) => [
-                ...prev.filter((tst) => tst.id !== toast.id),
-              ]);
-            }}
-            title={toast.title}
-            className=""
-            inline
-            dismissible
-            icon={getIcon(toast.icon || "")}
-            description={toast.description}
-            actionLabel={toast.actionBtnText || ""}
-            onAction={toast.onAction || (() => null)}
-            background={theme === "dark" ? "#27272a" : "hsl(240 4% 90% / 1)"}
-            color={theme === "dark" ? "#f5f5f5" : "#000"}
-            fuseColor={toast?.fuseColor?.trim() ?? "#f5a524"}
-            width={356}
-            radius={12}
-            slideMs={400}
-            settleBounce={0.3}
-            swipeDistance={40}
-            duration={3500}
-            fuse="bottom"
-            pauseOnHover
-            closeButton
-          />
-        ))}
       </div>
     </>
   );

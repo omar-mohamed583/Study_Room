@@ -1,4 +1,4 @@
-import { Suspense, useLayoutEffect, useMemo } from "react";
+import { Suspense, useLayoutEffect, useMemo, useRef } from "react";
 import {
   Link,
   redirect,
@@ -18,7 +18,18 @@ import SubjectItem from "../ui/SubjectItem";
 import FocusTimer from "../ui/FocusTimer";
 import UpcomingDeadlines from "../ui/UpcomingDeadlineComponent";
 import type { Exam, Task } from "~/types/deadlines";
-import MyPie, { type PieData } from "../ui/PieChart";
+import MyPie from "../ui/PieChart";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import useTheme from "~/context/themeContext";
+import SwipeToast from "../ui/SwipeToast";
+import { getIcon } from "../providers/themeContextprovider";
+import ProgressBars from "../ui/ProgressBar";
+import EmptyState from "../ui/EmptyState";
+
+export const GS_Duration = 0.6;
+export const GS_DELAY = 0.1;
 
 export const links: LinksFunction = () => [
   {
@@ -38,37 +49,65 @@ export const meta: MetaFunction = () => [
   },
 ];
 
+gsap.registerPlugin(useGSAP, ScrollTrigger);
+
 export default function DefaultMain() {
+  // Gsap Setup
+  const container = useRef<HTMLElement>(null);
+
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        gsap.utils.toArray<HTMLElement>(".gs-animate").forEach((el) => {
+          gsap.from(el, {
+            opacity: 0,
+            y: 50,
+            duration: GS_Duration,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: el,
+              start: "top 85%",
+              toggleActions: "play none none none",
+            },
+          });
+        });
+      });
+    },
+    { scope: container },
+  );
+
   // Fake Data
   const fakePieData = [
     {
       id: "Maths",
       label: "Maths",
-      value: 2,
+      value: 0.6 * 60,
       color: "hsl(200, 70%, 50%)",
     },
     {
       id: "English",
       label: "English",
-      value: 3,
+      value: 3 * 60,
       color: "hsl(290, 70%, 50%)",
     },
     {
       id: "Science",
       label: "Science",
-      value: 1,
+      value: 1 * 60,
       color: "hsl(43, 70%, 50%)",
     },
     {
       id: "Programming",
       label: "Programming",
-      value: 4,
+      value: 4 * 60,
       color: "hsl(98, 70%, 50%)",
     },
     {
       id: "Mechanics",
       label: "Mechanics",
-      value: 4,
+      value: 4 * 60,
       color: "hsl(165, 70%, 50%)",
     },
   ];
@@ -191,9 +230,13 @@ export default function DefaultMain() {
     [],
   );
 
+  const fakeProgressItems = [];
+
   // End Fake Data
 
   const { user } = useAuth();
+
+  const { toasts, setToasts, theme } = useTheme();
 
   useLayoutEffect(() => {
     document.body.style.paddingBottom = "3em";
@@ -347,10 +390,15 @@ export default function DefaultMain() {
   return (
     <>
       <Header />
-      <main className="relative grid grid-cols-2 gap-8 max-w-350 mx-auto px-4 md:px-8 *:grid *:gap-12 *:bg-(--sect-bg) *:p-3 *:rounded-[25px] *:overflow-auto max-[1010px]:grid-cols-1 *:shadow-[0_0_10px_0_var(--contrast-text)]">
-        <section>
+      <main
+        ref={container}
+        className="relative grid grid-cols-2 gap-8 max-w-350 mx-auto px-4 md:px-8 *:grid *:gap-12 *:bg-(--sect-bg) *:p-3 *:rounded-[25px] *:overflow-auto max-[1010px]:grid-cols-1 *:shadow-[0_0_10px_0_var(--contrast-text)]"
+      >
+
+        <section className="gs-animate">
           <DefaultMainSection
-            seeMore
+            seeMore={!!fakeTasks.length}
+            sectionDescription="Tasks you need to complete today"
             sectionTitleLogo={
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -370,7 +418,8 @@ export default function DefaultMain() {
             sectionTitle="Today Tasks"
             to="/tasks/today"
           >
-            {fakeData.TASK.map((task) => (
+            {!fakeData.TASK.length && <EmptyState emptyStateTitle="Tasks" to="tasks/new" icon="task" />}
+            {fakeData?.TASK?.map((task) => (
               <TaskItem
                 id={task.id}
                 key={task.id}
@@ -380,7 +429,8 @@ export default function DefaultMain() {
             ))}
           </DefaultMainSection>
         </section>
-        <section>
+
+        <section className="gs-animate">
           <UpcomingDeadlines
             exams={fakeExams}
             limit={4}
@@ -388,7 +438,7 @@ export default function DefaultMain() {
           />
         </section>
 
-        <section className="min-[1011px]:[grid-area:1/2/2/3] max-[1010px]:row-1 min-h-120 relative">
+        <section className="min-[1011px]:[grid-area:1/2/2/3] max-[1010px]:row-1 min-h-120 relative gs-animate">
           <SmallParticles />
           <DefaultMainSection
             className="border-0"
@@ -426,9 +476,10 @@ export default function DefaultMain() {
             </div>
           </DefaultMainSection>
         </section>
-        <section>
+        <section className="gs-animate">
           <DefaultMainSection
             sectionTitle="Focus Timer"
+            sectionDescription="Stay focused and make the most of your study time"
             to="/focus-timer"
             sectionTitleLogo={
               <svg
@@ -504,9 +555,10 @@ export default function DefaultMain() {
           </DefaultMainSection>
         </section>
 
-        <section className="min-[1011px]:[grid-area:3/1/4/3]">
+        <section className="gs-animate min-[1011px]:[grid-area:3/1/4/3]">
           <DefaultMainSection
             sectionTitle="Subjects"
+            sectionDescription="Keep track of your subjects and their tasks"
             to="/subject"
             sectionTitleLogo={
               <svg
@@ -526,13 +578,13 @@ export default function DefaultMain() {
               </svg>
             }
           >
-            {<SubjectItem subjects={fakeData.SUBJECT} />}
+            <SubjectItem subjects={fakeData.SUBJECT} />
           </DefaultMainSection>
         </section>
-        <section>
+        <section className="gs-animate">
           <DefaultMainSection
-            sectionTitle="Calendar"
-            to="/calendar"
+            sectionTitle="Statistics"
+            sectionDescription="Number of hours spent in each subject"
             sectionTitleLogo={
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -544,59 +596,117 @@ export default function DefaultMain() {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="lucide lucide-calendar-days preview-icon"
+                className="lucide lucide-notebook-text preview-icon"
               >
-                <path d="M8 2v3" />
-                <path d="M16 2v3" />
+                <path d="M2 6h4" />
+                <path d="M2 10h4" />
+                <path d="M2 14h4" />
+                <path d="M2 18h4" />
                 <rect
-                  x="3"
-                  y="3"
-                  width="18"
-                  height="18"
+                  width="16"
+                  height="20"
+                  x="4"
+                  y="2"
                   rx="2"
                 />
-                <path d="M3 9h18" />
-                <path d="M8 13h.01" />
-                <path d="M12 13h.01" />
-                <path d="M16 13h.01" />
-                <path d="M8 17h.01" />
-                <path d="M12 17h.01" />
-                <path d="M16 17h.01" />
-              </svg>
-            }
-          >
-            hh
-          </DefaultMainSection>
-        </section>
-        <section>
-          <DefaultMainSection
-            sectionTitle="Progress"
-            to="/dashboard"
-            sectionTitleLogo={
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="lucide lucide-chart-no-axes-column-increasing preview-icon"
-              >
-                <path d="M5 21v-6" />
-                <path d="M12 21V9" />
-                <path d="M19 21V3" />
+                <path d="M9.5 8h5" />
+                <path d="M9.5 12H16" />
+                <path d="M9.5 16H14" />
               </svg>
             }
           >
             <div className="justify-self-center text-black">
-              <MyPie data={fakePieData} />
+              <MyPie
+                data={fakePieData}
+                valueFormat={(value) =>
+                  value / 60 >= 1 ? value / 60 + "h" : value + "m"
+                }
+                width={
+                  typeof window !== "undefined" && window.innerWidth > 500
+                    ? 500
+                    : 297
+                }
+                height={380}
+              />
+            </div>
+          </DefaultMainSection>
+        </section>
+        <section className="gs-animate">
+          <DefaultMainSection
+            sectionTitle="Progress"
+            sectionDescription="Completed tasks percentages"
+            sectionTitleLogo={
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="lucide lucide-chart-spline preview-icon"
+              >
+                <path d="M3 3v16a2 2 0 0 0 2 2h16" />
+                <path d="M7 16c.5-2 1.5-7 4-7 2 0 2 3 4 3 2.5 0 4.5-5 5-7" />
+              </svg>
+            }
+          >
+            <div className="max-w-130 mx-auto">
+              <div>
+                <ProgressBars
+                  items={fakeProgressItems}
+                  className=""
+                />
+              </div>
             </div>
           </DefaultMainSection>
         </section>
       </main>
+
+      <div
+        style={{
+          display: "flex",
+          position: "fixed",
+          right: "1.5rem",
+          bottom: "1.5rem",
+          flexDirection: "column",
+          alignItems: "flex-end",
+          zIndex: 10000,
+          gap: 10,
+        }}
+      >
+        {toasts.map((toast) => (
+          <SwipeToast
+            key={toast.id}
+            open
+            onClose={() => {
+              setToasts((prev) => prev.filter((tst) => tst.id !== toast.id));
+            }}
+            title={toast.title}
+            className=""
+            inline
+            dismissible
+            icon={getIcon(toast.icon || "")}
+            description={toast.description}
+            actionLabel={toast.actionBtnText || ""}
+            onAction={toast.onAction || (() => null)}
+            background={theme === "dark" ? "#27272a" : "hsl(240 4% 90% / 1)"}
+            color={theme === "dark" ? "#f5f5f5" : "#000"}
+            fuseColor={toast?.fuseColor?.trim() ?? "#f5a524"}
+            width={356}
+            radius={12}
+            slideMs={400}
+            settleBounce={0.3}
+            swipeDistance={40}
+            duration={3500}
+            fuse="bottom"
+            pauseOnHover
+            closeButton
+          />
+        ))}
+      </div>
     </>
   );
 }
@@ -605,7 +715,8 @@ function DefaultMainSection({
   children,
   sectionTitle = "",
   sectionTitleLogo = null,
-  className,
+  sectionDescription = "",
+  className = "",
   to = "",
   seeMore = false,
   alignContentBetween = false,
@@ -613,19 +724,23 @@ function DefaultMainSection({
   return (
     <section
       className={twMerge(
-        `relative rounded-[17px] grid content-stretch border border-zinc-400/50 overflow-hidden ${className}`,
+        "relative rounded-[17px] grid grid-rows-[auto_1fr] content-stretch border border-zinc-400/50 overflow-hidden",
+        className,
       )}
     >
       {sectionTitle && (
-        <header className="p-4 flex justify-between items-center content-center transition-colors">
+        <header className="p-4 grid gap-1.5">
           <h2 className="text-xl flex gap-2 items-center leading-[normal] font-medium">
             {sectionTitleLogo}
             {sectionTitle}
           </h2>
+          <span className="text-sm text-(--text-secondary)">
+            {sectionDescription}
+          </span>
         </header>
       )}
 
-      <main
+      <div
         className="overflow-y-auto scrollbar-none p-2"
         style={{
           alignContent: alignContentBetween ? "space-between" : undefined,
@@ -635,12 +750,12 @@ function DefaultMainSection({
         }}
       >
         {children}
-      </main>
+      </div>
 
       {seeMore && (
         <Link
           to={to.toLowerCase()}
-          className="block p-2 hover:bg-zinc-600 transition-colors duration-200 text-white text-center px-6 bg-zinc-500"
+          className="block p-2 bg-(--accent-300) hover:bg-(--accent-300)/80 text-white in-[.dark]:hover:bg-zinc-900 transition-colors duration-200 text-center px-6 in-[.dark]:bg-zinc-800"
         >
           See more...
         </Link>
@@ -652,13 +767,8 @@ function DefaultMainSection({
 export const clientMiddleware = [authMiddleware];
 
 async function authMiddleware() {
-  const jwt = localStorage?.getItem("jwt");
+  if (typeof localStorage === "undefined") return;
 
-  if (!localStorage)
-    return setTimeout(() => {
-      const jwt = localStorage.getItem("jwt");
-      if (!jwt) throw redirect("/login");
-    }, 10);
-
+  const jwt = localStorage.getItem("jwt");
   if (!jwt) throw redirect("/login");
 }

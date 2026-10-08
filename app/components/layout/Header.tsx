@@ -9,8 +9,24 @@ import {
   useTransition,
 } from "react";
 import { Link } from "react-router";
+import { useGSAP } from "@gsap/react";
+import { GS_DELAY, GS_Duration } from "./Main";
+import gsap from "gsap";
 
 export default function Header() {
+
+  // Gsap Setup
+  if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    useGSAP(() => {
+      gsap.from(".header", {
+        opacity: 0,
+        translateY: -30,
+        delay: GS_DELAY,
+        duration: GS_Duration,
+      });
+    }, []);
+  }
+
   const { theme, setTheme } = useTheme();
 
   const [openMenu, setOpenMenu] = useState(false);
@@ -328,7 +344,7 @@ export default function Header() {
   });
 
   return (
-    <header className="w-fit rounded-full bg-[hsl(from_var(--sect-bg)_h_s_l_/.6)] backdrop-blur-2xl flex gap-4 p-3 *:bg-(--body-gray) *:border-t *:border-t-gray-400/10 *:shadow-(--xl-shadow) *:rounded-full shadow-(--xs-shadow) mx-auto my-6 z-10000 relative">
+    <header className="header w-fit rounded-full bg-[hsl(from_var(--sect-bg)_h_s_l_/.6)] backdrop-blur-2xl flex gap-4 p-3 *:bg-(--body-gray) *:border-t *:border-t-gray-400/10 *:shadow-(--xl-shadow) *:rounded-full shadow-(--xs-shadow) mx-auto my-6 z-10000 relative">
       <h1 className="font-bold text-lg leading-[normal] cursor-pointer p-4 px-5 md:px-8 flex items-center tracking-wide">
         <ShinyText
           text="Study Room"

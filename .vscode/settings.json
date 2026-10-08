@@ -2,10 +2,14 @@
   "js/ts.tsdk.path": "node_modules\\typescript\\lib",
   "cSpell.words": [
     "Contextprovider",
+    "dayflow",
     "fakeapi",
+    "fontsource",
+    "Gsap",
     "nivo",
     "Pomodoro",
     "rubberband",
+    "shadcn",
     "yoyo"
   ]
 }

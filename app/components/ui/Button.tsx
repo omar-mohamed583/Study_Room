@@ -11,7 +11,9 @@ export default function Button({
   const navigate = useNavigate();
   return (
     <button
-      className={twMerge(`p-2 rounded-xl cursor-pointer transition-colors duration-300 ${className}`)}
+      className={twMerge(
+        `p-2 rounded-xl cursor-pointer transition-colors duration-300 ${className} leading-[normal]`,
+      )}
       onClick={navigation?.to ? () => navigate(navigation.to) : () => ""}
       {...props}
     >
