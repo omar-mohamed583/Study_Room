@@ -1,10 +1,12 @@
 import { useId } from "react";
 import Button from "./Button";
 import EmptyState from "./EmptyState";
+import type { Subject } from "~/types/subjectTypes";
+import type { Task } from "~/types/deadlines";
 
 type BaseItem = {
   id: string | number;
-  title: string;
+  name: string;
   color?: string;
 };
 
@@ -20,30 +22,37 @@ type ValueItem = BaseItem & {
   percentage?: undefined;
 };
 
-export type ProgressBarItem = PercentageItem | ValueItem;
+function getPercentage(subj: Subject, tasks: Task[]): number {
+  const subjTasks = {
+    total: 0,
+    completed: 0,
+  };
+  const raw = subjTasks.total
+    ? (subjTasks.completed / subjTasks.total) * 100
+    : 0;
 
-function getPercentage(item: ProgressBarItem): number {
-  const raw =
-    item.percentage !== undefined
-      ? item.percentage
-      : item.total > 0
-        ? (item.value / item.total) * 100
-        : 0;
+  for (const task of tasks) {
+    if (task.subject.name === subj.name) {
+      subjTasks.total++;
 
-  // Clamp to 0-100 and guard against NaN / Infinity
+      if (task.completed) subjTasks.completed++;
+    }
+  }
+
   return Number.isFinite(raw) ? Math.min(100, Math.max(0, raw)) : 0;
 }
 
-/** A single progress bar: title top-left, percentage top-right, bar underneath. */
 export function ProgressBar({
-  item,
+  subj,
   decimals = 0,
+  tasks,
 }: {
-  item: ProgressBarItem;
+  subj: Subject;
+  tasks: Task[];
   decimals?: number;
 }) {
   const labelId = useId();
-  const percentage = getPercentage(item);
+  const percentage = getPercentage(subj, tasks);
   const text = percentage.toFixed(decimals);
 
   return (
@@ -53,7 +62,7 @@ export function ProgressBar({
           id={labelId}
           className="min-w-0 text-(--text-primary) truncate font-medium"
         >
-          {item.title}
+          {subj.name}
         </span>
         <span className="shrink-0 tabular-nums text-(--text-primary)">
           {text}%
@@ -70,7 +79,7 @@ export function ProgressBar({
       >
         <div
           className="h-full rounded-full bg-(--accent-100) transition-[scale] duration-500 origin-left ease-out motion-reduce:transition-none"
-          style={{ scale: `${percentage}% 1`, backgroundColor: item.color }}
+          style={{ scale: `${percentage}% 1`, backgroundColor: subj.color }}
         />
       </div>
     </div>
@@ -78,30 +87,39 @@ export function ProgressBar({
 }
 
 export default function ProgressBars({
-  items,
+  subjects,
   decimals = 0,
+  tasks,
   className = "",
 }: {
-  items: ProgressBarItem[];
-  /** How many decimals to show in the percentage text. */
+  subjects: Subject[];
+  tasks: Task[];
   decimals?: number;
   className?: string;
 }) {
   const limit = 5;
-  const inLimitItems = items?.slice(0, limit);
-  const outLimitItemsCount = items?.length - inLimitItems?.length;
+  const inLimitSubjects = subjects?.slice(0, limit);
+  const outLimitItemsCount = subjects?.length - inLimitSubjects?.length;
 
   return (
     <div className={["grid gap-5", className].filter(Boolean).join(" ")}>
-      {!items?.length && <EmptyState emptyStateTitle="Subjects" to="subject/new" icon="subject" />}
-
-      {inLimitItems?.map((item) => (
-        <ProgressBar
-          key={item.id ?? item.title}
-          item={item}
-          decimals={decimals}
+      {!subjects?.length && (
+        <EmptyState
+          emptyStateTitle="Subjects"
+          to="subject/new"
+          icon="subject"
         />
-      ))}
+      )}
+
+      {subjects.length &&
+        inLimitSubjects?.map((subj) => (
+          <ProgressBar
+            key={subj.id ?? subj.name}
+            subj={subj}
+            tasks={tasks}
+            decimals={decimals}
+          />
+        ))}
 
       {outLimitItemsCount > 0 && (
         <Button

@@ -6,9 +6,8 @@ import {
   type MetaFunction,
 } from "react-router";
 import type DefaultMainSecType from "~/types/defaultMain";
-import { fakeData } from "~/api/fakeapi";
 import Button from "../ui/Button";
-import Header from "./Header";
+import Header, { GS_Duration } from "./Header";
 import { useAuth } from "../providers/authProvider";
 import LoadingComponent from "../ui/LoadingComponent";
 import { twMerge } from "cn";
@@ -17,7 +16,6 @@ import TaskItem from "../ui/TaskItem";
 import SubjectItem from "../ui/SubjectItem";
 import FocusTimer from "../ui/FocusTimer";
 import UpcomingDeadlines from "../ui/UpcomingDeadlineComponent";
-import type { Exam, Task } from "~/types/deadlines";
 import MyPie from "../ui/PieChart";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -27,9 +25,9 @@ import SwipeToast from "../ui/SwipeToast";
 import { getIcon } from "../providers/themeContextprovider";
 import ProgressBars from "../ui/ProgressBar";
 import EmptyState from "../ui/EmptyState";
-
-export const GS_Duration = 0.6;
-export const GS_DELAY = 0.1;
+import useGetEvents from "~/api/getEvents";
+import type { Exam, Task } from "~/types/deadlines";
+import type { Subject } from "~/types/subjectTypes";
 
 export const links: LinksFunction = () => [
   {
@@ -51,9 +49,42 @@ export const meta: MetaFunction = () => [
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
+function isToday(value: unknown) {
+  if (!value) return false;
+  const date = new Date(String(value));
+  return (
+    !Number.isNaN(date.getTime()) &&
+    date.toDateString() === new Date().toDateString()
+  );
+}
+
 export default function DefaultMain() {
   // Gsap Setup
   const container = useRef<HTMLElement>(null);
+
+  const { user } = useAuth();
+
+  const { toasts, setToasts, theme } = useTheme();
+
+  const tasksQuery = useGetEvents<Task[]>({
+    endpoint: "/tasks?populate[subject]=true",
+  });
+  const subjectsQuery = useGetEvents<Subject[]>({ endpoint: "/subjects" });
+  const examsQuery = useGetEvents<Exam[]>({
+    endpoint: "/exams?populate[subject]=true",
+  });
+
+  const tasks = useMemo(() => tasksQuery.data, [tasksQuery.data]);
+  const subjects = useMemo(() => subjectsQuery.data, [subjectsQuery.data]);
+  const exams = useMemo(() => examsQuery.data, [examsQuery.data]);
+
+  const todayTasks = tasks?.filter((task) => isToday(task.dueDate));
+
+  console.table({
+    tasks,
+    subjects,
+    exams,
+  });
 
   useGSAP(
     () => {
@@ -65,7 +96,6 @@ export default function DefaultMain() {
             opacity: 0,
             y: 50,
             duration: GS_Duration,
-            ease: "power2.out",
             scrollTrigger: {
               trigger: el,
               start: "top 85%",
@@ -77,166 +107,6 @@ export default function DefaultMain() {
     },
     { scope: container },
   );
-
-  // Fake Data
-  const fakePieData = [
-    {
-      id: "Maths",
-      label: "Maths",
-      value: 0.6 * 60,
-      color: "hsl(200, 70%, 50%)",
-    },
-    {
-      id: "English",
-      label: "English",
-      value: 3 * 60,
-      color: "hsl(290, 70%, 50%)",
-    },
-    {
-      id: "Science",
-      label: "Science",
-      value: 1 * 60,
-      color: "hsl(43, 70%, 50%)",
-    },
-    {
-      id: "Programming",
-      label: "Programming",
-      value: 4 * 60,
-      color: "hsl(98, 70%, 50%)",
-    },
-    {
-      id: "Mechanics",
-      label: "Mechanics",
-      value: 4 * 60,
-      color: "hsl(165, 70%, 50%)",
-    },
-  ];
-  const at = (days: number, hour = 12, minute = 0) => {
-    const date = new Date();
-    date.setDate(date.getDate() + days);
-    date.setHours(hour, minute, 0, 0);
-    return date.toISOString();
-  };
-  const fakeTasks: Task[] = useMemo<Task[]>(
-    () => [
-      // Overdue -> solid red tile
-      {
-        id: 1,
-        title: "submit chemistry lab report",
-        dueDate: at(-1, 18),
-        priority: "high",
-        estimatedDuration: 90,
-        completed: false,
-        subject: { id: 1, title: "chemistry" },
-      },
-      // Today -> solid orange tile
-      {
-        id: 2,
-        title: "finish calculus problem set",
-        dueDate: at(0, 23, 30),
-        priority: "medium",
-        estimatedDuration: 120,
-        completed: false,
-        subject: { id: 2, title: "calculus" },
-      },
-      // Tomorrow -> tinted orange tile
-      {
-        id: 3,
-        title: "read chapter 6 of operating systems",
-        dueDate: at(1, 9),
-        priority: "low",
-        estimatedDuration: 45,
-        completed: false,
-        subject: { id: 3, title: "operating systems" },
-      },
-      // In 4 days -> neutral tile, exactly 1 hour
-      {
-        id: 4,
-        title: "train the linear regression model",
-        dueDate: at(4, 16),
-        priority: "medium",
-        estimatedDuration: 60,
-        completed: false,
-        subject: { id: 4, title: "machine learning" },
-      },
-      // In 9 days -> no priority, no duration, no subject
-      {
-        id: 5,
-        title: "plan the group presentation",
-        dueDate: at(9, 14),
-        completed: false,
-      },
-      // In 16 days -> shows as "In 2 weeks"
-      {
-        id: 6,
-        title: "write the research paper outline",
-        dueDate: at(16, 10),
-        priority: "high",
-        estimatedDuration: 150,
-        completed: false,
-        subject: { id: 5, title: "english" },
-      },
-      // Should NOT appear: already completed
-      {
-        id: 7,
-        title: "hand in the physics worksheet",
-        dueDate: at(2, 11),
-        priority: "low",
-        completed: true,
-        subject: { id: 6, title: "physics" },
-      },
-      // Should NOT appear: no due date
-      {
-        id: 8,
-        title: "someday: organize my notes",
-        completed: false,
-      },
-    ],
-    [],
-  );
-  const fakeExams: Exam[] = useMemo<Exam[]>(
-    () => [
-      // In 2 days -> 3 topics
-      {
-        id: 1,
-        title: "calculus midterm",
-        examDate: at(2, 10),
-        subject: { id: 2, title: "calculus" },
-        exam_topics: [{ id: 1 }, { id: 2 }, { id: 3 }],
-      },
-      // In 6 days -> exactly 1 topic ("1 topic", not "1 topics")
-      {
-        id: 2,
-        title: "operating systems quiz",
-        examDate: at(6, 13, 30),
-        subject: { id: 3, title: "operating systems" },
-        exam_topics: [{ id: 4 }],
-      },
-      // In 3 weeks -> no topics, no subject
-      {
-        id: 3,
-        title: "machine learning final",
-        examDate: at(21, 9),
-      },
-      // Should NOT appear: exam already happened
-      {
-        id: 4,
-        title: "chemistry quiz 1",
-        examDate: at(-3, 10),
-        subject: { id: 1, title: "chemistry" },
-        exam_topics: [{ id: 5 }, { id: 6 }],
-      },
-    ],
-    [],
-  );
-
-  const fakeProgressItems = [];
-
-  // End Fake Data
-
-  const { user } = useAuth();
-
-  const { toasts, setToasts, theme } = useTheme();
 
   useLayoutEffect(() => {
     document.body.style.paddingBottom = "3em";
@@ -392,12 +262,11 @@ export default function DefaultMain() {
       <Header />
       <main
         ref={container}
-        className="relative grid grid-cols-2 gap-8 max-w-350 mx-auto px-4 md:px-8 *:grid *:gap-12 *:bg-(--sect-bg) *:p-3 *:rounded-[25px] *:overflow-auto max-[1010px]:grid-cols-1 *:shadow-[0_0_10px_0_var(--contrast-text)]"
+        className="relative grid grid-cols-2 gap-7 max-w-350 mx-auto px-4 md:px-8 *:grid *:gap-10 *:bg-(--sect-bg) *:p-3 *:rounded-[25px] *:overflow-auto max-[1010px]:grid-cols-1 *:shadow-[0_0_8px_0_var(--contrast-text)] *:min-h-120"
       >
-
         <section className="gs-animate">
           <DefaultMainSection
-            seeMore={!!fakeTasks.length}
+            seeMore={Boolean(todayTasks?.length)}
             sectionDescription="Tasks you need to complete today"
             sectionTitleLogo={
               <svg
@@ -418,23 +287,30 @@ export default function DefaultMain() {
             sectionTitle="Today Tasks"
             to="/tasks/today"
           >
-            {!fakeData.TASK.length && <EmptyState emptyStateTitle="Tasks" to="tasks/new" icon="task" />}
-            {fakeData?.TASK?.map((task) => (
-              <TaskItem
-                id={task.id}
-                key={task.id}
-                subject={task.subject}
-                title={task.title}
+            {!todayTasks?.length && (
+              <EmptyState
+                message="No tasks due today."
+                icon="task"
               />
-            ))}
+            )}
+
+            {Boolean(todayTasks?.length) &&
+              (todayTasks?.map((task) => (
+                <TaskItem
+                  key={task.documentId}
+                  id={task.documentId}
+                  subject={task.subject.name}
+                  title={task.title}
+                />
+              )))}
           </DefaultMainSection>
         </section>
 
         <section className="gs-animate">
           <UpcomingDeadlines
-            exams={fakeExams}
+            exams={exams}
             limit={4}
-            tasks={fakeTasks}
+            tasks={tasks}
           />
         </section>
 
@@ -444,7 +320,7 @@ export default function DefaultMain() {
             className="border-0"
             alignContentBetween
           >
-            <Suspense fallback={<LoadingComponent loading={user?.username} />}>
+            <Suspense fallback={""}>
               <div className="px-3">
                 <h2 className="font-medium text-3xl text-white leading-[normal] text-center capitalize">
                   Have A Good Day,<br></br>
@@ -578,7 +454,12 @@ export default function DefaultMain() {
               </svg>
             }
           >
-            <SubjectItem subjects={fakeData.SUBJECT} />
+            <Suspense fallback={""}>
+              <SubjectItem
+                subjects={subjects}
+                tasks={tasks!}
+              />
+            </Suspense>
           </DefaultMainSection>
         </section>
         <section className="gs-animate">
@@ -617,8 +498,8 @@ export default function DefaultMain() {
           >
             <div className="justify-self-center text-black">
               <MyPie
-                data={fakePieData}
-                valueFormat={(value) =>
+                data={subjects ?? []}
+                valueFormat={(value: any) =>
                   value / 60 >= 1 ? value / 60 + "h" : value + "m"
                 }
                 width={
@@ -656,7 +537,8 @@ export default function DefaultMain() {
             <div className="max-w-130 mx-auto">
               <div>
                 <ProgressBars
-                  items={fakeProgressItems}
+                  subjects={subjects ?? []}
+                  tasks={tasks ?? []}
                   className=""
                 />
               </div>
@@ -707,6 +589,16 @@ export default function DefaultMain() {
           />
         ))}
       </div>
+
+      <LoadingComponent
+        loading={
+          !(
+            tasksQuery.isLoading ||
+            examsQuery.isLoading ||
+            subjectsQuery.isLoading
+          )
+        }
+      />
     </>
   );
 }
@@ -724,7 +616,7 @@ function DefaultMainSection({
   return (
     <section
       className={twMerge(
-        "relative rounded-[17px] grid grid-rows-[auto_1fr] content-stretch border border-zinc-400/50 overflow-hidden",
+        "relative rounded-[17px] grid grid-rows-[auto_1fr] content-stretch",
         className,
       )}
     >
@@ -740,7 +632,7 @@ function DefaultMainSection({
         </header>
       )}
 
-      <div
+      <main
         className="overflow-y-auto scrollbar-none p-2"
         style={{
           alignContent: alignContentBetween ? "space-between" : undefined,
@@ -750,12 +642,12 @@ function DefaultMainSection({
         }}
       >
         {children}
-      </div>
+      </main>
 
       {seeMore && (
         <Link
           to={to.toLowerCase()}
-          className="block p-2 bg-(--accent-300) hover:bg-(--accent-300)/80 text-white in-[.dark]:hover:bg-zinc-900 transition-colors duration-200 text-center px-6 in-[.dark]:bg-zinc-800"
+          className="block p-2 bg-(--accent-300) hover:bg-(--accent-300)/80 text-white in-[.dark]:hover:bg-zinc-900 transition-colors duration-200 text-center px-6 in-[.dark]:bg-zinc-800 rounded-full"
         >
           See more...
         </Link>

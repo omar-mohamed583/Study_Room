@@ -7,6 +7,10 @@ import {
   ScrollRestoration,
 } from "react-router";
 
+import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
+
 import type { Route } from "./+types/root";
 import "./app.css";
 import ThemeContextProvider from "./components/providers/themeContextprovider";
@@ -48,11 +52,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <ThemeContextProvider>
-        <Outlet />
-      </ThemeContextProvider>
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <ThemeContextProvider>
+          <Outlet />
+        </ThemeContextProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
 

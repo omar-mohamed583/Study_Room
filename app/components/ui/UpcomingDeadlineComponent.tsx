@@ -2,6 +2,7 @@ import { useId } from "react";
 import type { Exam, Task } from "~/types/deadlines";
 import { buildDeadlines, pluralize } from "../utils/deadlines";
 import DeadlineItem from "./DeadlineItem";
+import Button from "./Button";
 
 interface UpcomingDeadlinesProps {
   tasks?: Task[];
@@ -34,7 +35,7 @@ export default function UpcomingDeadlines({
   return (
     <section
       aria-labelledby={headingId}
-      className={`overflow-hidden rounded-[14px] border border-zinc-400/50 bg-(--sect-bg) ${className}`}
+      className={`overflow-hidden rounded-[14px] bg-(--sect-bg) ${className}`}
     >
       <header className="p-4 sm:px-5">
         <h2
@@ -83,9 +84,12 @@ export default function UpcomingDeadlines({
       )}
 
       {hiddenCount > 0 && (
-        <p className="border-t border-zinc-400/40 px-4 py-3 text-center text-(--text-secondary) [font-size:var(--sm-text)]">
+        <Button
+          navigation={{ to: "/calendar" }}
+          className="bg-(--accent-300) hover:bg-(--accent-300)/80 text-white in-[.dark]:hover:bg-zinc-900 transition-colors duration-200 text-center px-6 in-[.dark]:bg-zinc-800 rounded-full py-3 w-full"
+        >
           +{hiddenCount} more
-        </p>
+        </Button>
       )}
     </section>
   );

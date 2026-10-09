@@ -10,8 +10,10 @@ import {
 } from "react";
 import { Link } from "react-router";
 import { useGSAP } from "@gsap/react";
-import { GS_DELAY, GS_Duration } from "./Main";
 import gsap from "gsap";
+
+export const GS_Duration = 0.8;
+export const GS_DELAY = 0.1;
 
 export default function Header() {
 

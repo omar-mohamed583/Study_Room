@@ -14,13 +14,13 @@ export default function MyPie({
   width,
   height,
   valueFormat,
-}: PieSvgProps<PieData>) {
+}: any) {
   const { theme } = useTheme();
 
   return (
     <>
-      {!data.length && <EmptyState to="/subject/new" icon="subject" emptyStateTitle="Subjects" />}
-      <Pie
+      {!data?.length && <EmptyState to="/subject/new" icon="subject" emptyStateTitle="Subjects" />}
+      {data?.length && <Pie
         data={data}
         margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
         height={height}
@@ -36,7 +36,7 @@ export default function MyPie({
         arcLinkLabelsColor={{ from: "color" }}
         arcLabelsSkipAngle={10}
         arcLabelsTextColor={{ from: "color", modifiers: [["darker", 2]] }}
-      />
+      />}
     </>
   );
 }

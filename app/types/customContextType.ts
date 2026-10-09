@@ -5,7 +5,7 @@ export type TimerMode = "focus" | "short break" | "long break";
 
 export interface PastFocusTimer {
   id: string;
-  startDate: Date | null,
+  startDate: Date | null;
   takenFocusTime: number;
   takenShortBreakTime: number;
   takenLongBreakTime: number;
@@ -30,12 +30,14 @@ export type Toast = {
   title: string;
   description: string;
   actionBtnText?: string;
-  icon?: string,
+  icon?: string;
   onAction?: () => any | (() => null);
   fuseColor?: string;
 };
 
 export default interface CustomContextType {
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  loading: boolean;
   theme: Theme;
   setTheme: Dispatch<SetStateAction<Theme>>;
   timerStates: TimerStates;

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, type LinksFunction, type MetaFunction } from "react-router";
+import { useNavigate, useNavigation, type LinksFunction, type MetaFunction } from "react-router";
 import { useAuth } from "~/components/providers/authProvider";
 import GradientWaves from "~/components/ui/GradientWaves";
 import InputComponent, { useInputStates } from "~/components/ui/inputField";
@@ -26,6 +26,7 @@ export const meta: MetaFunction = () => [
 
 export default function Login() {
   const navigate = useNavigate();
+  const navigation = useNavigation();
 
   const actionObj = {
     login: "Welcome Back",
@@ -280,7 +281,7 @@ export default function Login() {
         </div>
       </form>
 
-      <LoadingComponent loading={!(loading || isLoading)} />
+      <LoadingComponent loading={!(loading || isLoading || !navigation.state)} />
     </main>
   );
 }

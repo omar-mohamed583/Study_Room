@@ -1,12 +1,10 @@
-export default interface SubjectTypes {
-  subjects: Subject[],
-}
-
 export type Subject = {
-  id: string;
-  creationDate: Date;
-  title: string;
-  tasksCount: number;
-  completedTasks: number;
-  timeSpent: number;
+  color: string;
+  createdAt: string;
+  documentId: string;
+  icon: string;
+  id: number;
+  name: string;
+  publishedAt: string;
+  updatedAt: string;
 };

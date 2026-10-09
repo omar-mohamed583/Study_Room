@@ -12,6 +12,11 @@ class ApiError extends Error {
 
 export async function apiFetch(endpoint: string, options: any = {}, isRetry: boolean = false) {
   const token = localStorage.getItem("jwt");
+  console.table({
+    endpoint,
+    options,
+    API_URL,
+  })
 
   const headers = {
     "Content-Type": "application/json",
@@ -28,9 +33,7 @@ export async function apiFetch(endpoint: string, options: any = {}, isRetry: boo
     credentials: "include",
   });
 
-  const data = await response.json();
-
-  console.warn("Data ", data);
+  const data = await response?.json();
 
   if (!response.ok) {
 
@@ -49,7 +52,6 @@ export async function apiFetch(endpoint: string, options: any = {}, isRetry: boo
       data?.error?.status,
       data?.error?.message || "Something went wrong",
     );
-
   }
 
   return data;

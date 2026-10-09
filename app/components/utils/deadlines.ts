@@ -57,7 +57,7 @@ function taskToDeadline(task: Task): Deadline | null {
     key: `task-${task.id}`,
     kind: "task",
     title: task.title,
-    subject: task.subject?.title,
+    subject: task?.subject?.title,
     date: new Date(task.dueDate),
     href: `/tasks/${task.id}`,
     priority: task.priority ?? undefined,
@@ -87,10 +87,15 @@ export function buildDeadlines(
   exams: Exam[],
   now = new Date(),
 ): Deadline[] {
+  if (!tasks.length || !exams.length) {
+    console.error(`no Lengths:\ntasks: ${tasks}\nexams: ${exams}`)
+    return [];
+  }
+
   return [
-    ...tasks.map(taskToDeadline),
-    ...exams.map((exam) => examToDeadline(exam, now)),
+    ...tasks?.map(taskToDeadline),
+    ...exams?.map((exam) => examToDeadline(exam, now)),
   ]
-    .filter((item): item is Deadline => item !== null)
-    .sort((a, b) => a.date.getTime() - b.date.getTime());
+    ?.filter((item): item is Deadline => item !== null)
+    ?.sort((a, b) => a.date.getTime() - b.date.getTime());
 }

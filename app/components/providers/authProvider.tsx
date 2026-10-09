@@ -1,3 +1,4 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useContext, useEffect, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router";
 import { apiFetch } from "~/api/api";
@@ -5,148 +6,147 @@ import { AuthContext } from "~/context/authContext";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  const [jwt, setJwt] = useState(() => {
-    return localStorage.getItem("jwt");
-  });
-
-  const [user, setUser] = useState(null);
-
-  const [isLoading, setLoading] = useState(false);
-
+  const [jwt, setJwt] = useState<string | null>(() =>
+    localStorage.getItem("jwt"),
+  );
   const [resetPassSuccess, setResetPassSuccess] = useState<boolean>(false);
 
+  function clearAuth() {
+    localStorage.removeItem("jwt");
+    setJwt(null);
+    queryClient.removeQueries({ queryKey: ["user"] });
+  }
+
+  // ---------- current user (query) ----------
+  const userQuery = useQuery({
+    queryKey: ["user", jwt],
+    queryFn: ({ signal }) => apiFetch("/users/me", { signal }),
+    enabled: !!jwt,
+    retry: false,
+  });
+
+  const user = userQuery.data ?? null;
+
   useEffect(() => {
-    const controller = new AbortController();
+    const err: any = userQuery.error;
+    if (!err || err.name === "AbortError") return;
 
-    async function loadUser() {
-      setLoading(true);
-      if (!jwt) {
-        console.log("no JWT");
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const currentUser = await apiFetch("/users/me", {
-          signal: controller.signal,
-        });
-        setUser(currentUser);
-      } catch (error: any) {
-        console.error("Failed to load user:", error);
-
-        if (error.name === "AbortError")
-          return console.log("Aborted From If Condition");
-
-        if (error?.status === 401 || error?.status === 403) {
-          localStorage.removeItem("jwt");
-          setJwt(null);
-          setUser(null);
-
-          navigate("/login");
-        }
-
-        return { error };
-      } finally {
-        setLoading(false);
-      }
+    if (err.status === 401 || err.status === 403) {
+      clearAuth();
+      navigate("/login");
     }
+  }, [userQuery.error]);
 
-    loadUser();
+  // ---------- mutations (all at top level) ----------
+  function onAuthSuccess(data: { jwt: string; user: unknown }) {
+    localStorage.setItem("jwt", data.jwt);
+    setJwt(data.jwt);
+    queryClient.setQueryData(["user", data.jwt], data.user);
+  }
 
-    return () => {
-      controller.abort();
-      console.log("aborted");
-    };
-  }, [jwt]);
+  const registerMutation = useMutation({
+    mutationFn: (v: {
+      username: string;
+      email: string;
+      password: string | number;
+    }) =>
+      apiFetch("/auth/local/register", {
+        method: "POST",
+        body: JSON.stringify(v),
+      }),
+    onSuccess: onAuthSuccess,
+  });
 
+  const loginMutation = useMutation({
+    mutationFn: (v: { identifier: string; password: string }) =>
+      apiFetch("/auth/local", {
+        method: "POST",
+        body: JSON.stringify(v),
+      }),
+    onSuccess: onAuthSuccess,
+  });
+
+  const requestOtpMutation = useMutation({
+    mutationFn: (email: string) =>
+      apiFetch("/password-otp/send", {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      }),
+  });
+
+  const verifyOtpMutation = useMutation({
+    mutationFn: (v: { email: string; otp: string }) =>
+      apiFetch("/password-otp/verify", {
+        method: "POST",
+        body: JSON.stringify(v),
+      }),
+  });
+
+  const resetPasswordMutation = useMutation({
+    mutationFn: (v: {
+      resetToken: string;
+      password: string;
+      passwordConfirmation: string;
+    }) =>
+      apiFetch("/password-otp/reset-password", {
+        method: "POST",
+        body: JSON.stringify(v),
+      }),
+  });
+
+  const resendOtpMutation = useMutation({
+    mutationFn: (email: string) =>
+      apiFetch("/password-otp/resend", {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      }),
+  });
+
+  // ---------- wrappers: plain functions, safe to call from handlers ----------
   async function register(
     username: string,
     email: string,
     password: string | number,
   ) {
-    setLoading(true);
     try {
-      const data = await apiFetch("/auth/local/register", {
-        method: "POST",
-        body: JSON.stringify({
-          username,
-          email,
-          password,
-        }),
+      const data = await registerMutation.mutateAsync({
+        username,
+        email,
+        password,
       });
-
-      localStorage.setItem("jwt", data.jwt);
-
-      setJwt(data.jwt);
-      setUser(data.user);
-
       return data.user;
-    } catch (e: any) {
-      console.log("Error: ", e);
+    } catch (e) {
       return { error: String(e) };
-    } finally {
-      setLoading(false);
     }
   }
 
   async function login(identifier: string, password: string) {
-    setLoading(true);
     try {
-      const data = await apiFetch("/auth/local", {
-        method: "POST",
-        body: JSON.stringify({
-          identifier,
-          password,
-        }),
-      });
-
-      localStorage.setItem("jwt", data.jwt);
-
-      setJwt(data.jwt);
-      setUser(data.user);
-
+      const data = await loginMutation.mutateAsync({ identifier, password });
       return data.user;
-    } catch (e: any) {
+    } catch (e) {
       console.log("Error: ", e);
       return { error: String(e).replace(/identifier/, "email") };
-    } finally {
-      setLoading(false);
     }
   }
 
   async function requestOtp(email: string) {
-    setLoading(true);
     try {
-      const otp = await apiFetch("/password-otp/send", {
-        method: "POST",
-        body: JSON.stringify({ email }),
-      });
-
-      return otp;
+      return await requestOtpMutation.mutateAsync(email);
     } catch (e) {
       console.warn(e);
       return { error: e };
-    } finally {
-      setLoading(false);
     }
   }
 
   async function verifyOtp(email: string, otp: string) {
-    setLoading(true);
     try {
-      const otpVerification = await apiFetch("/password-otp/verify", {
-        method: "POST",
-        body: JSON.stringify({ email, otp }),
-      });
-
-      return otpVerification;
+      return await verifyOtpMutation.mutateAsync({ email, otp });
     } catch (e) {
       console.warn(e);
-
       return { error: e };
-    } finally {
-      setLoading(false);
     }
   }
 
@@ -155,50 +155,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     newPassword: string,
     newPassConfirmation: string,
   ) {
-    setLoading(true);
     try {
-      const passwordReset = await apiFetch("/password-otp/reset-password", {
-        method: "POST",
-        body: JSON.stringify({
-          resetToken,
-          password: newPassword,
-          passwordConfirmation: newPassConfirmation,
-        }),
+      return await resetPasswordMutation.mutateAsync({
+        resetToken,
+        password: newPassword,
+        passwordConfirmation: newPassConfirmation,
       });
-
-      return passwordReset;
     } catch (e) {
       console.warn(e);
       return { error: e };
-    } finally {
-      setLoading(false);
     }
   }
 
   async function resendOtp(email: string) {
-    setLoading(true);
-
     try {
-      const data = await apiFetch("/password-otp/resend", {
-        method: "POST",
-        body: JSON.stringify({ email }),
-      });
-
-      return data;
+      return await resendOtpMutation.mutateAsync(email);
     } catch (e) {
       console.warn(e);
       return { error: e };
-    } finally {
-      setLoading(false);
     }
   }
 
   function logout() {
-    localStorage.removeItem("jwt");
-
-    setJwt(null);
-    setUser(null);
+    clearAuth();
   }
+
+  const isLoading =
+    userQuery.isLoading ||
+    registerMutation.isPending ||
+    loginMutation.isPending ||
+    requestOtpMutation.isPending ||
+    verifyOtpMutation.isPending ||
+    resetPasswordMutation.isPending ||
+    resendOtpMutation.isPending;
 
   return (
     <AuthContext

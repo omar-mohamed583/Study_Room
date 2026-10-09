@@ -115,9 +115,13 @@ export default function ThemeContextProvider({
 
   const [toasts, setToasts] = useState<Toast[]>([]);
 
+  const [loading, setLoading] = useState<boolean>(false);
+
   return (
     <ThemeContext
       value={{
+        loading,
+        setLoading,
         theme,
         setTheme,
         timerStates,

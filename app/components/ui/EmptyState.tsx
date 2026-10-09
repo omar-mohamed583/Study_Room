@@ -1,14 +1,18 @@
 import Button from "./Button";
 
+type EmptyStateProps = {
+  icon: "subject" | "task" | "exam" | "data";
+  to?: string;
+  emptyStateTitle?: string;
+  message?: string;
+};
+
 export default function EmptyState({
   to,
   icon,
   emptyStateTitle,
-}: {
-  to: string;
-  icon: "subject" | "task" | "exam" | "data";
-  emptyStateTitle: string;
-}) {
+  message,
+}: EmptyStateProps) {
   return (
     <div className="grid gap-3 pt-10 justify-center content-start min-h-96">
       <div className="rounded-[50%] w-25 aspect-square bg-zinc-400/30 in-[.dark]:bg-zinc-400/20 grid place-content-center *:stroke-zinc-400 in-[.dark]:*:stroke-zinc-400/60 mx-auto">
@@ -92,27 +96,35 @@ export default function EmptyState({
         )}
       </div>
 
-      <div className="*:text-center grid gap-2">
-        <h4 className="font-bold text-lg">No {emptyStateTitle} yet</h4>
-        <p className="text-sm text-(--text-secondary)">
-          There is no {emptyStateTitle} yet, get started by creating one
-        </p>
-      </div>
+      {message ? (
+        <p className="text-center text-sm text-(--text-secondary)">{message}</p>
+      ) : (
+        to && (
+          <>
+            <div className="*:text-center grid gap-2">
+              <h4 className="font-bold text-lg">No {emptyStateTitle} yet</h4>
+              <p className="text-sm text-(--text-secondary)">
+                There is no {emptyStateTitle} yet, get started by creating one
+              </p>
+            </div>
 
-      <div className="flex gap-3 mt-4 items-center *:py-3 *:px-5 justify-center *:rounded-full *:transition-colors duration-200">
-        <Button
-          className="bg-(--accent-200) text-white hover:bg-(--accent-200)/65"
-          navigation={{ to }}
-        >
-          Create {emptyStateTitle}
-        </Button>
-        <a
-          href="mailto:omarabualmagd06@gmail.com"
-          className="border border-zinc-400/60 in-[.dark]:border-zinc-400/20 hover:bg-zinc-400/20 in-[.dark]:hover:bg-zinc-400/10"
-        >
-          Contact us
-        </a>
-      </div>
+            <div className="flex gap-3 mt-4 items-center *:py-3 *:px-5 justify-center *:rounded-full *:transition-colors duration-200">
+              <Button
+                className="bg-(--accent-200) text-white hover:bg-(--accent-200)/65"
+                navigation={{ to }}
+              >
+                Create {emptyStateTitle}
+              </Button>
+              <a
+                href="mailto:omarabualmagd06@gmail.com"
+                className="border border-zinc-400/60 in-[.dark]:border-zinc-400/20 hover:bg-zinc-400/20 in-[.dark]:hover:bg-zinc-400/10"
+              >
+                Contact us
+              </a>
+            </div>
+          </>
+        )
+      )}
     </div>
   );
 }
