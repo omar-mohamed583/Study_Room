@@ -9,7 +9,6 @@ import type DefaultMainSecType from "~/types/defaultMain";
 import Button from "../ui/Button";
 import Header, { GS_Duration } from "./Header";
 import { useAuth } from "../providers/authProvider";
-import LoadingComponent from "../ui/LoadingComponent";
 import { twMerge } from "cn";
 import SmallParticles from "../ui/smallParticles";
 import TaskItem from "../ui/TaskItem";
@@ -30,6 +29,10 @@ import type { Task } from "~/types/taskType";
 import type { Exam } from "~/types/examType";
 import type { Subject } from "~/types/subjectTypes";
 import SubjectItems from "../ui/SubjectItem";
+import TaskItemSkeleton from "../skeleton/todayTasksSkeleton";
+import DeadlineItemSkeleton from "../skeleton/UpcomingDeadlinesSkeleton";
+import SubjectItemsSkeleton from "../skeleton/SubjectsSkeleton";
+import { ProgressBarSkeleton } from "../skeleton/ProgressBarsSkeleton";
 
 export const links: LinksFunction = () => [
   {
@@ -64,16 +67,21 @@ export default function DefaultMain() {
   // Gsap Setup
   const container = useRef<HTMLElement>(null);
 
-  const { user } = useAuth();
+  const { user, accessToken } = useAuth();
 
   const { toasts, setToasts, theme } = useTheme();
 
   const tasksQuery = useGetEvents<Task[]>({
     endpoint: "/tasks?populate[subject]=true",
+    accessToken,
   });
-  const subjectsQuery = useGetEvents<Subject[]>({ endpoint: "/subjects" });
+  const subjectsQuery = useGetEvents<Subject[]>({
+    endpoint: "/subjects",
+    accessToken,
+  });
   const examsQuery = useGetEvents<Exam[]>({
     endpoint: "/exams?populate[subject]=true",
+    accessToken
   });
 
   const tasks = useMemo(() => tasksQuery.data, [tasksQuery.data]);
@@ -82,7 +90,9 @@ export default function DefaultMain() {
 
   const todayTasks = tasks?.filter((task) => isToday(task.dueDate)).slice(0, 4);
   const inLimitTodayTasks =
-    todayTasks?.length && todayTasks?.length > 4 ? todayTasks?.slice(0, 4) : todayTasks;
+    todayTasks?.length && todayTasks?.length > 4
+      ? todayTasks?.slice(0, 4)
+      : todayTasks;
   console.table({
     tasks,
     subjects,
@@ -290,14 +300,18 @@ export default function DefaultMain() {
             sectionTitle="Today Tasks"
             to="/tasks/today"
           >
-            {!inLimitTodayTasks?.length && (
+            {tasksQuery.isLoading &&
+              [1, 2, 3, 4].map((item) => <TaskItemSkeleton key={item} />)}
+
+            {!tasksQuery.isLoading && !inLimitTodayTasks?.length && (
               <EmptyState
                 message="No tasks due today."
                 icon="task"
               />
             )}
 
-            {Boolean(inLimitTodayTasks?.length) &&
+            {!tasksQuery.isLoading &&
+              Boolean(inLimitTodayTasks?.length) &&
               inLimitTodayTasks?.map((task) => (
                 <TaskItem
                   key={task.documentId}
@@ -310,11 +324,16 @@ export default function DefaultMain() {
         </section>
 
         <section className="gs-animate">
-          <UpcomingDeadlines
-            exams={exams}
-            limit={4}
-            tasks={tasks}
-          />
+          {(examsQuery.isLoading || tasksQuery.isLoading) &&
+            [1, 2, 3, 4].map((item) => <DeadlineItemSkeleton key={item} />)}
+
+          {!(examsQuery.isLoading || tasksQuery.isLoading) && (
+            <UpcomingDeadlines
+              exams={exams}
+              limit={4}
+              tasks={tasks}
+            />
+          )}
         </section>
 
         <section className="min-[1011px]:[grid-area:1/2/2/3] max-[1010px]:row-1 min-h-120 relative gs-animate">
@@ -457,10 +476,16 @@ export default function DefaultMain() {
               </svg>
             }
           >
-            <SubjectItems
-              subjects={subjects ?? []}
-              tasks={tasks!}
-            />
+            {(subjectsQuery.isLoading || tasksQuery.isLoading) && (
+              <SubjectItemsSkeleton />
+            )}
+
+            {!(subjectsQuery.isLoading || tasksQuery.isLoading) && (
+              <SubjectItems
+                subjects={subjects ?? []}
+                tasks={tasks!}
+              />
+            )}
           </DefaultMainSection>
         </section>
         <section className="gs-animate">
@@ -538,11 +563,18 @@ export default function DefaultMain() {
           >
             <div className="max-w-130 mx-auto">
               <div>
-                <ProgressBars
-                  subjects={subjects ?? []}
-                  tasks={tasks ?? []}
-                  className=""
-                />
+                {(subjectsQuery.isLoading || tasksQuery.isLoading) &&
+                  [1, 2, 3, 4, 5].map((item) => (
+                    <ProgressBarSkeleton key={item} />
+                  ))}
+
+                {!(subjectsQuery.isLoading || tasksQuery.isLoading) && (
+                  <ProgressBars
+                    subjects={subjects ?? []}
+                    tasks={tasks ?? []}
+                    className=""
+                  />
+                )}
               </div>
             </div>
           </DefaultMainSection>
@@ -591,16 +623,6 @@ export default function DefaultMain() {
           />
         ))}
       </div>
-
-      <LoadingComponent
-        loading={
-          !(
-            tasksQuery.isLoading ||
-            examsQuery.isLoading ||
-            subjectsQuery.isLoading
-          )
-        }
-      />
     </>
   );
 }

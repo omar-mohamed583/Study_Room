@@ -2,7 +2,7 @@ import { useId } from "react";
 import Button from "./Button";
 import EmptyState from "./EmptyState";
 import type { Subject } from "~/types/subjectTypes";
-import type { Task } from "~/types/deadlines";
+import type { Task } from "~/types/taskType";
 
 type BaseItem = {
   id: string | number;
@@ -60,7 +60,7 @@ export function ProgressBar({
       <div className="mb-1.5 flex items-baseline justify-between gap-4 text-sm">
         <span
           id={labelId}
-          className="min-w-0 text-(--text-primary) truncate font-medium"
+          className="min-w-0 text-(--text-primary) truncate font-medium capitalize"
         >
           {subj.name}
         </span>

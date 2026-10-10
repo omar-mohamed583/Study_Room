@@ -198,7 +198,7 @@ export default function Login() {
 
       <form
         onSubmit={handleFormSubmission}
-        className="grid relative [anchor-name:--anc] z-10 gap-4 bg-black/15 min-h-[50vh] p-5 py-7 sm:p-8 rounded-3xl backdrop-blur-lg w-[min(28rem,90vw)] border border-white/10 isolation-auto"
+        className="grid relative [anchor-name:--anc] z-10 gap-4 bg-black/1 min-h-[50vh h-max p-5 py-7 sm:p-8 rounded-3xl backdrop-blur-lg w-[min(28rem,90vw)] border border-white/10 isolation-auto"
       >
         <legend className="text-2xl font-black text-center mb-5">
           {actionObj[`${action}`]}

@@ -14,7 +14,7 @@ export default function EmptyState({
   message,
 }: EmptyStateProps) {
   return (
-    <div className="grid gap-3 pt-10 justify-center content-start min-h-96">
+    <div className="grid gap-3 pt-16 justify-center content-start min-h-96">
       <div className="rounded-[50%] w-25 aspect-square bg-zinc-400/30 in-[.dark]:bg-zinc-400/20 grid place-content-center *:stroke-zinc-400 in-[.dark]:*:stroke-zinc-400/60 mx-auto">
         {icon.toLowerCase() === "subject" && (
           <svg

@@ -55,7 +55,7 @@ export default function SubjectItems({
                   key={subject.documentId}
                 >
                   <td className="grid p-1">
-                    <h3 className="font-medium text-[18px]">{subject.name}</h3>
+                    <h3 className="font-medium text-[18px] capitalize">{subject.name}</h3>
                     <span className="[color:var(--text-secondary)] [font-size:11px]">
                       Created at:{" "}
                       {new Date(subject.createdAt)
@@ -66,20 +66,20 @@ export default function SubjectItems({
                         .toUpperCase()}
                     </span>
                   </td>
-                  <td className="text-center font-medium text-(--pale-text)">
+                  <td className="text-center font-medium">
                     {subjectTasks.totalTasks}
                   </td>
-                  <td className="text-center font-medium text-(--pale-text)">
+                  <td className="text-center font-medium)">
                     {subjectTasks.completedTasks}
                   </td>
-                  <td className="text-center font-medium text-(--pale-text)">
+                  <td className="text-center font-medium">
                     {(
                       (subjectTasks.completedTasks / subjectTasks.totalTasks) *
                       100
                     ).toFixed(0)}
                     %
                   </td>
-                  <td className="text-center font-medium text-(--pale-text)">
+                  <td className="text-center font-medium">
                     {0}h
                   </td>
                   <td>

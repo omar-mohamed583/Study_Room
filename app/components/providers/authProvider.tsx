@@ -3,31 +3,29 @@ import { useContext, useEffect, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router";
 import { apiFetch } from "~/api/api";
 import { AuthContext } from "~/context/authContext";
+import type { UserType } from "~/types/userType";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const [jwt, setJwt] = useState<string | null>(() =>
-    localStorage.getItem("jwt"),
-  );
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [user, setUser] = useState<UserType | null>(null);
   const [resetPassSuccess, setResetPassSuccess] = useState<boolean>(false);
 
   function clearAuth() {
-    localStorage.removeItem("jwt");
-    setJwt(null);
+    setAccessToken(null);
     queryClient.removeQueries({ queryKey: ["user"] });
   }
 
-  // ---------- current user (query) ----------
   const userQuery = useQuery({
-    queryKey: ["user", jwt],
-    queryFn: ({ signal }) => apiFetch("/users/me", { signal }),
-    enabled: !!jwt,
+    queryKey: ["user", accessToken],
+    queryFn: ({ signal }) => apiFetch("/users/me", accessToken, { signal }),
+    enabled: !!accessToken,
     retry: false,
   });
 
-  const user = userQuery.data ?? null;
+  setUser(userQuery.data ?? null);
 
   useEffect(() => {
     const err: any = userQuery.error;
@@ -39,10 +37,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [userQuery.error]);
 
-  // ---------- mutations (all at top level) ----------
   function onAuthSuccess(data: { jwt: string; user: unknown }) {
-    localStorage.setItem("jwt", data.jwt);
-    setJwt(data.jwt);
+    setAccessToken(data.jwt);
     queryClient.setQueryData(["user", data.jwt], data.user);
   }
 
@@ -52,7 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email: string;
       password: string | number;
     }) =>
-      apiFetch("/auth/local/register", {
+      apiFetch("/auth/local/register", accessToken, {
         method: "POST",
         body: JSON.stringify(v),
       }),
@@ -61,16 +57,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginMutation = useMutation({
     mutationFn: (v: { identifier: string; password: string }) =>
-      apiFetch("/auth/local", {
+      apiFetch("/auth/local", accessToken, {
         method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(v),
       }),
+
     onSuccess: onAuthSuccess,
   });
 
   const requestOtpMutation = useMutation({
     mutationFn: (email: string) =>
-      apiFetch("/password-otp/send", {
+      apiFetch("/password-otp/send", accessToken, {
         method: "POST",
         body: JSON.stringify({ email }),
       }),
@@ -78,7 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const verifyOtpMutation = useMutation({
     mutationFn: (v: { email: string; otp: string }) =>
-      apiFetch("/password-otp/verify", {
+      apiFetch("/password-otp/verify", accessToken, {
         method: "POST",
         body: JSON.stringify(v),
       }),
@@ -90,7 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       password: string;
       passwordConfirmation: string;
     }) =>
-      apiFetch("/password-otp/reset-password", {
+      apiFetch("/password-otp/reset-password", accessToken, {
         method: "POST",
         body: JSON.stringify(v),
       }),
@@ -98,13 +99,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const resendOtpMutation = useMutation({
     mutationFn: (email: string) =>
-      apiFetch("/password-otp/resend", {
+      apiFetch("/password-otp/resend", accessToken, {
         method: "POST",
         body: JSON.stringify({ email }),
       }),
   });
 
-  // ---------- wrappers: plain functions, safe to call from handlers ----------
   async function register(
     username: string,
     email: string,
@@ -193,9 +193,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext
       value={{
         user,
-        jwt,
+        accessToken,
         isLoading,
-        isAuthenticated: !!jwt && !!user,
+        isAuthenticated: !!accessToken && !!user,
         register,
         login,
         requestOtp,

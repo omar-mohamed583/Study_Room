@@ -27,7 +27,7 @@ const URGENCY_STYLES: Record<Urgency, { tile: string; label: string }> = {
     label: "stroke-white",
   },
   later: {
-    tile: "bg-(--stripping-color)/70",
+    tile: "bg-zinc-500/70",
     label: "stroke-white",
   },
 };
