@@ -26,8 +26,10 @@ import { getIcon } from "../providers/themeContextprovider";
 import ProgressBars from "../ui/ProgressBar";
 import EmptyState from "../ui/EmptyState";
 import useGetEvents from "~/api/getEvents";
-import type { Exam, Task } from "~/types/deadlines";
+import type { Task } from "~/types/taskType";
+import type { Exam } from "~/types/examType";
 import type { Subject } from "~/types/subjectTypes";
+import SubjectItems from "../ui/SubjectItem";
 
 export const links: LinksFunction = () => [
   {
@@ -78,8 +80,9 @@ export default function DefaultMain() {
   const subjects = useMemo(() => subjectsQuery.data, [subjectsQuery.data]);
   const exams = useMemo(() => examsQuery.data, [examsQuery.data]);
 
-  const todayTasks = tasks?.filter((task) => isToday(task.dueDate));
-
+  const todayTasks = tasks?.filter((task) => isToday(task.dueDate)).slice(0, 4);
+  const inLimitTodayTasks =
+    todayTasks?.length && todayTasks?.length > 4 ? todayTasks?.slice(0, 4) : todayTasks;
   console.table({
     tasks,
     subjects,
@@ -266,7 +269,7 @@ export default function DefaultMain() {
       >
         <section className="gs-animate">
           <DefaultMainSection
-            seeMore={Boolean(todayTasks?.length)}
+            seeMore={Boolean(inLimitTodayTasks?.length)}
             sectionDescription="Tasks you need to complete today"
             sectionTitleLogo={
               <svg
@@ -287,22 +290,22 @@ export default function DefaultMain() {
             sectionTitle="Today Tasks"
             to="/tasks/today"
           >
-            {!todayTasks?.length && (
+            {!inLimitTodayTasks?.length && (
               <EmptyState
                 message="No tasks due today."
                 icon="task"
               />
             )}
 
-            {Boolean(todayTasks?.length) &&
-              (todayTasks?.map((task) => (
+            {Boolean(inLimitTodayTasks?.length) &&
+              inLimitTodayTasks?.map((task) => (
                 <TaskItem
                   key={task.documentId}
                   id={task.documentId}
                   subject={task.subject.name}
                   title={task.title}
                 />
-              )))}
+              ))}
           </DefaultMainSection>
         </section>
 
@@ -454,12 +457,10 @@ export default function DefaultMain() {
               </svg>
             }
           >
-            <Suspense fallback={""}>
-              <SubjectItem
-                subjects={subjects}
-                tasks={tasks!}
-              />
-            </Suspense>
+            <SubjectItems
+              subjects={subjects ?? []}
+              tasks={tasks!}
+            />
           </DefaultMainSection>
         </section>
         <section className="gs-animate">
@@ -498,7 +499,8 @@ export default function DefaultMain() {
           >
             <div className="justify-self-center text-black">
               <MyPie
-                data={subjects ?? []}
+                subjects={subjects ?? []}
+                focusTimers={[]}
                 valueFormat={(value: any) =>
                   value / 60 >= 1 ? value / 60 + "h" : value + "m"
                 }

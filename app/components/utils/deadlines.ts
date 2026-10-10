@@ -1,4 +1,6 @@
-import type { Deadline, Exam, Task, Urgency } from "~/types/deadlines";
+import type { Deadline, Urgency } from "~/types/deadlines";
+import type { Exam } from "~/types/examType";
+import type { Task } from "~/types/taskType";
 
 const LOCALE = "en";
 const DAY_MS = 86_400_000;
@@ -57,7 +59,7 @@ function taskToDeadline(task: Task): Deadline | null {
     key: `task-${task.id}`,
     kind: "task",
     title: task.title,
-    subject: task?.subject?.title,
+    subject: task?.subject?.name,
     date: new Date(task.dueDate),
     href: `/tasks/${task.id}`,
     priority: task.priority ?? undefined,
@@ -74,7 +76,7 @@ function examToDeadline(exam: Exam, now: Date): Deadline | null {
     key: `exam-${exam.id}`,
     kind: "exam",
     title: exam.title,
-    subject: exam.subject?.title,
+    subject: exam.subject?.name,
     date,
     href: `/exams/${exam.id}`,
     topicsCount: exam.exam_topics?.length,
@@ -88,7 +90,7 @@ export function buildDeadlines(
   now = new Date(),
 ): Deadline[] {
   if (!tasks.length || !exams.length) {
-    console.error(`no Lengths:\ntasks: ${tasks}\nexams: ${exams}`)
+    console.warn(`no Lengths:\ntasks: ${tasks}\nexams: ${exams}`)
     return [];
   }
 

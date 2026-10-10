@@ -1,15 +1,17 @@
 import { Link } from "react-router";
 import type { Subject } from "~/types/subjectTypes";
 import EmptyState from "./EmptyState";
-import type { Task } from "~/types/deadlines";
+import type { Task } from "~/types/taskType";
 
-export default function SubjectItem({
+export default function SubjectItems({
   subjects,
   tasks,
 }: {
   subjects: Subject[];
   tasks: Task[];
 }) {
+  const visibleItems = subjects?.length > 5 ? subjects.slice(0, 5) : subjects;
+
   return (
     <>
       {subjects && !subjects?.length && (
@@ -20,7 +22,7 @@ export default function SubjectItem({
         />
       )}
 
-      {subjects?.length && tasks?.length && (
+      {visibleItems?.length && tasks?.length && (
         <table className="w-full min-w-max">
           <thead>
             <tr className="*:text-(--text-secondary) *:font-semibold *:text-[15px] **:p-4 bg-(--stripping-color) border-b border-b-zinc-500">
@@ -33,7 +35,7 @@ export default function SubjectItem({
             </tr>
           </thead>
           <tbody className="*:not-[tr:last-child]:border-b border-b-zinc-400 *:even:bg-(--stripping-color)">
-            {subjects?.map((subject) => {
+            {visibleItems?.map((subject) => {
               const subjectTasks = {
                 totalTasks: 0,
                 completedTasks: 0,
@@ -55,19 +57,29 @@ export default function SubjectItem({
                   <td className="grid p-1">
                     <h3 className="font-medium text-[18px]">{subject.name}</h3>
                     <span className="[color:var(--text-secondary)] [font-size:11px]">
-                      {new Date(subject.createdAt).toDateString()}
+                      Created at:{" "}
+                      {new Date(subject.createdAt)
+                        .toDateString()
+                        .split(" ")
+                        .splice(1)
+                        .join(" ")
+                        .toUpperCase()}
                     </span>
                   </td>
-                  <td className="text-center font-medium">{subjectTasks.totalTasks}</td>
-                  <td className="text-center font-medium">{subjectTasks.completedTasks}</td>
-                  <td className="text-center font-medium">
+                  <td className="text-center font-medium text-(--pale-text)">
+                    {subjectTasks.totalTasks}
+                  </td>
+                  <td className="text-center font-medium text-(--pale-text)">
+                    {subjectTasks.completedTasks}
+                  </td>
+                  <td className="text-center font-medium text-(--pale-text)">
                     {(
                       (subjectTasks.completedTasks / subjectTasks.totalTasks) *
                       100
                     ).toFixed(0)}
                     %
                   </td>
-                  <td className="text-center font-medium">
+                  <td className="text-center font-medium text-(--pale-text)">
                     {0}h
                   </td>
                   <td>

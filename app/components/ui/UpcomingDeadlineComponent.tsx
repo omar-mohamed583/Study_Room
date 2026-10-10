@@ -1,5 +1,6 @@
 import { useId } from "react";
-import type { Exam, Task } from "~/types/deadlines";
+import type { Task } from "../../types/taskType";
+import type { Exam } from "../../types/examType";
 import { buildDeadlines, pluralize } from "../utils/deadlines";
 import DeadlineItem from "./DeadlineItem";
 import Button from "./Button";
