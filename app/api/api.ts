@@ -1,24 +1,29 @@
+import { getAccessToken, refreshSession } from "~/auth/session";
+
 const API_URL = "http://localhost:1337/api";
 
-class ApiError extends Error {
+export class ApiError extends Error {
   status: number;
 
   constructor(status: number, message: string) {
-    super();
-    this.message = message;
+    super(message);
+    this.name = "ApiError";
     this.status = status;
   }
 }
 
 export async function apiFetch(
   path: string,
-  accessToken: string | null,
   options: RequestInit = {},
+  canRetry = true,
 ) {
   const headers = new Headers(options.headers);
 
-  if (accessToken) {
-    headers.set("Authorization", `Bearer ${accessToken}`);
+  const token = getAccessToken();
+  if (token) headers.set("Authorization", `Bearer ${token}`);
+
+  if (options.body && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
   }
 
   const response = await fetch(`${API_URL}${path}`, {
@@ -27,7 +32,19 @@ export async function apiFetch(
     credentials: "include",
   });
 
-  const data = await response.json();
+  if (response.status === 401 && canRetry && !path.startsWith("/auth/")) {
+    const newToken = await refreshSession();
+    if (newToken) return apiFetch(path, options, false);
+  }
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new ApiError(
+      response.status,
+      data?.error?.message ?? response.statusText,
+    );
+  }
 
   return data;
 }

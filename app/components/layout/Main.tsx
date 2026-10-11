@@ -5,6 +5,7 @@ import {
   type LinksFunction,
   type MetaFunction,
 } from "react-router";
+import logo from "~/assets/logo.svg"
 import type DefaultMainSecType from "~/types/defaultMain";
 import Button from "../ui/Button";
 import Header, { GS_Duration } from "./Header";
@@ -12,7 +13,6 @@ import { useAuth } from "../providers/authProvider";
 import { twMerge } from "cn";
 import SmallParticles from "../ui/smallParticles";
 import TaskItem from "../ui/TaskItem";
-import SubjectItem from "../ui/SubjectItem";
 import FocusTimer from "../ui/FocusTimer";
 import UpcomingDeadlines from "../ui/UpcomingDeadlineComponent";
 import MyPie from "../ui/PieChart";
@@ -29,16 +29,17 @@ import type { Task } from "~/types/taskType";
 import type { Exam } from "~/types/examType";
 import type { Subject } from "~/types/subjectTypes";
 import SubjectItems from "../ui/SubjectItem";
-import TaskItemSkeleton from "../skeleton/todayTasksSkeleton";
+import TaskItemSkeleton from "../skeleton/TodayTasksSkeleton";
 import DeadlineItemSkeleton from "../skeleton/UpcomingDeadlinesSkeleton";
 import SubjectItemsSkeleton from "../skeleton/SubjectsSkeleton";
 import { ProgressBarSkeleton } from "../skeleton/ProgressBarsSkeleton";
+import { ensureSession } from "~/auth/session";
 
 export const links: LinksFunction = () => [
   {
     rel: "icon",
     as: "image",
-    href: "../../assets/logo.svg",
+    href: logo,
   },
 ];
 
@@ -67,21 +68,18 @@ export default function DefaultMain() {
   // Gsap Setup
   const container = useRef<HTMLElement>(null);
 
-  const { user, accessToken } = useAuth();
+  const { user } = useAuth();
 
   const { toasts, setToasts, theme } = useTheme();
 
   const tasksQuery = useGetEvents<Task[]>({
     endpoint: "/tasks?populate[subject]=true",
-    accessToken,
   });
   const subjectsQuery = useGetEvents<Subject[]>({
     endpoint: "/subjects",
-    accessToken,
   });
   const examsQuery = useGetEvents<Exam[]>({
     endpoint: "/exams?populate[subject]=true",
-    accessToken
   });
 
   const tasks = useMemo(() => tasksQuery.data, [tasksQuery.data]);
@@ -275,7 +273,7 @@ export default function DefaultMain() {
       <Header />
       <main
         ref={container}
-        className="relative grid grid-cols-2 gap-7 max-w-350 mx-auto px-4 md:px-8 *:grid *:gap-10 *:bg-(--sect-bg) *:p-3 *:rounded-[25px] *:overflow-auto max-[1010px]:grid-cols-1 *:shadow-[0_0_8px_0_var(--contrast-text)] *:min-h-120"
+        className="relative grid grid-cols-2 gap-7 max-w-350 mx-auto px-4 md:px-8 *:grid *:gap-10 *:bg-(--sect-bg) *:p-3 *:rounded-[20px] *:overflow-auto max-[1010px]:grid-cols-1 *:shadow-[0_0_8px_0_var(--contrast-text)] *:min-h-120"
       >
         <section className="gs-animate">
           <DefaultMainSection
@@ -623,6 +621,13 @@ export default function DefaultMain() {
           />
         ))}
       </div>
+
+      <footer className="flex justify-between px-5 max-w-350 mt-20 mx-auto *:text-xs *:font-medium">
+        <p>&copy;{new Date().getFullYear()} All Rights Reserved For Study Planner Team</p>
+        <p>
+          Developed By <a href="https://github.com/omar-mohamed583" className="active:text-sky-500 text-blue-500 underline underline-offset-1 decoration-wavy" target="_blank">Omar</a>
+        </p>
+      </footer>
     </>
   );
 }
@@ -683,8 +688,6 @@ function DefaultMainSection({
 export const clientMiddleware = [authMiddleware];
 
 async function authMiddleware() {
-  if (typeof localStorage === "undefined") return;
-
-  const jwt = localStorage.getItem("jwt");
-  if (!jwt) throw redirect("/login");
+  const accessToken = await ensureSession();
+  if (!accessToken) throw redirect("/login");
 }

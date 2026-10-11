@@ -1,17 +1,41 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useContext, useEffect, useState, type ReactNode } from "react";
+import {
+  useContext,
+  useEffect,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 import { useNavigate } from "react-router";
 import { apiFetch } from "~/api/api";
+import {
+  ensureSession,
+  getAccessToken,
+  onTokenChange,
+  setAccessToken,
+} from "~/auth/session";
 import { AuthContext } from "~/context/authContext";
 import type { UserType } from "~/types/userType";
+
+const send = (path: string, body: unknown) =>
+  apiFetch(path, { method: "POST", body: JSON.stringify(body) });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [user, setUser] = useState<UserType | null>(null);
+  const accessToken = useSyncExternalStore(
+    onTokenChange,
+    getAccessToken,
+    () => null,
+  );
+
+  const [isRestoring, setIsRestoring] = useState(true);
   const [resetPassSuccess, setResetPassSuccess] = useState<boolean>(false);
+
+  useEffect(() => {
+    ensureSession().finally(() => setIsRestoring(false));
+  }, []);
 
   function clearAuth() {
     setAccessToken(null);
@@ -19,13 +43,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const userQuery = useQuery({
-    queryKey: ["user", accessToken],
-    queryFn: ({ signal }) => apiFetch("/users/me", accessToken, { signal }),
+    queryKey: ["user"],
+    queryFn: ({ signal }) => apiFetch("/users/me", { signal }),
     enabled: !!accessToken,
     retry: false,
+    staleTime: 5 * 60 * 1000,
   });
 
-  setUser(userQuery.data ?? null);
+  const user: UserType | null = userQuery.data ?? null;
 
   useEffect(() => {
     const err: any = userQuery.error;
@@ -39,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   function onAuthSuccess(data: { jwt: string; user: unknown }) {
     setAccessToken(data.jwt);
-    queryClient.setQueryData(["user", data.jwt], data.user);
+    queryClient.setQueryData(["user"], data.user);
   }
 
   const registerMutation = useMutation({
@@ -47,42 +72,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       username: string;
       email: string;
       password: string | number;
-    }) =>
-      apiFetch("/auth/local/register", accessToken, {
-        method: "POST",
-        body: JSON.stringify(v),
-      }),
+    }) => send("/auth/local/register", v),
     onSuccess: onAuthSuccess,
   });
 
   const loginMutation = useMutation({
     mutationFn: (v: { identifier: string; password: string }) =>
-      apiFetch("/auth/local", accessToken, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(v),
-      }),
-
+      send("/auth/local", v),
     onSuccess: onAuthSuccess,
   });
 
   const requestOtpMutation = useMutation({
-    mutationFn: (email: string) =>
-      apiFetch("/password-otp/send", accessToken, {
-        method: "POST",
-        body: JSON.stringify({ email }),
-      }),
+    mutationFn: (email: string) => send("/password-otp/send", { email }),
   });
 
   const verifyOtpMutation = useMutation({
     mutationFn: (v: { email: string; otp: string }) =>
-      apiFetch("/password-otp/verify", accessToken, {
-        method: "POST",
-        body: JSON.stringify(v),
-      }),
+      send("/password-otp/verify", v),
   });
 
   const resetPasswordMutation = useMutation({
@@ -90,20 +96,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       resetToken: string;
       password: string;
       passwordConfirmation: string;
-    }) =>
-      apiFetch("/password-otp/reset-password", accessToken, {
-        method: "POST",
-        body: JSON.stringify(v),
-      }),
+    }) => send("/password-otp/reset-password", v),
   });
 
   const resendOtpMutation = useMutation({
-    mutationFn: (email: string) =>
-      apiFetch("/password-otp/resend", accessToken, {
-        method: "POST",
-        body: JSON.stringify({ email }),
-      }),
+    mutationFn: (email: string) => send("/password-otp/resend", { email }),
   });
+
+  const message = (e: unknown) => (e instanceof Error ? e.message : String(e));
 
   async function register(
     username: string,
@@ -118,7 +118,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       return data.user;
     } catch (e) {
-      return { error: String(e) };
+      return { error: message(e) };
     }
   }
 
@@ -127,8 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const data = await loginMutation.mutateAsync({ identifier, password });
       return data.user;
     } catch (e) {
-      console.log("Error: ", e);
-      return { error: String(e).replace(/identifier/, "email") };
+      return { error: message(e).replace(/identifier/, "email") };
     }
   }
 
@@ -136,8 +135,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       return await requestOtpMutation.mutateAsync(email);
     } catch (e) {
-      console.warn(e);
-      return { error: e };
+      return { error: message(e) };
     }
   }
 
@@ -145,8 +143,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       return await verifyOtpMutation.mutateAsync({ email, otp });
     } catch (e) {
-      console.warn(e);
-      return { error: e };
+      return { error: message(e) };
     }
   }
 
@@ -162,8 +159,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         passwordConfirmation: newPassConfirmation,
       });
     } catch (e) {
-      console.warn(e);
-      return { error: e };
+      return { error: message(e) };
     }
   }
 
@@ -171,13 +167,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       return await resendOtpMutation.mutateAsync(email);
     } catch (e) {
-      console.warn(e);
-      return { error: e };
+      return { error: message(e) };
     }
   }
 
-  function logout() {
+  async function logout() {
+    try {
+      // Revokes the user's sessions on the server and clears the refresh cookie.
+      await send("/auth/logout", {});
+    } catch {
+      // Even if the call fails, log out locally.
+    }
     clearAuth();
+    navigate("/login");
   }
 
   const isLoading =
@@ -195,6 +197,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user,
         accessToken,
         isLoading,
+        isRestoring, // protected routes: show a spinner while true, don't redirect yet
         isAuthenticated: !!accessToken && !!user,
         register,
         login,
