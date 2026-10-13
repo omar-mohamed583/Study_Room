@@ -8,15 +8,17 @@ import {
   useState,
   useTransition,
 } from "react";
+import logo from "~/assets/logo.svg";
 import { Link } from "react-router";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import type { LinksFunction } from "react-router";
+import DialogComp from "../ui/Dialog";
 
 export const GS_Duration = 0.8;
 export const GS_DELAY = 0.1;
 
 export default function Header() {
-
   // Gsap Setup
   if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     useGSAP(() => {
@@ -379,12 +381,12 @@ export default function Header() {
             <input
               type="text"
               id="search"
-              className="bg-transparent ring-3 ring-transparent focus:ring-(--secondary-gray) border-0 focus-visible:ring-(--secondary-gray) pl-10 p-2 outline-0"
+              className="bg-transparent shadow-[0_0_7px_1px_var(--tw-shadow)] shadow-transparent focus:shadow-violet-500 border-0 focus-visible:shadow-violet-500 pl-10 p-2 outline-0 "
               placeholder=" "
             />
             <label
               htmlFor="search"
-              className="text-(--pale-text) absolute top-1/2 left-2.5 -translate-y-1/2 pointer-events-none items-center content-center flex gap-1.5"
+              className="text-(--pale-text) absolute top-1/2 left-2.5 -translate-y-1/2 pointer-events-none items-end content-center flex gap-1.5 text-sm leading-[normal] "
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -595,17 +597,46 @@ function ContainerListItem({
         <span className="h-px flex-1 bg-current/30"></span>
       </div>
       <ul className="[&_a]:py-3 [&_a]:px-4 *:min-w-50 cursor-pointer *:hover:bg-zinc-400/20 *:font-medium *:transition-colors *:duration-300 *:text-[15px]">
-        {items.map((item) => (
-          <li key={item.id}>
-            <Link
-              to={item.toLocation}
-              className="flex items-center content-center justify-between"
-            >
-              {item.name}
-              {item.svg}
-            </Link>
-          </li>
-        ))}
+        {items.map((item) => {
+          if (
+            item.name.toLowerCase() === "account" ||
+            item.name.toLowerCase() === "setting"
+          ) {
+            if (item.name.toLowerCase() === "account")
+              return (
+                <li key={item.id}>
+                  <DialogComp
+                    className="py-3 px-4 min-w-50 cursor-pointer hover:bg-zinc-400/20 font-medium transition-colors duration-300 text-[15px] w-full"
+                    dialogType="account"
+                    svg={item.svg}
+                  />
+                </li>
+              );
+            else {
+              return (
+                <li key={item.id}>
+                  <DialogComp
+                    className="py-3 px-4 min-w-50 cursor-pointer hover:bg-zinc-400/20 font-medium transition-colors duration-300 text-[15px] w-full"
+                    dialogType="setting"
+                    svg={item.svg}
+                  />
+                </li>
+              );
+            }
+          } else {
+            return (
+              <li key={item.id}>
+                <Link
+                  to={item.toLocation}
+                  className="flex items-center content-center justify-between"
+                >
+                  {item.name}
+                  {item.svg}
+                </Link>
+              </li>
+            );
+          }
+        })}
       </ul>
     </li>
   );

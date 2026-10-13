@@ -35,7 +35,6 @@ export default function FocusTimer({
     setTimerStates,
     setToasts,
     setShowToast,
-    theme
   } = useTheme();
 
   let minutes = Math.trunc(

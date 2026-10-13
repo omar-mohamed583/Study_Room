@@ -1,11 +1,10 @@
-import { Suspense, useLayoutEffect, useMemo, useRef } from "react";
+import { Suspense, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   Link,
   redirect,
   type LinksFunction,
   type MetaFunction,
 } from "react-router";
-import logo from "~/assets/logo.svg"
 import type DefaultMainSecType from "~/types/defaultMain";
 import Button from "../ui/Button";
 import Header, { GS_Duration } from "./Header";
@@ -17,6 +16,7 @@ import FocusTimer from "../ui/FocusTimer";
 import UpcomingDeadlines from "../ui/UpcomingDeadlineComponent";
 import MyPie from "../ui/PieChart";
 import gsap from "gsap";
+import logo from "~/assets/logo.svg";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import useTheme from "~/context/themeContext";
@@ -34,11 +34,12 @@ import DeadlineItemSkeleton from "../skeleton/UpcomingDeadlinesSkeleton";
 import SubjectItemsSkeleton from "../skeleton/SubjectsSkeleton";
 import { ProgressBarSkeleton } from "../skeleton/ProgressBarsSkeleton";
 import { ensureSession } from "~/auth/session";
+import type { StudySession } from "~/types/studySessionType";
 
 export const links: LinksFunction = () => [
   {
     rel: "icon",
-    as: "image",
+    type: "image/svg+xml",
     href: logo,
   },
 ];
@@ -81,21 +82,25 @@ export default function DefaultMain() {
   const examsQuery = useGetEvents<Exam[]>({
     endpoint: "/exams?populate[subject]=true",
   });
+  const studySessionsQuery = useGetEvents<StudySession[]>({
+    endpoint: "/study-sessions",
+  });
 
   const tasks = useMemo(() => tasksQuery.data, [tasksQuery.data]);
   const subjects = useMemo(() => subjectsQuery.data, [subjectsQuery.data]);
   const exams = useMemo(() => examsQuery.data, [examsQuery.data]);
+  const studySessions = useMemo(
+    () => studySessionsQuery.data,
+    [studySessionsQuery.data],
+  );
 
   const todayTasks = tasks?.filter((task) => isToday(task.dueDate)).slice(0, 4);
   const inLimitTodayTasks =
     todayTasks?.length && todayTasks?.length > 4
       ? todayTasks?.slice(0, 4)
       : todayTasks;
-  console.table({
-    tasks,
-    subjects,
-    exams,
-  });
+
+  const now = new Date().getHours();
 
   useGSAP(
     () => {
@@ -106,10 +111,9 @@ export default function DefaultMain() {
           gsap.from(el, {
             opacity: 0,
             y: 50,
-            duration: GS_Duration,
             scrollTrigger: {
               trigger: el,
-              start: "top 85%",
+              start: "top 90%",
               toggleActions: "play none none none",
             },
           });
@@ -299,7 +303,7 @@ export default function DefaultMain() {
             to="/tasks/today"
           >
             {tasksQuery.isLoading &&
-              [1, 2, 3, 4].map((item) => <TaskItemSkeleton key={item} />)}
+              [1, 2, 3, 4, 5].map((item) => <TaskItemSkeleton key={item} />)}
 
             {!tasksQuery.isLoading && !inLimitTodayTasks?.length && (
               <EmptyState
@@ -343,8 +347,8 @@ export default function DefaultMain() {
             <Suspense fallback={""}>
               <div className="px-3">
                 <h2 className="font-medium text-3xl text-white leading-[normal] text-center capitalize">
-                  Have A Good Day,<br></br>
-                  {user?.username} 👋
+                  {now < 20 && now > 6 ? "Have A Good Day" : "Welcome Night Owl"}<br></br>
+                  {user?.username}!
                 </h2>
               </div>
             </Suspense>
@@ -360,7 +364,7 @@ export default function DefaultMain() {
                     key={btn.name}
                     className={
                       btn.variation +
-                      " flex gap-1 items-center content-center text-[.9rem] px-4 hover:brightness-75 transition-[filter] duration-200"
+                      " py-2.5 flex gap-1 items-center content-center text-[.9rem] px-4 hover:brightness-75 transition-[filter] duration-200"
                     }
                     navigation={{ to: btn.toLocation }}
                   >
@@ -523,7 +527,7 @@ export default function DefaultMain() {
             <div className="justify-self-center text-black">
               <MyPie
                 subjects={subjects ?? []}
-                focusTimers={[]}
+                focusTimers={studySessions ?? []}
                 valueFormat={(value: any) =>
                   value / 60 >= 1 ? value / 60 + "h" : value + "m"
                 }
@@ -559,7 +563,7 @@ export default function DefaultMain() {
               </svg>
             }
           >
-            <div className="max-w-130 mx-auto">
+            <div className="max-w-130 mx-auto mt-10">
               <div>
                 {(subjectsQuery.isLoading || tasksQuery.isLoading) &&
                   [1, 2, 3, 4, 5].map((item) => (
@@ -623,9 +627,19 @@ export default function DefaultMain() {
       </div>
 
       <footer className="flex justify-between px-5 max-w-350 mt-20 mx-auto *:text-xs *:font-medium">
-        <p>&copy;{new Date().getFullYear()} All Rights Reserved For Study Planner Team</p>
         <p>
-          Developed By <a href="https://github.com/omar-mohamed583" className="active:text-sky-500 text-blue-500 underline underline-offset-1 decoration-wavy" target="_blank">Omar</a>
+          &copy;{new Date().getFullYear()} All Rights Reserved For Study Planner
+          Team
+        </p>
+        <p>
+          Developed By{" "}
+          <a
+            href="https://github.com/omar-mohamed583"
+            className="visited:text-sky-600 text-blue-500 underline underline-offset-1 decoration-wavy"
+            target="_blank"
+          >
+            Omar
+          </a>
         </p>
       </footer>
     </>

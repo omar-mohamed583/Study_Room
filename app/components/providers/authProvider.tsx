@@ -176,7 +176,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Revokes the user's sessions on the server and clears the refresh cookie.
       await send("/auth/logout", {});
     } catch {
-      // Even if the call fails, log out locally.
     }
     clearAuth();
     navigate("/login");

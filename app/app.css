@@ -43,7 +43,7 @@ body {
   --body-gray: hsl(0, 0%, 92%);
   --stripping-color: #EAEAEA;
   --body-bg:
-    linear-gradient(to right bottom,
+    linear-gradient(to bottom,
     hsl(0, 2%, 85%),
       var(--stripping-color));
   --secondary-gray: hsl(0, 0%, 74%);
