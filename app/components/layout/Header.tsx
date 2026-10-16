@@ -8,11 +8,9 @@ import {
   useState,
   useTransition,
 } from "react";
-import logo from "~/assets/logo.svg";
 import { Link } from "react-router";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import type { LinksFunction } from "react-router";
 import DialogComp from "../ui/Dialog";
 
 export const GS_Duration = 0.8;
@@ -82,7 +80,7 @@ export default function Header() {
             />
           </svg>
         ),
-        toLocation: "/account",
+        toLocation: "/",
       },
       {
         id: crypto.randomUUID(),
@@ -108,7 +106,7 @@ export default function Header() {
             />
           </svg>
         ),
-        toLocation: "/setting",
+        toLocation: "/",
       },
     ],
     [],
@@ -116,6 +114,28 @@ export default function Header() {
 
   const MAIN_ITEMS = useMemo(
     () => [
+      {
+        name: "Home",
+        svg: (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="lucide lucide-house preview-icon"
+          >
+            <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
+            <path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          </svg>
+        ),
+        id: crypto.randomUUID(),
+        toLocation: "/",
+      },
       {
         id: crypto.randomUUID(),
         name: "Dashboard",
@@ -348,7 +368,7 @@ export default function Header() {
   });
 
   return (
-    <header className="header w-fit rounded-full bg-[hsl(from_var(--sect-bg)_h_s_l_/.6)] backdrop-blur-2xl flex gap-4 p-3 *:bg-(--body-gray) *:border-t *:border-t-gray-400/10 *:shadow-(--xl-shadow) *:rounded-full shadow-(--xs-shadow) mx-auto my-6 z-10000 relative">
+    <header className="header w-fit rounded-[26px] bg-[hsl(from_var(--sect-bg)_h_s_l_/.6)] backdrop-blur-2xl flex gap-4 p-3 *:bg-(--body-gray) *:border-t *:border-t-gray-400/10 *:shadow-(--xl-shadow) *:rounded-[20px] shadow-(--xs-shadow) mx-auto my-6 z-10000 relative">
       <h1 className="font-bold text-lg leading-[normal] cursor-pointer p-4 px-5 md:px-8 flex items-center tracking-wide">
         <ShinyText
           text="Study Room"
@@ -367,21 +387,21 @@ export default function Header() {
         />
       </h1>
 
-      <div className="flex gap-3 items-center content-center *:p-3 *:px-5 p-1 px-2 *:rounded-full *:transition-colors duration-300 *:hover:bg-gray-400/25 in-[.dark]:*:hover:bg-zinc-800/80 max-[870px]:hidden">
-        <Link to="">Statistics</Link>
-        <Link to="">Focus Timer</Link>
+      <div className="flex gap-3 items-center content-center *:p-3 *:px-5 p-1 px-2 *:rounded-[15px] *:transition-colors duration-300 *:hover:bg-gray-400/25 in-[.dark]:*:hover:bg-zinc-800/80 max-[870px]:hidden">
+        <Link to="/dashboard">Dashboard</Link>
+        <Link to="/focus-timer">Focus Timer</Link>
       </div>
 
-      <div className="flex gap-3 p-2 *:not-[&>div:first-child]:bg-zinc-50 *:not-[&>div:first-child]:in-[.dark]:bg-zinc-800 *:not-[&>div:first-child]:backdrop-blur-3xl *:not-[&>div:first-child]:rounded-full [&_button,&_a]:cursor-pointer [&_button,&_a]:hover:bg-gray-400/25 in-[.dark]:[&_button,&_a]:hover:bg-zinc-700/75 [&_button,&_a]:transition-colors duration-300 z-1000">
+      <div className="flex gap-3 p-2 *:not-[&>div:first-child]:bg-zinc-50 *:not-[&>div:first-child]:in-[.dark]:bg-zinc-800 *:not-[&>div:first-child]:backdrop-blur-3xl *:not-[&>div:first-child]:rounded-[15px] [&_button,&_a]:cursor-pointer [&_button,&_a]:hover:bg-gray-400/25 in-[.dark]:[&_button,&_a]:hover:bg-zinc-700/75 [&_button,&_a]:transition-colors duration-300 z-1000">
         <div
-          className={`menu-burger max-[870px]:flex-col max-[870px]:absolute [position-anchor:--menu] top-[calc(anchor(bottom)+10px)] rounded-xl bg-(--body-gray) right-[anchor(right)] translate-x-12 min-[871px]:translate-x-0 flex gap-3 *:bg-zinc-50 *:in-[.dark]:bg-zinc-800 *:backdrop-blur-3xl *:rounded-full [&_button]:cursor-pointer [&_button]:hover:bg-gray-400/25 in-[.dark]:[&_button]:hover:bg-zinc-700/75 [&_button]:transition-colors duration-200 z-1000 max-[870px]:p-4 max-[870px]:border border-zinc-400/35 in-[.dark]:border-zinc-400/20 transition-[opacity,scale] ${openMenuBurger ? "pointer-events-auto opacity-100 scale-100" : "pointer-events-none opacity-0 scale-95"} min-[870px]:opacity-100 min-[870px]:scale-100 min-[870px]:pointer-events-auto origin-top-right`}
+          className={`menu-burger max-[870px]:flex-col max-[870px]:absolute [position-anchor:--menu] top-[calc(anchor(bottom)+10px)] rounded-xl bg-(--body-gray) right-[anchor(right)] translate-x-12 min-[871px]:translate-x-0 flex gap-3 *:bg-zinc-50 *:in-[.dark]:bg-zinc-800 *:backdrop-blur-3xl *:rounded-[15px] [&_button]:cursor-pointer [&_button]:hover:bg-gray-400/25 in-[.dark]:[&_button]:hover:bg-zinc-700/75 [&_button]:transition-colors duration-200 z-1000 max-[870px]:p-4 max-[870px]:border border-zinc-400/35 in-[.dark]:border-zinc-400/20 transition-[opacity,scale] ${openMenuBurger ? "pointer-events-auto opacity-100 scale-100" : "pointer-events-none opacity-0 scale-95"} min-[870px]:opacity-100 min-[870px]:scale-100 min-[870px]:pointer-events-auto origin-top-right`}
           ref={menuBurgerRef}
         >
           <div className="isolate *:rounded-full rounded-full relative z-1000">
             <input
               type="text"
               id="search"
-              className="bg-transparent shadow-[0_0_7px_1px_var(--tw-shadow)] shadow-transparent focus:shadow-violet-500 border-0 focus-visible:shadow-violet-500 pl-10 p-2 outline-0 "
+              className="bg-transparent shadow-[0_0_7px_2px_var(--tw-shadow)] shadow-transparent focus:shadow-violet-700/60 border-0 focus-visible:shadow-violet-700/60 pl-10 p-2 outline-0 "
               placeholder=" "
             />
             <label
@@ -463,7 +483,7 @@ export default function Header() {
             }}
           >
             <span className="font-medium max-[870px]:inline-block hidden">
-              Toggle Theme
+              Change Theme
             </span>
             {/* Moon */}
             <svg
@@ -561,7 +581,7 @@ export default function Header() {
         className={`menu transition-[opacity,scale] duration-200 ${openMenu ? "pointer-events-auto opacity-100 scale-100" : "pointer-events-none opacity-0 scale-95"} origin-top-right absolute top-[calc(anchor(bottom)+6px)] right-[anchor(right)] [position-anchor:--anc] z-100000 shadow-(--text-primary)/20 border-gray-400/10 border shadow-[0_0_10px_3px_var(--tw-shadow)]`}
         ref={menuRef}
       >
-        <ul className="min-w-58 py-2">
+        <ul className="min-w-58 pt-2">
           <ContainerListItem
             heading="Personal"
             items={PERSONAL_ITEMS}

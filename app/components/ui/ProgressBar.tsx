@@ -22,7 +22,7 @@ type ValueItem = BaseItem & {
   percentage?: undefined;
 };
 
-function getPercentage(subj: Subject, tasks: Task[]): number {
+function getStatics(subj: Subject, tasks: Task[]) {
   const subjTasks = {
     total: 0,
     completed: 0,
@@ -39,7 +39,10 @@ function getPercentage(subj: Subject, tasks: Task[]): number {
     }
   }
 
-  return Number.isFinite(raw) ? Math.min(100, Math.max(0, raw)) : 0;
+  return {
+    percentage: Number.isFinite(raw) ? Math.min(100, Math.max(0, raw)) : 0,
+    total: subjTasks.total,
+  };
 }
 
 export function ProgressBar({
@@ -52,19 +55,22 @@ export function ProgressBar({
   decimals?: number;
 }) {
   const labelId = useId();
-  const percentage = getPercentage(subj, tasks);
+  const { percentage, total } = getStatics(subj, tasks);
   const text = percentage.toFixed(decimals);
 
   return (
     <div>
-      <div className="mb-1.5 flex items-baseline justify-between gap-4 text-sm">
+      <div className="mb-1.5 flex items-baseline justify-around gap-4 text-sm">
+        <span className="shrink-0 tabular-nums text-(--text-secondary)">
+          {total}{total === 1 ? " task" : total > 1 ? " tasks" : ""}
+        </span>
         <span
           id={labelId}
-          className="min-w-0 text-(--text-primary) truncate font-medium capitalize"
+          className="min-w-0 text-(--text-primary) truncate font-bold capitalize text-[15px]"
         >
           {subj.name}
         </span>
-        <span className="shrink-0 tabular-nums text-(--text-primary)">
+        <span className="shrink-0 tabular-nums text-(--text-secondary)">
           {text}%
         </span>
       </div>

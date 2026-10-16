@@ -1,4 +1,4 @@
-import { Suspense, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useLayoutEffect, useMemo, useRef } from "react";
 import {
   Link,
   redirect,
@@ -7,7 +7,7 @@ import {
 } from "react-router";
 import type DefaultMainSecType from "~/types/defaultMain";
 import Button from "../ui/Button";
-import Header, { GS_Duration } from "./Header";
+import Header from "./Header";
 import { useAuth } from "../providers/authProvider";
 import { twMerge } from "cn";
 import SmallParticles from "../ui/smallParticles";
@@ -94,6 +94,10 @@ export default function DefaultMain() {
     [studySessionsQuery.data],
   );
 
+  console.table({
+    studySessions,
+  });
+
   const todayTasks = tasks?.filter((task) => isToday(task.dueDate)).slice(0, 4);
   const inLimitTodayTasks =
     todayTasks?.length && todayTasks?.length > 4
@@ -124,7 +128,7 @@ export default function DefaultMain() {
   );
 
   useLayoutEffect(() => {
-    document.body.style.paddingBottom = "3em";
+    document.body.style.paddingBottom = "1.5em";
   }, []);
 
   const btns = [
@@ -347,7 +351,10 @@ export default function DefaultMain() {
             <Suspense fallback={""}>
               <div className="px-3">
                 <h2 className="font-medium text-3xl text-white leading-[normal] text-center capitalize">
-                  {now < 20 && now > 6 ? "Have A Good Day" : "Welcome Night Owl"}<br></br>
+                  {now < 20 && now > 5
+                    ? "Have A Good Day"
+                    : "Welcome Night Owl"}
+                  <br></br>
                   {user?.username}!
                 </h2>
               </div>
@@ -419,28 +426,6 @@ export default function DefaultMain() {
                 size="sm"
                 anchor
               />
-
-              <Button className="opacity-0 transition-opacity duration-300 in-[section:hover]:opacity-100 absolute rounded-full hover:bg-zinc-400/50 [position-anchor:--timer] top-[calc(anchor(top)-10px)] right-[calc(anchor(right)-15px)]">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="lucide lucide-settings preview-icon"
-                >
-                  <path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915" />
-                  <circle
-                    cx="12"
-                    cy="12"
-                    r="3"
-                  />
-                </svg>
-              </Button>
 
               <p className="text-center pt-8 pb-2 text-[14px]">
                 For more settings and actions visit the{" "}

@@ -6,5 +6,6 @@ export default [
   route("/login/forget-password", "./pages/forgetPass.tsx"),
   route("/tasks/:id?", "./pages/tasks.tsx"),
   route("/subject/:id?", "./pages/subjects.tsx"),
+  route("/focus-timer", "./pages/focusTimer.tsx"),
   route("*", "./pages/404.tsx"),
 ] satisfies RouteConfig;

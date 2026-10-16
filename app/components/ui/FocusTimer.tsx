@@ -13,6 +13,8 @@ export const links: LinksFunction = () => [
 
 import type { TimerMode } from "~/types/customContextType";
 import type { LinksFunction } from "react-router";
+import { useMutation } from "@tanstack/react-query";
+import { apiFetch } from "~/api/api";
 
 const TIMER_MODES: Record<
   TimerMode,
@@ -30,12 +32,15 @@ export default function FocusTimer({
   size?: "md" | "lg" | "sm";
   anchor?: boolean;
 }) {
-  const {
-    timerStates,
-    setTimerStates,
-    setToasts,
-    setShowToast,
-  } = useTheme();
+  const { mutate: mutateTimer } = useMutation({
+    mutationFn: (focusTimerDetails: { startedAt: string; duration: number, sessionType: string }) =>
+      apiFetch("/study-sessions/", {
+        method: "POST",
+        body: JSON.stringify({ data: focusTimerDetails }),
+      }),
+  });
+
+  const { timerStates, setTimerStates, setToasts, setShowToast } = useTheme();
 
   let minutes = Math.trunc(
     (timerStates[TIMER_MODES[timerStates.timerMode]] -
@@ -58,60 +63,72 @@ export default function FocusTimer({
       return console.log("Timer is idle or paused, not running the interval");
 
     const interval = setInterval(() => {
-      // update Current Time counter
-      setTimerStates((prev) => ({
-        ...prev,
-        currentFocusTimer: {
-          ...prev.currentFocusTimer,
-          currentTime: prev.currentFocusTimer.currentTime + 1,
-        },
-      }));
+      const total = timerStates[TIMER_MODES[timerStates.timerMode]];
+      const { currentTime, startDate } = timerStates.currentFocusTimer;
+
+      if (currentTime < total) {
+        setTimerStates((prev) => ({
+          ...prev,
+          currentFocusTimer: {
+            ...prev.currentFocusTimer,
+            currentTime: prev.currentFocusTimer.currentTime + 1,
+          },
+        }));
+        return;
+      }
 
       // Finish Timer
-      if (
-        minutes === 0 &&
-        seconds === 0 &&
-        timerStates.currentFocusTimer.currentTime >=
-          timerStates[TIMER_MODES[timerStates.timerMode]]
-      ) {
-        setTimerStates((prev) => {
-          const timerMode = prev.timerMode;
-          const currentTimeTaken = prev.currentFocusTimer.currentTime;
-          const currentFocusTimer =
-            timerMode === "focus"
+
+      const startedAt = startDate
+        ? new Date(startDate)
+        : new Date(Date.now() - currentTime * 1000);
+
+      mutateTimer({
+        startedAt: startedAt.toISOString(),
+        duration: currentTime,
+        sessionType:
+          timerStates.timerMode === "focus"
+            ? "focusTimer"
+            : timerStates.timerMode === "long break"
+              ? "longBreak"
+              : "shortBreak",
+      });
+
+      setTimerStates((prev) => {
+        const timerMode = prev.timerMode;
+        const currentFocusTimer =
+          timerMode === "focus"
+            ? {
+                ...prev.currentFocusTimer,
+                takenFocusTime: currentTime,
+                currentTime: 0,
+              }
+            : timerMode === "short break"
               ? {
                   ...prev.currentFocusTimer,
-                  takenFocusTime: currentTimeTaken,
+                  takenShortBreakTime: currentTime,
                   currentTime: 0,
                 }
-              : timerMode === "short break"
-                ? {
-                    ...prev.currentFocusTimer,
-                    takenShortBreakTime: currentTimeTaken,
-                    currentTime: 0,
-                  }
-                : {
-                    ...prev.currentFocusTimer,
-                    takenLongBreakTime: currentTimeTaken,
-                    currentTime: 0,
-                  };
+              : {
+                  ...prev.currentFocusTimer,
+                  takenLongBreakTime: currentTime,
+                  currentTime: 0,
+                };
 
-          // add the timer to past timers
-          return {
-            ...prev,
-            pastFocusTimers: [...prev.pastFocusTimers, currentFocusTimer],
-            currentFocusTimer: {
-              id: crypto.randomUUID(),
-              startDate: null,
-              currentTime: 0,
-              takenFocusTime: 0,
-              takenLongBreakTime: 0,
-              takenShortBreakTime: 0,
-            },
-            timerState: "idle",
-          };
-        });
-      }
+        return {
+          ...prev,
+          pastFocusTimers: [...prev.pastFocusTimers, currentFocusTimer],
+          currentFocusTimer: {
+            id: crypto.randomUUID(),
+            startDate: null,
+            currentTime: 0,
+            takenFocusTime: 0,
+            takenLongBreakTime: 0,
+            takenShortBreakTime: 0,
+          },
+          timerState: "idle",
+        };
+      });
     }, 1000);
 
     return () => clearInterval(interval);
@@ -142,6 +159,7 @@ export default function FocusTimer({
                 currentFocusTimer: {
                   ...prev.currentFocusTimer,
                   currentTime: 0,
+                  startDate: null,
                 },
               }));
             }}
@@ -215,7 +233,11 @@ export default function FocusTimer({
                 setTimerStates((prev) => ({
                   ...prev,
                   timerState:
-                    timerStates.timerState === "running" ? "paused" : "running",
+                    prev.timerState === "running" ? "paused" : "running",
+                  currentFocusTimer: {
+                    ...prev.currentFocusTimer,
+                    startDate: prev.currentFocusTimer.startDate ?? new Date(),
+                  },
                 }));
 
                 setToasts((prev) => [
@@ -302,6 +324,7 @@ export default function FocusTimer({
                   currentFocusTimer: {
                     ...prev.currentFocusTimer,
                     currentTime: 0,
+                    startDate: null,
                   },
                 }));
               }}

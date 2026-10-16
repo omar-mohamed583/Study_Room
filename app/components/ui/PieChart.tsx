@@ -35,14 +35,19 @@ export default function MyPie({
       />
     );
 
-    if (!subjects?.length) return (
+  if (!subjects?.length)
+    return (
       <EmptyState
         icon="data"
         message="No subjects found"
       />
     );
 
-    if (!focusTimers?.length) return (
+  if (
+    !focusTimers?.length ||
+    !focusTimers?.some((timer) => timer.sessionType === "focusTimer")
+  )
+    return (
       <EmptyState
         icon="data"
         message="No focus timers found"
@@ -58,10 +63,10 @@ export default function MyPie({
     value: 0,
   }));
 
-  const memoData = useMemo(() => {
+  useMemo(() => {
     for (let i = 0; i < focusTimers.length; i++) {
       const matchedObj = formateData.find(
-        (item) => item.label === focusTimers[i]?.subject?.name,
+        (subj) => subj.label === focusTimers[i]?.subject?.name,
       );
 
       if (matchedObj?.id) matchedObj.value = Number(focusTimers[i].duration);

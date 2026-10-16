@@ -6,6 +6,7 @@ export interface StudySession {
   startedAt: Date | string;
   endedAt?: Date | string;
   duration: number | string;
+  sessionType: "shortBreak" | "longBreak" | "focusTimer";
   user?: UserType;
   subject?: Subject;
   task?: Task;

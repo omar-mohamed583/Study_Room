@@ -17,7 +17,6 @@ export default function DialogComp({
   className: string;
 }) {
   const { user, logout } = useAuth();
-  console.log(user);
 
   const client = useQueryClient();
 

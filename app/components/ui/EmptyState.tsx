@@ -19,8 +19,8 @@ export default function EmptyState({
         {icon.toLowerCase() === "subject" && (
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="32"
-            height="32"
+            width="30"
+            height="30"
             viewBox="0 0 24 24"
             fill="none"
             strokeWidth="2"
@@ -33,8 +33,8 @@ export default function EmptyState({
         {icon.toLowerCase() === "task" && (
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="32"
-            height="32"
+            width="30"
+            height="30"
             viewBox="0 0 24 24"
             fill="none"
             strokeWidth="2"
@@ -59,8 +59,8 @@ export default function EmptyState({
         {icon.toLowerCase() === "exam" && (
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="32"
-            height="32"
+            width="30"
+            height="30"
             viewBox="0 0 24 24"
             fill="none"
             strokeWidth="2"
@@ -76,8 +76,8 @@ export default function EmptyState({
         {icon.toLowerCase() === "data" && (
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="32"
-            height="32"
+            width="30"
+            height="30"
             viewBox="0 0 24 24"
             fill="none"
             strokeWidth="2"
