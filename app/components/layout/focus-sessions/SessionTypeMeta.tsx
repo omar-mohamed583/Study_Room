@@ -10,7 +10,7 @@ interface SessionTypeMeta {
 }
 
 export const SESSION_TYPE_META: Record<SessionKind, SessionTypeMeta> = {
-  focus: {
+  focusTimer: {
     label: "Focus",
     dot: "bg-[#03a9f4]",
     badge: "bg-sky-500/10 text-sky-700 dark:text-sky-300",
@@ -32,7 +32,7 @@ export const FILTER_OPTIONS: ReadonlyArray<{
   label: string;
 }> = [
   { value: "all", label: "All Sessions" },
-  { value: "focus", label: "Focus Timers" },
+  { value: "focusTimer", label: "Focus Timers" },
   { value: "shortBreak", label: "Short Breaks" },
   { value: "longBreak", label: "Long Breaks" },
 ];

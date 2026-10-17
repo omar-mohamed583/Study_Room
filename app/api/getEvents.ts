@@ -13,12 +13,14 @@ type UseGetEventsArgs = {
   event?: EventType;
   endpoint?: string;
   opt?: RequestInit;
+  enabled?: boolean;
 };
 
 export default function useGetEvents<T = any>({
   event,
   endpoint,
   opt,
+  enabled = true,
 }: UseGetEventsArgs) {
   const url = endpoint ?? (event ? EVENT_ENDPOINTS[event] : undefined);
 
@@ -28,5 +30,6 @@ export default function useGetEvents<T = any>({
     queryKey: [url, opt ?? null],
     queryFn: ({ signal }) => apiFetch(url, { ...opt, signal }),
     select: (res) => res.data,
+    enabled,
   });
 }

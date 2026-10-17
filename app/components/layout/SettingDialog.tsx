@@ -12,6 +12,8 @@ import useTheme from "~/context/themeContext";
 export type Preferences = {
   weeklyGoalHours: number;
   sessionMinutes: number;
+  shortBreakMinutes: number;
+  longBreakMinutes: number;
   notifyTasks: boolean;
   notifyExams: boolean;
 };
@@ -19,6 +21,7 @@ export type Preferences = {
 const LIMITS = {
   goal: { min: 1, max: 60 },
   session: { min: 5, max: 180 },
+  break: { min: 1, max: 60 },
 };
 
 const SESSION_PRESETS = [25, 45, 60, 90];
@@ -186,9 +189,12 @@ export default function SettingsContent({
   isLoading?: boolean;
   onSave: (values: Preferences) => Promise<void> | void;
 }) {
+  const { theme, setTheme, timerStates, setTimerStates } = useTheme();
   const DEFAULT_PREFERENCES: Preferences = {
     weeklyGoalHours: preferences?.weeklyGoalHours ?? 10,
     sessionMinutes: preferences?.sessionMinutes ?? 25,
+    shortBreakMinutes: Math.round(timerStates.timeForShortBreak / 60),
+    longBreakMinutes: Math.round(timerStates.timeForLongBreak / 60),
     notifyTasks: preferences?.notifyTasks ?? true,
     notifyExams: preferences?.notifyExams ?? true,
   };
@@ -202,9 +208,11 @@ export default function SettingsContent({
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { theme, setTheme } = useTheme();
-
-  const incomingKey = JSON.stringify(preferences);
+  const incomingKey = JSON.stringify([
+    preferences,
+    timerStates.timeForShortBreak,
+    timerStates.timeForLongBreak,
+  ]);
   useEffect(() => {
     setForm(DEFAULT_PREFERENCES);
     setSaved(DEFAULT_PREFERENCES);
@@ -231,12 +239,28 @@ export default function SettingsContent({
         LIMITS.session.min,
         LIMITS.session.max,
       ),
+      shortBreakMinutes: clamp(
+        form.shortBreakMinutes,
+        LIMITS.break.min,
+        LIMITS.break.max,
+      ),
+      longBreakMinutes: clamp(
+        form.longBreakMinutes,
+        LIMITS.break.min,
+        LIMITS.break.max,
+      ),
     };
 
     setError(null);
     setIsSaving(true);
     try {
       await onSave(clean);
+      setTimerStates((prev) => ({
+        ...prev,
+        timeForFocus: clean.sessionMinutes * 60,
+        timeForShortBreak: clean.shortBreakMinutes * 60,
+        timeForLongBreak: clean.longBreakMinutes * 60,
+      }));
       setForm(clean);
       setSaved(clean);
     } catch {
@@ -473,6 +497,54 @@ export default function SettingsContent({
                   <p className={HINT_CLASS}>
                     Between {LIMITS.session.min} and {LIMITS.session.max}{" "}
                     minutes.
+                  </p>
+                </fieldset>
+
+                <fieldset className="grid gap-4 sm:grid-cols-2">
+                  <legend className="text-[16px] font-bold mb-3 text-(--text-secondary)">
+                    Break durations
+                  </legend>
+                  {([
+                    ["shortBreakMinutes", "Short break", "short-break"],
+                    ["longBreakMinutes", "Long break", "long-break"],
+                  ] as const).map(([key, label, id]) => (
+                    <div key={key} className="grid gap-2">
+                      <label
+                        htmlFor={`${uid}-${id}`}
+                        className="text-sm font-medium"
+                      >
+                        {label}
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          id={`${uid}-${id}`}
+                          type="number"
+                          inputMode="numeric"
+                          min={LIMITS.break.min}
+                          max={LIMITS.break.max}
+                          value={form[key]}
+                          onChange={(e) => set(key, Number(e.target.value))}
+                          onBlur={() =>
+                            set(
+                              key,
+                              clamp(
+                                form[key],
+                                LIMITS.break.min,
+                                LIMITS.break.max,
+                              ),
+                            )
+                          }
+                          className={`${FIELD_CLASS} w-20 tabular-nums`}
+                        />
+                        <span className="text-sm text-(--text-secondary)">
+                          min
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                  <p className={`${HINT_CLASS} sm:col-span-2`}>
+                    Between {LIMITS.break.min} and {LIMITS.break.max} minutes.
+                    Saved with your timer settings.
                   </p>
                 </fieldset>
               </div>

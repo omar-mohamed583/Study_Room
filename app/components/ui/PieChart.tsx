@@ -13,7 +13,6 @@ export type PieData = {
 };
 
 type MyPieProps = {
-  focusTimers: StudySession[];
   subjects: Subject[];
   width: number;
   height: number;
@@ -21,13 +20,12 @@ type MyPieProps = {
 };
 
 export default function MyPie({
-  focusTimers,
   subjects,
   width,
   height,
   valueFormat,
 }: MyPieProps) {
-  if (!subjects?.length && !focusTimers.length)
+  if (!subjects?.some(subj => subj?.studySessions?.length))
     return (
       <EmptyState
         icon="data"
@@ -35,43 +33,18 @@ export default function MyPie({
       />
     );
 
-  if (!subjects?.length)
-    return (
-      <EmptyState
-        icon="data"
-        message="No subjects found"
-      />
-    );
-
-  if (
-    !focusTimers?.length ||
-    !focusTimers?.some((timer) => timer.sessionType === "focusTimer")
-  )
-    return (
-      <EmptyState
-        icon="data"
-        message="No focus timers found"
-      />
-    );
 
   const { theme } = useTheme();
+  console.table({
+    subjects,
+  })
 
   const formateData = subjects.map((subject) => ({
     id: subject.name,
     label: subject.name,
     color: subject.color,
-    value: 0,
+    value: subject.studySessions.reduce((acc, v) => acc + +v.duration / 60, 0),
   }));
-
-  useMemo(() => {
-    for (let i = 0; i < focusTimers.length; i++) {
-      const matchedObj = formateData.find(
-        (subj) => subj.label === focusTimers[i]?.subject?.name,
-      );
-
-      if (matchedObj?.id) matchedObj.value = Number(focusTimers[i].duration);
-    }
-  }, [subjects, focusTimers]);
 
   return (
     <>

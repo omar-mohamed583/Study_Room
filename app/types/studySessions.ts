@@ -1,5 +1,8 @@
+import type { Subject } from "./subjectTypes";
+import type { Task } from "./taskType";
+
 /** The three kinds of session FocusTimer records. */
-export type SessionKind = "focus" | "shortBreak" | "longBreak";
+export type SessionKind = "focusTimer" | "shortBreak" | "longBreak";
 
 /** Value held by the history filter. */
 export type SessionFilter = "all" | SessionKind;
@@ -33,14 +36,12 @@ export interface RawStudySession {
  */
 export interface StudySession {
   id: number;
-  kind: SessionKind;
-  startedAtMs: number;
-  endedAtMs: number;
-  /** True when `endedAt` was missing or invalid and was derived from startedAt + duration. */
-  endedAtEstimated: boolean;
-  durationSeconds: number;
-  subjectName: string | null;
-  taskTitle: string | null;
+  sessionType: SessionKind;
+  startedAt: number;
+  endedAt: number;
+  duration: number;
+  subject: Subject;
+  task: Task;
 }
 
 export interface SessionStats {

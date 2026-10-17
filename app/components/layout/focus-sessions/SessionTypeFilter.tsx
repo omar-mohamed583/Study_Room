@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from "react";
 import type { FocusEvent, KeyboardEvent, MouseEvent } from "react";
-import type { SessionFilter } from "~/types/studySession";
+import type { SessionFilter } from "~/types/studySessions";
 import { CheckIcon, ChevronDownIcon, ListFilterIcon } from "./icons";
 import { FILTER_OPTIONS, SESSION_TYPE_META } from "./sessionTypeMeta";
 

@@ -3,9 +3,8 @@ import type {
   RawStudySession,
   SessionFilter,
   SessionKind,
-  SessionStats,
   StudySession,
-} from "~/types/studySession";
+} from "~/types/studySessions";
 
 /* -------------------------------------------------------------------------- */
 /* Turning Strapi records into validated sessions                             */
@@ -14,13 +13,27 @@ import type {
 // FocusTimer saves focusTimer / shortBreak / longBreak. The spaced and short
 // spellings are accepted too, so the page survives a renamed enum value.
 const KIND_ALIASES = new Map<string, SessionKind>([
-  ["focus", "focus"],
-  ["focustimer", "focus"],
+  ["focus", "focusTimer"],
+  ["focustimer", "focusTimer"],
   ["shortbreak", "shortBreak"],
   ["longbreak", "longBreak"],
 ]);
 
-function parseKind(value: unknown): SessionKind | null {
+export function normalizeSessionKind(value: unknown): SessionKind | null {
+  if (value && typeof value === "object") {
+    const session = value as {
+      sessionType?: unknown;
+      session_type?: unknown;
+      type?: unknown;
+      attributes?: unknown;
+    };
+    return (
+      normalizeSessionKind(session.sessionType) ??
+      normalizeSessionKind(session.session_type) ??
+      normalizeSessionKind(session.type) ??
+      normalizeSessionKind(session.attributes)
+    );
+  }
   if (typeof value !== "string") return null;
   return KIND_ALIASES.get(value.toLowerCase().replace(/[\s_-]+/g, "")) ?? null;
 }
@@ -52,8 +65,8 @@ function relationLabel(
  *
  * `duration` is read as seconds, the unit FocusTimer saves.
  */
-export function normalizeSession(raw: RawStudySession): StudySession | null {
-  const kind = parseKind(raw.sessionType);
+export function normalizeSession(raw: RawStudySession) {
+  const kind = normalizeSessionKind(raw.sessionType);
   const startedAtMs = parseTime(raw.startedAt);
   const durationSeconds = Number(raw.duration);
 
@@ -71,7 +84,7 @@ export function normalizeSession(raw: RawStudySession): StudySession | null {
 
   return {
     id: raw.id,
-    kind,
+    sessionType: kind,
     startedAtMs,
     endedAtMs: hasValidEnd
       ? reportedEndMs
@@ -87,18 +100,19 @@ export function normalizeSession(raw: RawStudySession): StudySession | null {
 /* Statistics and filtering                                                   */
 /* -------------------------------------------------------------------------- */
 
-export function computeStats(sessions: readonly StudySession[]): SessionStats {
+export function computeStats(sessions: readonly StudySession[]) {
+  if (!sessions) return;
   let focusSeconds = 0;
   let focusCount = 0;
   let longestFocusSeconds = 0;
 
   for (const session of sessions) {
-    if (session.kind !== "focus") continue;
-    focusSeconds += session.durationSeconds;
+    if (normalizeSessionKind(session) !== "focusTimer") continue;
+    focusSeconds += session.duration;
     focusCount += 1;
     longestFocusSeconds = Math.max(
       longestFocusSeconds,
-      session.durationSeconds,
+      session.duration,
     );
   }
 
@@ -115,11 +129,15 @@ export function countByFilter(
 ): Record<SessionFilter, number> {
   const counts: Record<SessionFilter, number> = {
     all: sessions.length,
-    focus: 0,
+    focusTimer: 0,
     shortBreak: 0,
     longBreak: 0,
   };
-  for (const session of sessions) counts[session.kind] += 1;
+  for (const session of sessions) {
+    const kind = normalizeSessionKind(session);
+
+    if (kind) counts[kind] += 1;
+  }
   return counts;
 }
 
@@ -129,7 +147,9 @@ export function filterSessions(
 ): readonly StudySession[] {
   return filter === "all"
     ? sessions
-    : sessions.filter((session) => session.kind === filter);
+    : sessions.filter(
+        (session) => normalizeSessionKind(session) === filter,
+      );
 }
 
 /* -------------------------------------------------------------------------- */
@@ -190,6 +210,7 @@ export function formatDateTime(ms: number): string {
 
 /** Just the time when the session ended on the day it started, otherwise date and time. */
 export function formatEndTime(startMs: number, endMs: number): string {
+  console.log("start: ", startMs, " ENd> ", endMs)
   const sameDay =
     new Date(startMs).toDateString() === new Date(endMs).toDateString();
   return sameDay ? timeFormat.format(endMs) : formatDateTime(endMs);

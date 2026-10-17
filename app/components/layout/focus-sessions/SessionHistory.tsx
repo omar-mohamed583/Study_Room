@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import {
   countByFilter,
@@ -6,6 +6,7 @@ import {
   formatDateTime,
   formatDuration,
   formatEndTime,
+  normalizeSessionKind,
 } from "~/components/utils/studySession";
 import type { SessionFilter, StudySession } from "~/types/studySessions";
 import { AlertIcon, InboxIcon } from "./icons";
@@ -52,10 +53,10 @@ export default function SessionHistory({
     () => filterSessions(sessions, filter),
     [sessions, filter],
   );
-  const visible = filtered.slice(0, visibleCount);
+  const visible = filtered?.slice(0, visibleCount);
 
   const filterLabel =
-    FILTER_OPTIONS.find((option) => option.value === filter)?.label ??
+    FILTER_OPTIONS?.find((option) => option.value === filter)?.label ??
     "Sessions";
 
   function changeFilter(next: SessionFilter) {
@@ -73,14 +74,14 @@ export default function SessionHistory({
         isRetrying={isRetrying}
       />
     );
-  } else if (sessions.length === 0) {
+  } else if (sessions?.length === 0) {
     body = (
       <EmptyState
         title="No completed sessions yet"
         description="Finish a focus timer or a break and it will show up here."
       />
     );
-  } else if (filtered.length === 0) {
+  } else if (filtered?.length === 0) {
     body = (
       <EmptyState
         title={`No ${filterLabel.toLowerCase()} yet`}
@@ -105,7 +106,7 @@ export default function SessionHistory({
           tabIndex={0}
           className={`relative overflow-x-auto rounded-2xl border ${FOCUS_RING}`}
         >
-          <table className="w-full min-w-[44rem] text-left text-sm">
+          <table className="w-full min-w-176 text-left text-sm">
             <caption className="sr-only">
               Completed focus timers and breaks, newest first
             </caption>
@@ -123,12 +124,13 @@ export default function SessionHistory({
               </tr>
             </thead>
             <tbody className="divide-y">
-              {visible.map((session) => (
-                <SessionRow
-                  key={session.id}
-                  session={session}
-                />
-              ))}
+              {visible.length &&
+                visible.map((session) => (
+                  <SessionRow
+                    key={session.id}
+                    session={session}
+                  />
+                ))}
             </tbody>
           </table>
         </div>
@@ -166,7 +168,7 @@ export default function SessionHistory({
       description="Every finished focus timer and break, newest first."
       className={className}
       action={
-        sessions.length > 0 && !isPending && !hasError ? (
+        sessions?.length > 0 && !isPending && !hasError ? (
           <SessionTypeFilter
             value={filter}
             onChange={changeFilter}
@@ -181,45 +183,54 @@ export default function SessionHistory({
 }
 
 function SessionRow({ session }: { session: StudySession }) {
-  const meta = SESSION_TYPE_META[session.kind];
+  const kind = normalizeSessionKind(session);
+  const meta = kind ? SESSION_TYPE_META[kind] : undefined;
+
+  console.warn("Meta: ", meta + " Session: " + session);
+  console.table({ session });
 
   return (
-    <tr className="hover:bg-muted/50">
-      <td className="px-4 py-3 whitespace-nowrap">
-        <span
-          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${meta.badge}`}
-        >
+    <Suspense>
+      <tr className="hover:bg-muted/50">
+        <td className="px-4 py-3 whitespace-nowrap">
           <span
-            aria-hidden="true"
-            className={`size-1.5 rounded-full ${meta.dot}`}
-          />
-          {meta.label}
-        </span>
-      </td>
-      <td className="px-4 py-3">
-        <Relation value={session.subjectName} />
-      </td>
-      <td className="px-4 py-3">
-        <Relation value={session.taskTitle} />
-      </td>
-      <td className="px-4 py-3 whitespace-nowrap text-(--text-secondary)">
-        {formatDateTime(session.startedAtMs)}
-      </td>
-      <td className="px-4 py-3 font-medium whitespace-nowrap">
-        {formatDuration(session.durationSeconds, { showSeconds: true })}
-      </td>
-      <td className="px-4 py-3 whitespace-nowrap text-(--text-secondary)">
-        <span
-          title={
-            session.endedAtEstimated
-              ? "Calculated from the start time and duration"
-              : undefined
-          }
-        >
-          {formatEndTime(session.startedAtMs, session.endedAtMs)}
-        </span>
-      </td>
-    </tr>
+            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${meta?.badge}`}
+          >
+            <span
+              aria-hidden="true"
+              className={`size-1.5 rounded-full ${meta?.dot}`}
+            />
+            {meta?.label}
+          </span>
+        </td>
+        <td className="px-4 py-3">
+          <Relation value={session?.subject?.name} />
+        </td>
+        <td className="px-4 py-3">
+          <Relation value={session?.task?.title} />
+        </td>
+        <td className="px-4 py-3 whitespace-nowrap text-(--text-secondary)">
+          {session?.startedAt && formatDateTime(session?.startedAt)}
+        </td>
+        <td className="px-4 py-3 font-medium whitespace-nowrap">
+          {formatDuration(session?.duration, { showSeconds: true })}
+        </td>
+        <td className="px-4 py-3 whitespace-nowrap text-(--text-secondary)">
+          <span
+            title={
+              session?.endedAt
+                ? "Calculated from the start time and duration"
+                : undefined
+            }
+          >
+            {formatEndTime(
+              new Date(session?.startedAt).getTime(),
+              new Date(session?.endedAt).getTime(),
+            )}
+          </span>
+        </td>
+      </tr>
+    </Suspense>
   );
 }
 

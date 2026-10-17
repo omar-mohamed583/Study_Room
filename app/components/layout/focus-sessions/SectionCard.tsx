@@ -26,7 +26,7 @@ export default function SectionCard({
   return (
     <section
       aria-labelledby={headingId}
-      className={`flex min-w-0 flex-col rounded-3xl border bg-(--sect-bg) p-5 text-(--text-primary) shadow-[0_1px_2px_rgb(0_0_0/0.04),0_10px_30px_-14px_rgb(0_0_0/0.16)] sm:p-6 dark:shadow-[inset_0_1px_0_rgb(255_255_255/0.05),0_12px_32px_-16px_rgb(0_0_0/0.9)] ${className}`}
+      className={`flex min-w-0 flex-col rounded-3xl border bg-(--sect-bg) p-5 text-(--text-primary) shadow-[0_1px_2px_rgb(0_0_0/0.04),0_10px_30px_-14px_rgb(0_0_0/0.16)] sm:p-6 dark:shadow-[inset_0_1px_0_rgb(255_255_255/0.05),0_12px_32px_-16px_rgb(0_0_0/0.9)] ${className} gs-animate`}
     >
       <header className="mb-5 flex flex-wrap items-start justify-between gap-x-4 gap-y-3">
         <div className="min-w-0">

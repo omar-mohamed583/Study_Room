@@ -60,7 +60,14 @@ export default function DialogComp({
                 />
               ) : (
                 <SettingsContent
-                  onSave={(values) => mutate({ ...values })}
+                  onSave={(values) => {
+                    const {
+                      shortBreakMinutes: _shortBreakMinutes,
+                      longBreakMinutes: _longBreakMinutes,
+                      ...accountPreferences
+                    } = values;
+                    return mutate(accountPreferences);
+                  }}
                   isLoading={isPending}
                   preferences={{
                     notifyExams: user?.notifyExams,

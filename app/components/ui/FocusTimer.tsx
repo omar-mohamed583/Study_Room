@@ -13,7 +13,7 @@ export const links: LinksFunction = () => [
 
 import type { TimerMode } from "~/types/customContextType";
 import type { LinksFunction } from "react-router";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "~/api/api";
 
 const TIMER_MODES: Record<
@@ -32,11 +32,22 @@ export default function FocusTimer({
   size?: "md" | "lg" | "sm";
   anchor?: boolean;
 }) {
+  const client = useQueryClient();
   const { mutate: mutateTimer } = useMutation({
-    mutationFn: (focusTimerDetails: { startedAt: string; duration: number, sessionType: string }) =>
+    mutationFn: (focusTimerDetails: {
+      startedAt: string;
+      duration: number;
+      sessionType: string;
+      endedAt: string;
+    }) =>
       apiFetch("/study-sessions/", {
         method: "POST",
         body: JSON.stringify({ data: focusTimerDetails }),
+      }),
+
+    onSuccess: () =>
+      client.invalidateQueries({
+        queryKey: ["/study-sessions?populate=*"],
       }),
   });
 
@@ -92,6 +103,15 @@ export default function FocusTimer({
             : timerStates.timerMode === "long break"
               ? "longBreak"
               : "shortBreak",
+        endedAt: new Date(
+          new Date().getFullYear(),
+          new Date().getMonth(),
+          new Date().getDate(),
+          new Date().getHours(),
+          new Date().getMinutes(),
+          startedAt.getSeconds() + currentTime,
+          new Date().getMilliseconds(),
+        ).toISOString(),
       });
 
       setTimerStates((prev) => {

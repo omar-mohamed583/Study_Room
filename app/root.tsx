@@ -15,6 +15,7 @@ import type { Route } from "./+types/root";
 import "./app.css";
 import ThemeContextProvider from "./components/providers/themeContextprovider";
 import { AuthProvider } from "./components/providers/authProvider";
+import StudyDataProvider from "./components/providers/studyDataProvider";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -55,7 +56,9 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <ThemeContextProvider>
-          <Outlet />
+          <StudyDataProvider>
+            <Outlet />
+          </StudyDataProvider>
         </ThemeContextProvider>
       </AuthProvider>
     </QueryClientProvider>

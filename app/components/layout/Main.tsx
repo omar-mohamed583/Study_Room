@@ -1,4 +1,4 @@
-import { Suspense, useLayoutEffect, useMemo, useRef } from "react";
+import { Suspense, useLayoutEffect, useRef } from "react";
 import {
   Link,
   redirect,
@@ -24,17 +24,13 @@ import SwipeToast from "../ui/SwipeToast";
 import { getIcon } from "../providers/themeContextprovider";
 import ProgressBars from "../ui/ProgressBar";
 import EmptyState from "../ui/EmptyState";
-import useGetEvents from "~/api/getEvents";
-import type { Task } from "~/types/taskType";
-import type { Exam } from "~/types/examType";
-import type { Subject } from "~/types/subjectTypes";
+import useStudyData from "~/context/studyDataContext";
 import SubjectItems from "../ui/SubjectItem";
 import TaskItemSkeleton from "../skeleton/TodayTasksSkeleton";
 import DeadlineItemSkeleton from "../skeleton/UpcomingDeadlinesSkeleton";
 import SubjectItemsSkeleton from "../skeleton/SubjectsSkeleton";
 import { ProgressBarSkeleton } from "../skeleton/ProgressBarsSkeleton";
 import { ensureSession } from "~/auth/session";
-import type { StudySession } from "~/types/studySessionType";
 
 export const links: LinksFunction = () => [
   {
@@ -73,30 +69,15 @@ export default function DefaultMain() {
 
   const { toasts, setToasts, theme } = useTheme();
 
-  const tasksQuery = useGetEvents<Task[]>({
-    endpoint: "/tasks?populate[subject]=true",
-  });
-  const subjectsQuery = useGetEvents<Subject[]>({
-    endpoint: "/subjects",
-  });
-  const examsQuery = useGetEvents<Exam[]>({
-    endpoint: "/exams?populate[subject]=true",
-  });
-  const studySessionsQuery = useGetEvents<StudySession[]>({
-    endpoint: "/study-sessions",
-  });
+  const {
+    tasks: tasksQuery,
+    subjects: subjectsQuery,
+    exams: examsQuery,
+  } = useStudyData();
 
-  const tasks = useMemo(() => tasksQuery.data, [tasksQuery.data]);
-  const subjects = useMemo(() => subjectsQuery.data, [subjectsQuery.data]);
-  const exams = useMemo(() => examsQuery.data, [examsQuery.data]);
-  const studySessions = useMemo(
-    () => studySessionsQuery.data,
-    [studySessionsQuery.data],
-  );
-
-  console.table({
-    studySessions,
-  });
+  const tasks = tasksQuery.data;
+  const subjects = subjectsQuery.data;
+  const exams = examsQuery.data;
 
   const todayTasks = tasks?.filter((task) => isToday(task.dueDate)).slice(0, 4);
   const inLimitTodayTasks =
@@ -512,7 +493,6 @@ export default function DefaultMain() {
             <div className="justify-self-center text-black">
               <MyPie
                 subjects={subjects ?? []}
-                focusTimers={studySessions ?? []}
                 valueFormat={(value: any) =>
                   value / 60 >= 1 ? value / 60 + "h" : value + "m"
                 }
