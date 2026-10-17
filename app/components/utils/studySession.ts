@@ -26,9 +26,7 @@ export function normalizeSessionKind(value: unknown): SessionKind | null {
     const session = value as {
       sessionType?: unknown;
     };
-    return (
-      normalizeSessionKind(session.sessionType)
-    );
+    return normalizeSessionKind(session.sessionType);
   }
   if (typeof value !== "string") return null;
   return KIND_ALIASES.get(value.toLowerCase().replace(/[\s_-]+/g, "")) ?? null;
@@ -106,10 +104,7 @@ export function computeStats(sessions: readonly StudySession[]) {
     if (normalizeSessionKind(session) !== "focusTimer") continue;
     focusSeconds += session.duration;
     focusCount += 1;
-    longestFocusSeconds = Math.max(
-      longestFocusSeconds,
-      session.duration,
-    );
+    longestFocusSeconds = Math.max(longestFocusSeconds, session.duration);
   }
 
   return {
@@ -143,9 +138,7 @@ export function filterSessions(
 ): readonly StudySession[] {
   return filter === "all"
     ? sessions
-    : sessions.filter(
-        (session) => normalizeSessionKind(session) === filter,
-      );
+    : sessions.filter((session) => normalizeSessionKind(session) === filter);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -197,17 +190,27 @@ const timeFormat = new Intl.DateTimeFormat(undefined, {
   minute: "2-digit",
 });
 
+export const isYesterday = (value: unknown) => {
+  const date = new Date(String(value));
+  if (!date.getDate()) return "Invalid Date";
+
+  const yesterday = new Date().getDate() - 1;
+
+  return date.getDate() === yesterday;
+};
+
 /** "Oct 14, 10:30 AM", with the year added for dates outside the current year. */
 export function formatDateTime(ms: number): string {
   const date = new Date(ms);
   const sameYear = date.getFullYear() === new Date().getFullYear();
-  let time = (sameYear ? dateTimeFormat : dateTimeWithYearFormat).format(
-    date,
-  );
+  let time = (sameYear ? dateTimeFormat : dateTimeWithYearFormat).format(date);
   const today = isToday(date);
+  const yesterday = isYesterday(date);
 
   if (today) {
     time = "Today, " + time.split(",")[1];
+  } else if (yesterday) {
+    time = "Yesterday, " + time.split(",")[1];
   }
 
   return time;
