@@ -1,4 +1,4 @@
-import { Suspense, useMemo } from "react";
+import { useMemo } from "react";
 import type { ReactNode } from "react";
 import { computeStats, formatDuration } from "~/components/utils/studySession";
 import type { StudySession } from "~/types/studySessions";
@@ -62,11 +62,10 @@ export default function SessionStats({
       description="Based on your completed focus sessions."
       className={className}
     >
-      <Suspense
-        fallback={<SessionStatsSkeleton className="order-2 lg:order-1" />}
-      >
+      {isPending ? (
+        <SessionStatsSkeleton />
+      ) : (
         <ul
-          aria-busy={isPending}
           className="grid flex-1 grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-2"
         >
           {tiles.map((tile) => (
@@ -79,23 +78,17 @@ export default function SessionStats({
               </span>
               <div>
                 <p className="text-sm text-(--text-secondary)">{tile.label}</p>
-                {isPending ? (
-                  <span className="mt-1.5 block h-8 w-20 rounded-md bg-foreground/10 motion-safe:animate-pulse">
-                    <span className="sr-only">Loading</span>
-                  </span>
-                ) : (
-                  <p
-                    className="mt-1 text-xl font-medium tracking-tight sm:text-2xl"
-                    style={VALUE_FONT}
-                  >
-                    {hasError ? "—" : tile.value}
-                  </p>
-                )}
+                <p
+                  className="mt-1 text-xl font-medium tracking-tight sm:text-2xl"
+                  style={VALUE_FONT}
+                >
+                  {hasError ? "—" : tile.value}
+                </p>
               </div>
             </li>
           ))}
         </ul>
-      </Suspense>
+      )}
     </SectionCard>
   );
 }

@@ -23,15 +23,9 @@ export function normalizeSessionKind(value: unknown): SessionKind | null {
   if (value && typeof value === "object") {
     const session = value as {
       sessionType?: unknown;
-      session_type?: unknown;
-      type?: unknown;
-      attributes?: unknown;
     };
     return (
-      normalizeSessionKind(session.sessionType) ??
-      normalizeSessionKind(session.session_type) ??
-      normalizeSessionKind(session.type) ??
-      normalizeSessionKind(session.attributes)
+      normalizeSessionKind(session.sessionType)
     );
   }
   if (typeof value !== "string") return null;
@@ -210,7 +204,6 @@ export function formatDateTime(ms: number): string {
 
 /** Just the time when the session ended on the day it started, otherwise date and time. */
 export function formatEndTime(startMs: number, endMs: number): string {
-  console.log("start: ", startMs, " ENd> ", endMs)
   const sameDay =
     new Date(startMs).toDateString() === new Date(endMs).toDateString();
   return sameDay ? timeFormat.format(endMs) : formatDateTime(endMs);

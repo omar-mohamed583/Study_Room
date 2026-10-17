@@ -7,7 +7,6 @@ export type SessionKind = "focusTimer" | "shortBreak" | "longBreak";
 /** Value held by the history filter. */
 export type SessionFilter = "all" | SessionKind;
 
-/** A related Subject or Task as Strapi v5 returns it (flat, no `attributes` wrapper). */
 export interface RawRelation {
   id?: number;
   documentId?: string;

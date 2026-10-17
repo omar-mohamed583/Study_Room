@@ -108,7 +108,7 @@ export default function SessionHistory({
         >
           <table className="w-full min-w-176 text-left text-sm">
             <caption className="sr-only">
-              Completed focus timers and breaks, newest first
+              Completed focus timers and breaks
             </caption>
             <thead className="bg-muted/50 text-(--text-secondary)">
               <tr>
@@ -185,9 +185,6 @@ export default function SessionHistory({
 function SessionRow({ session }: { session: StudySession }) {
   const kind = normalizeSessionKind(session);
   const meta = kind ? SESSION_TYPE_META[kind] : undefined;
-
-  console.warn("Meta: ", meta + " Session: " + session);
-  console.table({ session });
 
   return (
     <Suspense>

@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import type { FocusEvent, KeyboardEvent, MouseEvent } from "react";
 import type { SessionFilter } from "~/types/studySessions";
 import { CheckIcon, ChevronDownIcon, ListFilterIcon } from "./icons";
-import { FILTER_OPTIONS, SESSION_TYPE_META } from "./sessionTypeMeta";
+import { FILTER_OPTIONS, SESSION_TYPE_META } from "./SessionTypeMeta";
 
 interface SessionTypeFilterProps {
   value: SessionFilter;
@@ -121,7 +121,7 @@ export default function SessionTypeFilter({
         aria-activedescendant={open ? `${listId}-${activeIndex}` : undefined}
         onClick={handleTriggerClick}
         onKeyDown={handleKeyDown}
-        className="inline-flex h-10 items-center gap-2 rounded-xl border bg-(--sect-bg) pr-3 pl-3.5 text-sm font-medium text-(--text-primary) hover:bg-muted/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--text-primary) aria-expanded:bg-muted/60"
+        className="inline-flex h-10 items-center gap-2 rounded-xl border bg-(--sect-bg) pr-3 pl-3.5 text-sm font-medium text-(--text-primary) hover:bg-muted/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--text-primary) leading-[normal] aria-expanded:bg-muted/60"
       >
         <ListFilterIcon className="size-4 text-(--text-secondary)" />
         <span>{selectedLabel}</span>

@@ -663,10 +663,3 @@ function DefaultMainSection({
     </section>
   );
 }
-
-export const clientMiddleware = [authMiddleware];
-
-async function authMiddleware() {
-  const accessToken = await ensureSession();
-  if (!accessToken) throw redirect("/login");
-}

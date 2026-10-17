@@ -90,7 +90,6 @@ export function buildDeadlines(
   now = new Date(),
 ): Deadline[] {
   if (!tasks.length || !exams.length) {
-    console.warn(`no Lengths:\ntasks: ${tasks}\nexams: ${exams}`)
     return [];
   }
 

@@ -35,9 +35,6 @@ export default function MyPie({
 
 
   const { theme } = useTheme();
-  console.table({
-    subjects,
-  })
 
   const formateData = subjects.map((subject) => ({
     id: subject.name,

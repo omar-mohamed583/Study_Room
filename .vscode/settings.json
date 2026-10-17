@@ -4,12 +4,15 @@
     "Contextprovider",
     "dayflow",
     "fakeapi",
+    "focustimer",
     "fontsource",
     "Gsap",
+    "longbreak",
     "nivo",
     "Pomodoro",
     "rubberband",
     "shadcn",
+    "shortbreak",
     "Uncontained",
     "yoyo"
   ]

@@ -71,7 +71,7 @@ export default function FocusTimer({
       timerStates.timerState === "idle" ||
       timerStates.timerState === "paused"
     )
-      return console.log("Timer is idle or paused, not running the interval");
+      return;
 
     const interval = setInterval(() => {
       const total = timerStates[TIMER_MODES[timerStates.timerMode]];
