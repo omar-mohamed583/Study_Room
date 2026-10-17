@@ -164,8 +164,9 @@ export default function SessionHistory({
 
   return (
     <SectionCard
+      svgName="comp_sessions"
       title="Completed Sessions"
-      description="Every finished focus timer and break, newest first."
+      description="Every finished focus timer and break"
       className={className}
       action={
         sessions?.length > 0 && !isPending && !hasError ? (

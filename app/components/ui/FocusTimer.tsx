@@ -15,6 +15,7 @@ import type { TimerMode } from "~/types/customContextType";
 import type { LinksFunction } from "react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "~/api/api";
+import NotificationModal from "./NotificationModal";
 
 const TIMER_MODES: Record<
   TimerMode,
@@ -373,6 +374,8 @@ export default function FocusTimer({
           </div>
         </div>
       </div>
+
+      <NotificationModal />
     </>
   );
 }

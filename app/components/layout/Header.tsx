@@ -44,7 +44,7 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
-    document.body.classList.replace(theme === "dark" ? "dark" : "light", theme);
+    document.body.classList.replace(theme === "dark" ? "light" : "dark", theme);
   }, [theme]);
 
   const PERSONAL_ITEMS = useMemo(

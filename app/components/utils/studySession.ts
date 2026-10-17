@@ -5,6 +5,8 @@ import type {
   SessionKind,
   StudySession,
 } from "~/types/studySessions";
+import { isToday } from "../layout/Main";
+import type { LeftToRightListBulletIcon } from "@hugeicons/core-free-icons";
 
 /* -------------------------------------------------------------------------- */
 /* Turning Strapi records into validated sessions                             */
@@ -199,7 +201,16 @@ const timeFormat = new Intl.DateTimeFormat(undefined, {
 export function formatDateTime(ms: number): string {
   const date = new Date(ms);
   const sameYear = date.getFullYear() === new Date().getFullYear();
-  return (sameYear ? dateTimeFormat : dateTimeWithYearFormat).format(date);
+  let time = (sameYear ? dateTimeFormat : dateTimeWithYearFormat).format(
+    date,
+  );
+  const today = isToday(date);
+
+  if (today) {
+    time = "Today, " + time.split(",")[1];
+  }
+
+  return time;
 }
 
 /** Just the time when the session ended on the day it started, otherwise date and time. */

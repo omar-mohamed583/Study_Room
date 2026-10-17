@@ -1,7 +1,6 @@
 import { Suspense, useLayoutEffect, useRef } from "react";
 import {
   Link,
-  redirect,
   type LinksFunction,
   type MetaFunction,
 } from "react-router";
@@ -20,9 +19,6 @@ import logo from "~/assets/logo.svg";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import useTheme from "~/context/themeContext";
-import SwipeToast from "../ui/SwipeToast";
-import { getIcon } from "../providers/themeContextprovider";
-import ProgressBars from "../ui/ProgressBar";
 import EmptyState from "../ui/EmptyState";
 import useStudyData from "~/context/studyDataContext";
 import SubjectItems from "../ui/SubjectItem";
@@ -30,7 +26,7 @@ import TaskItemSkeleton from "../skeleton/TodayTasksSkeleton";
 import DeadlineItemSkeleton from "../skeleton/UpcomingDeadlinesSkeleton";
 import SubjectItemsSkeleton from "../skeleton/SubjectsSkeleton";
 import { ProgressBarSkeleton } from "../skeleton/ProgressBarsSkeleton";
-import { ensureSession } from "~/auth/session";
+import ProgressBars from "../ui/ProgressBar";
 
 export const links: LinksFunction = () => [
   {
@@ -52,7 +48,7 @@ export const meta: MetaFunction = () => [
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
-function isToday(value: unknown) {
+export function isToday(value: unknown) {
   if (!value) return false;
   const date = new Date(String(value));
   return (
@@ -547,49 +543,6 @@ export default function DefaultMain() {
           </DefaultMainSection>
         </section>
       </main>
-
-      <div
-        style={{
-          display: "flex",
-          position: "fixed",
-          right: "1.5rem",
-          bottom: "1.5rem",
-          flexDirection: "column",
-          alignItems: "flex-end",
-          zIndex: 10000,
-          gap: 10,
-        }}
-      >
-        {toasts.map((toast) => (
-          <SwipeToast
-            key={toast.id}
-            open
-            onClose={() => {
-              setToasts((prev) => prev.filter((tst) => tst.id !== toast.id));
-            }}
-            title={toast.title}
-            className=""
-            inline
-            dismissible
-            icon={getIcon(toast.icon || "")}
-            description={toast.description}
-            actionLabel={toast.actionBtnText || ""}
-            onAction={toast.onAction || (() => null)}
-            background={theme === "dark" ? "#27272a" : "hsl(240 4% 90% / 1)"}
-            color={theme === "dark" ? "#f5f5f5" : "#000"}
-            fuseColor={toast?.fuseColor?.trim() ?? "#f5a524"}
-            width={356}
-            radius={12}
-            slideMs={400}
-            settleBounce={0.3}
-            swipeDistance={40}
-            duration={3500}
-            fuse="bottom"
-            pauseOnHover
-            closeButton
-          />
-        ))}
-      </div>
 
       <footer className="flex justify-between px-5 max-w-350 mt-20 mx-auto *:text-xs *:font-medium">
         <p>

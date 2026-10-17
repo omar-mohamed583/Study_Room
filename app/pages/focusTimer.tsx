@@ -12,8 +12,6 @@ import { ensureSession } from "~/auth/session";
 import { redirect, useNavigate } from "react-router";
 import Button from "~/components/ui/Button";
 import useTheme from "~/context/themeContext";
-import SwipeToast from "~/components/ui/SwipeToast";
-import { getIcon } from "~/components/providers/themeContextprovider";
 
 const FocusTimer = lazy(() => import("~/components/ui/FocusTimer"));
 
@@ -24,8 +22,6 @@ export default function FocusTimerPage() {
   const { sessions: sessionsQuery } = useStudyData();
 
   const { isError, data: sessions, isLoading, isFetching } = sessionsQuery;
-
-  const { toasts, setToasts, theme } = useTheme();
 
   const navigate = useNavigate();
 
@@ -56,7 +52,7 @@ export default function FocusTimerPage() {
       <Header />
       <main
         ref={container}
-        className="mx-auto flex w-full max-w-300 flex-col gap-6 px-4 pb-6 text-(--text-primary) sm:px-6"
+        className="mx-auto flex w-full max-w-300 flex-col gap-6 px-4 pb-20 text-(--text-primary) sm:px-6"
       >
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_26rem]">
           <SessionStats
@@ -66,6 +62,7 @@ export default function FocusTimerPage() {
             className="order-2 lg:order-1 gs-animate"
           />
           <SectionCard
+            svgName="timer"
             title="Timer"
             description="Choose a mode, then press play."
             className="order-1 lg:order-2 gs-animate"
@@ -92,7 +89,7 @@ export default function FocusTimerPage() {
         />
       </main>
       <Button
-        className="fixed inset-e-8 inset-be-6 bg-orange-800/20 border hover:bg-orange-800/25 transition-[border-color,background-color,box-shadow] duration-300 border-orange-800/60 hover:border-orange-600 rounded-full text-orange-400 p-3 px-4 backdrop-blur-xl hover:shadow-orange-500/30 shadow-xl"
+        className="fixed inset-e-8 inset-be-6 bg-orange-400/15 border hover:bg-orange-400/25 transition-[border-color,translate,background-color,box-shadow] duration-300 border-orange-400/55 hover:border-orange-400 rounded-full text-orange-600 in-[.dark]:text-orange-400 p-3 px-4 backdrop-blur-xl hover:shadow-orange-400/30 shadow-xl hover:-translate-y-2"
         onClick={() => {
           document.startViewTransition(() => {
             navigate("/focus-mode");
@@ -101,49 +98,6 @@ export default function FocusTimerPage() {
       >
         Focus Mode
       </Button>
-
-      <div
-        style={{
-          display: "flex",
-          position: "fixed",
-          right: "1.5rem",
-          bottom: "1.5rem",
-          flexDirection: "column",
-          alignItems: "flex-end",
-          zIndex: 10000,
-          gap: 10,
-        }}
-      >
-        {toasts.map((toast) => (
-          <SwipeToast
-            key={toast.id}
-            open
-            onClose={() => {
-              setToasts((prev) => prev.filter((tst) => tst.id !== toast.id));
-            }}
-            title={toast.title}
-            className=""
-            inline
-            dismissible
-            icon={getIcon(toast.icon || "")}
-            description={toast.description}
-            actionLabel={toast.actionBtnText || ""}
-            onAction={toast.onAction || (() => null)}
-            background={theme === "dark" ? "#27272a" : "hsl(240 4% 90% / 1)"}
-            color={theme === "dark" ? "#f5f5f5" : "#000"}
-            fuseColor={toast?.fuseColor?.trim() ?? "#f5a524"}
-            width={356}
-            radius={12}
-            slideMs={400}
-            settleBounce={0.3}
-            swipeDistance={40}
-            duration={3500}
-            fuse="bottom"
-            pauseOnHover
-            closeButton
-          />
-        ))}
-      </div>
     </>
   );
 }

@@ -32,55 +32,53 @@ const velocityOf = (hist: [number[], number[]]) => {
   return performance.now() - t1 > 100 ? 0 : (y1 - y0) / Math.max(1, t1 - t0);
 };
 
-export default function SwipeToast(
-  {
-    title = "File archived",
-    description = "",
-    icon,
-    actionLabel = "",
-    onAction,
-    open = true,
-    onClose,
-    background = "#27272a",
-    color = "#f5f5f5",
-    fuseColor = "#f5a524",
-    width = 356,
-    radius = 12,
-    slideMs = 400,
-    settleBounce = 0.2,
-    swipeDistance = 40,
-    duration = 4000,
-    fuse = "bottom",
-    pauseOnHover = true,
-    closeButton = false,
-    inline = false,
-    dismissible = true,
-    className = "",
-  }: {
-    title: string,
-    description: string,
-    icon: any,
-    actionLabel: string,
-    onAction: () => any,
-    open: boolean,
-    onClose: () => any,
-    background: string,
-    color: string,
-    fuseColor: string,
-    width: number,
-    radius: number,
-    slideMs: number,
-    settleBounce: number,
-    swipeDistance: number,
-    duration: number,
-    fuse: string,
-    pauseOnHover: boolean,
-    closeButton: boolean,
-    inline: boolean,
-    dismissible: boolean,
-    className: string,
-  },
-) {
+export default function SwipeToast({
+  title = "File archived",
+  description = "",
+  icon,
+  actionLabel = "",
+  onAction,
+  open = true,
+  onClose,
+  background = "#27272a",
+  color = "#f5f5f5",
+  fuseColor = "#f5a524",
+  width = 356,
+  radius = 12,
+  slideMs = 400,
+  settleBounce = 0.2,
+  swipeDistance = 40,
+  duration = 4000,
+  fuse = "bottom",
+  pauseOnHover = true,
+  closeButton = false,
+  inline = false,
+  dismissible = true,
+  className = "",
+}: {
+  title: string;
+  description: string;
+  icon: any;
+  actionLabel: string;
+  onAction: () => any;
+  open: boolean;
+  onClose: () => any;
+  background: string;
+  color: string;
+  fuseColor: string;
+  width: number;
+  radius: number;
+  slideMs: number;
+  settleBounce: number;
+  swipeDistance: number;
+  duration: number;
+  fuse: string;
+  pauseOnHover: boolean;
+  closeButton: boolean;
+  inline: boolean;
+  dismissible: boolean;
+  className: string;
+}) {
   const reduce = useReducedMotion();
   const [phase, setPhase] = useState("open");
   const [instant, setInstant] = useState(false);

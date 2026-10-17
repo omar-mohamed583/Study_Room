@@ -151,7 +151,11 @@ export default function SessionTypeFilter({
                 // Keep focus on the trigger while the pointer is used.
                 onMouseDown={(event) => event.preventDefault()}
                 onMouseMove={() => setActiveIndex(index)}
-                onClick={() => choose(index)}
+                onClick={() =>
+                  document.startViewTransition(() => {
+                    choose(index);
+                  })
+                }
                 className={`flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm ${
                   isActive ? "bg-accent text-accent-foreground" : ""
                 } ${isSelected ? "font-medium" : ""}`}

@@ -19,11 +19,6 @@ interface Tile {
   value: string;
 }
 
-// Same face as the timer digits, so the numbers read as one family.
-const VALUE_FONT = {
-  fontFamily: '"DM Mono", ui-monospace, monospace',
-} as const;
-
 export default function SessionStats({
   sessions,
   isPending,
@@ -58,6 +53,7 @@ export default function SessionStats({
 
   return (
     <SectionCard
+      svgName="statistics"
       title="Statistics"
       description="Based on your completed focus sessions."
       className={className}
@@ -71,20 +67,22 @@ export default function SessionStats({
           {tiles.map((tile) => (
             <li
               key={tile.label}
-              className="flex min-h-28 flex-col justify-between gap-6 rounded-2xl bg-muted transition-[border-color,translate] duration-300 hover:-translate-y-2 in-[.dark]:bg-muted/55 border border-transparent hover:border-orange-500 backdrop-blur-2xl p-3 sm:p-4 hover:"
+              className="flex min-h-28 flex-col justify-between gap-6 rounded-2xl bg-muted transition-[border-color,translate,background-color] duration-300 hover:-translate-y-2 in-[.dark]:bg-muted/40 border border-transparent hover:border-orange-500 backdrop-blur-xl p-3 sm:p-4 in-[.dark]:hover:bg-muted/60 relative isolate overflow-clip"
             >
               <span className="grid size-8 place-items-center rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-300">
                 {tile.icon}
               </span>
-              <div>
+              <div className="relative z-10">
                 <p className="text-sm text-(--text-secondary)">{tile.label}</p>
                 <p
                   className="mt-1 text-xl font-medium tracking-tight sm:text-2xl"
-                  style={VALUE_FONT}
                 >
                   {hasError ? "—" : tile.value}
                 </p>
               </div>
+              <span className="block absolute inset-be-2 inset-e-7.5 scale-800 opacity-15 z-0 in-[li:hover]:-rotate-20 duration-300 transition-transform">
+                {tile.icon}
+              </span>
             </li>
           ))}
         </ul>
