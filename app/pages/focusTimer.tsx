@@ -11,7 +11,6 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ensureSession } from "~/auth/session";
 import { redirect, useNavigate } from "react-router";
 import Button from "~/components/ui/Button";
-import useTheme from "~/context/themeContext";
 
 const FocusTimer = lazy(() => import("~/components/ui/FocusTimer"));
 

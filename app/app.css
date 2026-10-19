@@ -12,6 +12,7 @@ html {
   font-weight: 400;
   font-style: normal;
   scrollbar-width: thin;
+  scrollbar-color: rgb(113 113 122/0.6) transparent;
 }
 
 input:autofill, input:-webkit-autofill, input:-internal-autofill-selected {

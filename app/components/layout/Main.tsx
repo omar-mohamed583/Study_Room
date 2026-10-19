@@ -1,6 +1,7 @@
 import { Suspense, useLayoutEffect, useRef } from "react";
 import {
   Link,
+  redirect,
   type LinksFunction,
   type MetaFunction,
 } from "react-router";
@@ -27,6 +28,7 @@ import DeadlineItemSkeleton from "../skeleton/UpcomingDeadlinesSkeleton";
 import SubjectItemsSkeleton from "../skeleton/SubjectsSkeleton";
 import { ProgressBarSkeleton } from "../skeleton/ProgressBarsSkeleton";
 import ProgressBars from "../ui/ProgressBar";
+import { ensureSession } from "~/auth/session";
 
 export const links: LinksFunction = () => [
   {
@@ -615,4 +617,11 @@ function DefaultMainSection({
       )}
     </section>
   );
+}
+
+export const clientMiddleware = [authMiddleware];
+
+async function authMiddleware() {
+  const accessToken = await ensureSession();
+  if (!accessToken) throw redirect("/login");
 }

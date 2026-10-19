@@ -395,7 +395,7 @@ export default function Header() {
             <input
               type="text"
               id="search"
-              className="bg-transparent shadow-[0_0_7px_2px_var(--tw-shadow)] shadow-transparent focus:shadow-violet-700/60 border-0 focus-visible:shadow-violet-700/60 pl-10 p-2 outline-0 "
+              className="bg-transparent ring-2 ring-transparent focus:ring-zinc-700 border-0 focus-visible:shadow-zinc-700 pl-10 p-2 outline-0 "
               placeholder=" "
             />
             <label
