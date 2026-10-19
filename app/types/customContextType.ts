@@ -46,4 +46,14 @@ export default interface CustomContextType {
   setToasts: Dispatch<SetStateAction<Toast[]>>;
   showToast: boolean;
   setShowToast: Dispatch<SetStateAction<boolean>>;
+  selectEventValue: {
+    name: string;
+    type: string;
+  };
+  setSelectEventValue: Dispatch<
+    SetStateAction<{
+      name: string;
+      type: string;
+    }>
+  >;
 }

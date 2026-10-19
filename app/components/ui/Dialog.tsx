@@ -6,6 +6,7 @@ import SettingsContent from "../layout/SettingDialog";
 import { useAuth } from "../providers/authProvider";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "~/api/api";
+import type { UserType } from "~/types/userType";
 
 export default function DialogComp({
   dialogType,
@@ -16,12 +17,12 @@ export default function DialogComp({
   svg: ReactNode;
   className: string;
 }) {
-  const { user, logout } = useAuth();
+  const { user, logout }: { user: UserType, logout: () => void } = useAuth();
 
   const client = useQueryClient();
 
   const { mutate, isPending } = useMutation({
-    mutationFn: (updatedFields: object ) =>
+    mutationFn: (updatedFields: object) =>
       apiFetch(`/users/${user?.id}`, {
         method: "PUT",
         body: JSON.stringify(updatedFields),
@@ -61,19 +62,16 @@ export default function DialogComp({
               ) : (
                 <SettingsContent
                   onSave={(values) => {
-                    const {
-                      shortBreakMinutes: _shortBreakMinutes,
-                      longBreakMinutes: _longBreakMinutes,
-                      ...accountPreferences
-                    } = values;
-                    return mutate(accountPreferences);
+                    return mutate(values);
                   }}
                   isLoading={isPending}
                   preferences={{
                     notifyExams: user?.notifyExams,
                     notifyTasks: user?.notifyTasks,
-                    sessionMinutes: user?.sessionMinutes,
-                    weeklyGoalHours: user?.weeklyGoalHours,
+                    sessionMinutes: +user?.sessionMinutes,
+                    shortBreakMinutes: user?.shortBreakMinutes ?? 5,
+                    longBreakMinutes: user?.longBreakMinutes ?? 15,
+                    weeklyGoalHours: +user?.weeklyGoalHours,
                   }}
                 />
               )}

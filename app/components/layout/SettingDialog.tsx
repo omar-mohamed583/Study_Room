@@ -193,12 +193,15 @@ export default function SettingsContent({
   const DEFAULT_PREFERENCES: Preferences = {
     weeklyGoalHours: preferences?.weeklyGoalHours ?? 10,
     sessionMinutes: preferences?.sessionMinutes ?? 25,
-    shortBreakMinutes: Math.round(timerStates.timeForShortBreak / 60),
-    longBreakMinutes: Math.round(timerStates.timeForLongBreak / 60),
+    shortBreakMinutes:
+      preferences?.shortBreakMinutes ??
+      Math.round(timerStates.timeForShortBreak / 60),
+    longBreakMinutes:
+      preferences?.longBreakMinutes ??
+      Math.round(timerStates.timeForLongBreak / 60),
     notifyTasks: preferences?.notifyTasks ?? true,
     notifyExams: preferences?.notifyExams ?? true,
   };
-
 
   const uid = useId();
 

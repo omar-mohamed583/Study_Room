@@ -2,13 +2,7 @@ import { useEffect, useId, useState } from "react";
 import AccountContentSkeleton from "../skeleton/AccountDialogSkeleton";
 import Button from "../ui/Button";
 import DialogPanel, { Icon } from "../ui/DialogPanel";
-
-// Only the fields this dialog needs. Your UserType should be assignable to it.
-export type ProfileUser = {
-  username: string;
-  email: string;
-  createdAt?: string;
-};
+import type { UserType } from "~/types/userType";
 
 const FIELD_CLASS =
   "h-10 w-full rounded-lg border border-zinc-400/40 bg-transparent px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-(--accent-100)";
@@ -21,7 +15,7 @@ export default function AccountContent({
   onSave,
   onLogout,
 }: {
-  user: ProfileUser | null;
+  user: UserType | null;
   isLoading?: boolean;
   onSave: (values: { username: string }) => Promise<void> | void;
   onLogout: () => Promise<void> | void;

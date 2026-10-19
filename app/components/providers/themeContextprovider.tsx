@@ -115,25 +115,9 @@ export default function ThemeContextProvider({
     timeForLongBreak: 15 * 60,
   });
 
-  const { user } = useAuth();
-
-  const client = useQueryClient();
-
-  const mutate = useMutation({
-    mutationFn: (timerSettings: {
-      focusTime: string | number;
-      shortBreak: string | number;
-      longBreak: string | number;
-    }) => {
-      if (!user) throw new Error("You must be signed in to update timer settings");
-
-      return apiFetch(`/users/${user.id}`, {
-        method: "PUT",
-        body: JSON.stringify(timerSettings),
-      });
-    },
-
-    onSuccess: () => client.invalidateQueries({ queryKey: ["user"] }),
+  const [selectEventValue, setSelectEventValue] = useState({
+    name: "",
+    type: "",
   });
 
   const [showToast, setShowToast] = useState<boolean>(false);
@@ -161,6 +145,8 @@ export default function ThemeContextProvider({
         setToasts,
         showToast,
         setShowToast,
+        selectEventValue,
+        setSelectEventValue,
       }}
     >
       {children}

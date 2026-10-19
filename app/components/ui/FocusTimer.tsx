@@ -16,6 +16,7 @@ import type { LinksFunction } from "react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "~/api/api";
 import NotificationModal from "./NotificationModal";
+import SearchBar from "./SearchBar";
 
 const TIMER_MODES: Record<
   TimerMode,
@@ -208,7 +209,7 @@ export default function FocusTimer({
         </div>
 
         <div
-          className={`timer aspect-square w-[clamp(130px,100%,250px)] rounded-[50%] bg-(--contrast-text) tracking-tight text-xl leading-[normal] grid place-content-center gap-2 mx-auto ${anchor && "[anchor-name:--timer]"}`}
+          className={`timer aspect-square w-[clamp(130px,100%,250px)] rounded-[50%] bg-(--contrast-text) tracking-tight text-xl leading-[normal] grid place-content-center gap-3 mx-auto ${anchor && "[anchor-name:--timer]"}`}
         >
           <div className="text-4xl md:text-[40px] font-bold leading-[normal] text-center *:tabular-nums min-w-max">
             {minutes.toString().length > 2
@@ -216,13 +217,7 @@ export default function FocusTimer({
               : minutes.toString().padStart(2, "0")}
             :{seconds < 10 ? `0${seconds}` : seconds}
           </div>
-          <Badge
-            variant="secondary"
-            className="tracking-normal -mt-1 mb-1 mx-auto"
-          >
-            {timerStates.timerMode}{" "}
-            {timerStates.timerMode === "focus" && "Timer"}
-          </Badge>
+          <SearchBar />
 
           <TimerRing
             progress={

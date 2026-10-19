@@ -8,5 +8,11 @@ export interface UserType {
   provider: string;
   publishedAt: string | Date;
   updatedAt: string | Date;
+  weeklyGoalHours: number | string;
+  sessionMinutes: string | number;
+  shortBreakMinutes: number;
+  longBreakMinutes: number;
+  notifyExams: boolean;
+  notifyTasks: boolean;
   username: string;
 }

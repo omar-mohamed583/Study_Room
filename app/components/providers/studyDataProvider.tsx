@@ -33,8 +33,8 @@ export default function StudyDataProvider({
   });
 
   return (
-    <StudyDataContext.Provider value={{ tasks, subjects, exams, sessions }}>
+    <StudyDataContext value={{ tasks, subjects, exams, sessions }}>
       {children}
-    </StudyDataContext.Provider>
+    </StudyDataContext>
   );
 }
