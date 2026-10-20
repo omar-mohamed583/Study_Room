@@ -62,12 +62,12 @@ export default function SessionStats({
         <SessionStatsSkeleton />
       ) : (
         <ul
-          className="grid flex-1 grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-2"
+          className="grid flex-1 grid-cols-2 gap-5 md:grid-cols-4 lg:grid-cols-2"
         >
           {tiles.map((tile) => (
             <li
               key={tile.label}
-              className="flex min-h-28 flex-col justify-between gap-6 rounded-2xl bg-muted transition-[border-color,translate,background-color] duration-300 hover:-translate-y-2 in-[.dark]:bg-muted/40 border border-transparent hover:border-orange-500 backdrop-blur-xl p-3 sm:p-4 in-[.dark]:hover:bg-muted/60 relative isolate overflow-clip"
+              className="flex min-h-28 flex-col justify-between gap-6 rounded-2xl bg-muted transition-[box-shadow,translate,background-color] duration-300 hover:-translate-y-2 in-[.dark]:bg-muted/40 ring-3 ring-transparent focus-visible:ring-sky-500 hover:ring-sky-500 backdrop-blur-xl p-3 sm:p-4 in-[.dark]:hover:bg-muted/60 relative isolate overflow-clip"
             >
               <span className="grid size-8 place-items-center rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-300">
                 {tile.icon}
@@ -80,7 +80,7 @@ export default function SessionStats({
                   {hasError ? "—" : tile.value}
                 </p>
               </div>
-              <span className="block absolute inset-be-2 inset-e-7.5 scale-800 opacity-15 z-0 in-[li:hover]:-rotate-20 duration-300 transition-transform">
+              <span className="block absolute inset-be-3 inset-e-8 scale-800 opacity-15 z-0 in-[li:hover]:-rotate-20 duration-300 transition-transform">
                 {tile.icon}
               </span>
             </li>

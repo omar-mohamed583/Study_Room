@@ -47,13 +47,15 @@ export default interface CustomContextType {
   showToast: boolean;
   setShowToast: Dispatch<SetStateAction<boolean>>;
   selectEventValue: {
+    eventId: string;
     name: string;
-    type: string;
+    type: ("task" | "subject" | "exam") | null;
   };
   setSelectEventValue: Dispatch<
     SetStateAction<{
+      eventId: string;
       name: string;
-      type: string;
+      type: ("task" | "subject" | "exam") | null;
     }>
   >;
 }

@@ -41,6 +41,9 @@ export default function FocusTimer({
       duration: number;
       sessionType: string;
       endedAt: string;
+      task?: string;
+      subject?: string;
+      exam?: string;
     }) =>
       apiFetch("/study-sessions/", {
         method: "POST",
@@ -52,6 +55,8 @@ export default function FocusTimer({
         queryKey: ["/study-sessions?populate=*"],
       }),
   });
+
+  const { selectEventValue } = useTheme();
 
   const { timerStates, setTimerStates, setToasts, setShowToast } = useTheme();
 
@@ -106,14 +111,20 @@ export default function FocusTimer({
               ? "longBreak"
               : "shortBreak",
         endedAt: new Date(
-          new Date().getFullYear(),
-          new Date().getMonth(),
-          new Date().getDate(),
-          new Date().getHours(),
-          new Date().getMinutes(),
-          startedAt.getSeconds() + currentTime,
-          new Date().getMilliseconds(),
+          startedAt.getTime() + currentTime * 1000,
         ).toISOString(),
+        task:
+          selectEventValue.type === "task"
+            ? selectEventValue.eventId
+            : undefined,
+        subject:
+          selectEventValue.type === "subject"
+            ? selectEventValue.eventId
+            : undefined,
+        exam:
+          selectEventValue.type === "exam"
+            ? selectEventValue.eventId
+            : undefined,
       });
 
       setTimerStates((prev) => {

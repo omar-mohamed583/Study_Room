@@ -19,7 +19,6 @@ import gsap from "gsap";
 import logo from "~/assets/logo.svg";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import useTheme from "~/context/themeContext";
 import EmptyState from "../ui/EmptyState";
 import useStudyData from "~/context/studyDataContext";
 import SubjectItems from "../ui/SubjectItem";
@@ -64,8 +63,6 @@ export default function DefaultMain() {
   const container = useRef<HTMLElement>(null);
 
   const { user } = useAuth();
-
-  const { toasts, setToasts, theme } = useTheme();
 
   const {
     tasks: tasksQuery,
@@ -327,17 +324,17 @@ export default function DefaultMain() {
             className="border-0"
             alignContentBetween
           >
-            <Suspense fallback={""}>
               <div className="px-3">
                 <h2 className="font-medium text-3xl text-white leading-[normal] text-center capitalize">
                   {now < 20 && now > 5
                     ? "Have A Good Day"
                     : "Welcome Night Owl"}
                   <br></br>
-                  {user?.username}!
+                  <Suspense fallback={"guest"}>
+                    {user?.username}!
+                  </Suspense>
                 </h2>
               </div>
-            </Suspense>
 
             <div className="px-3 pb-10">
               <h4 className="text-2xl text-center leading-[normal] text-white mb-5 text-shadow-lg text-shadow-blue-800/40">

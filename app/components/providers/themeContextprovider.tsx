@@ -3,6 +3,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { apiFetch } from "~/api/api";
 import { ThemeContext } from "~/context/themeContext";
 import { useLocalStorage } from "~/hooks/useLocalStorage";
+import type CustomContextType from "~/types/customContextType";
 import type { TimerStates, Toast } from "~/types/customContextType";
 import { useAuth } from "./authProvider";
 
@@ -115,9 +116,12 @@ export default function ThemeContextProvider({
     timeForLongBreak: 15 * 60,
   });
 
-  const [selectEventValue, setSelectEventValue] = useState({
+  const [selectEventValue, setSelectEventValue] = useLocalStorage<
+    CustomContextType["selectEventValue"]
+  >("timerEvent", {
+    eventId: "",
     name: "",
-    type: "",
+    type: null,
   });
 
   const [showToast, setShowToast] = useState<boolean>(false);

@@ -1,5 +1,6 @@
 import { lazy, Suspense, useRef } from "react";
 import SectionCard from "~/components/layout/focus-sessions/SectionCard";
+import logo from "~/assets/logo.svg";
 import SessionHistory from "~/components/layout/focus-sessions/SessionHistory";
 import SessionStats from "~/components/layout/focus-sessions/SessionStats";
 import Header from "~/components/layout/Header";
@@ -9,10 +10,28 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ensureSession } from "~/auth/session";
-import { redirect, useNavigate } from "react-router";
+import { redirect, useNavigate, type LinksFunction, type MetaFunction } from "react-router";
 import Button from "~/components/ui/Button";
 
 const FocusTimer = lazy(() => import("~/components/ui/FocusTimer"));
+
+export const links: LinksFunction = () => [
+  {
+    rel: "icon",
+    type: "image/svg+xml",
+    href: logo,
+  },
+];
+
+export const meta: MetaFunction = () => [
+  {
+    title: "Study Planner - Focus Timer",
+  },
+  {
+    name: "",
+    content: "",
+  },
+];
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -51,7 +70,7 @@ export default function FocusTimerPage() {
       <Header />
       <main
         ref={container}
-        className="mx-auto flex w-full max-w-300 flex-col gap-6 px-4 pb-20 text-(--text-primary) sm:px-6"
+        className="mx-auto flex w-full max-w-320 flex-col gap-6 px-4 pb-20 text-(--text-primary) sm:px-6"
       >
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_26rem]">
           <SessionStats

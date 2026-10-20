@@ -48,13 +48,12 @@ export default function SearchBar() {
   const anchorName = `--search-bar-${id.replace(/[^a-zA-Z0-9_-]/g, "")}`;
 
   const {
-    selectEventValue: { name, type },
+    selectEventValue: { eventId, name, type },
     setSelectEventValue: setValue,
   } = useTheme();
 
   const { tasks, subjects, exams } = useStudyData();
 
-  // the portal needs `document`, so only render it on the client (SSR-safe)
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -82,18 +81,18 @@ export default function SearchBar() {
 
     const all: Record<EventType, SearchItem[]> = {
       task: (tasks.data ?? []).map(
-        (t): SearchItem => ({ id: t.id, name: t.title, type: "task" }),
+        (t): SearchItem => ({ id: t.documentId, name: t.title, type: "task", }),
       ),
       subject: (subjects.data ?? []).map(
         (s): SearchItem => ({
-          id: s.id,
+          id: s.documentId,
           name: s.name,
           type: "subject",
           color: s.color,
         }),
       ),
       exam: (exams.data ?? []).map(
-        (x): SearchItem => ({ id: x.id, name: x.title, type: "exam" }),
+        (x): SearchItem => ({ id: x.documentId, name: x.title, type: "exam" }),
       ),
     };
 
@@ -109,7 +108,7 @@ export default function SearchBar() {
   }, [tasks.data, subjects.data, exams.data, inpValue, filter]);
 
   function handleSelect(item: SearchItem) {
-    setValue({ name: item.name, type: item.type });
+    setValue({ eventId: String(item.id), name: item.name, type: item.type });
     setOpen(false);
   }
 
@@ -121,7 +120,7 @@ export default function SearchBar() {
         className={`font-['DM_Sans'] w-30 transition-colors ${open ? "bg-zinc-600/30" : "bg-transparent"} hover:bg-zinc-600/30 tracking-[0.020em] border duration-200 border-zinc-400/40 p-1.75 px-2.5 rounded-lg flex items-center *:cursor-default *:text-[13px] *:leading-[normal] gap-1`}
         onClick={() => setOpen((prev) => !prev)}
       >
-        <span className="truncate w-[90%] font-medium">
+        <span className="truncate w-[90%] font-medium select-none">
           {name || "Select Event"}
         </span>
 
@@ -219,7 +218,7 @@ export default function SearchBar() {
                     key={group.type}
                     label={GROUP_LABELS[group.type]}
                     items={group.items}
-                    selected={{ name, type }}
+                    selected={{ eventId, type }}
                     onSelect={handleSelect}
                   />
                 ))
@@ -228,8 +227,8 @@ export default function SearchBar() {
             <footer className="border-t border-t-zinc-500/80 p-2.75">
               <button
                 className="rounded-lg border border-red-500 w-full p-1.75 text-red-500 text-sm leading-[normal] disabled:opacity-40 disabled:hover:bg-transparent hover:bg-red-500/15 transition-colors duration-200"
-                disabled={!name}
-                onClick={() => setValue({ name: "", type: "" })}
+                disabled={!eventId}
+                onClick={() => setValue({ eventId: "", name: "", type: null })}
               >
                 Remove event
               </button>
@@ -249,7 +248,7 @@ function EventSection({
 }: {
   label: string;
   items: SearchItem[];
-  selected: { name?: string; type?: string };
+  selected: { eventId: string; type: EventType | null };
   onSelect: (item: SearchItem) => void;
 }) {
   return (
@@ -262,7 +261,7 @@ function EventSection({
             key={`${item.type}-${item.id}`}
             item={item}
             isSelected={
-              selected.name === item.name && selected.type === item.type
+              selected.eventId === String(item.id) && selected.type === item.type
             }
             onSelect={onSelect}
           />
