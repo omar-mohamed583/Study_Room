@@ -34,7 +34,12 @@ body {
   background-image: var(--body-bg);
 }
 
+.df-calendar-wrapper * {
+  font-variant: tabular-nums;
+}
+
 :root {
+  --df-color-background: #fff;
   --accent-100: #ff7452;
   --accent-200: #0032e6;
   --accent-300: hsl(17, 83%, 56%);
@@ -49,7 +54,7 @@ body {
   --stripping-color: #EAEAEA;
   --body-bg:
     linear-gradient(to right bottom,
-    hsl(0, 2%, 80%),
+      hsl(0, 2%, 80%),
       var(--stripping-color));
   --secondary-gray: hsl(0, 0%, 74%);
   --border-clr: hsla(0, 0%, 74%, 0.85);
@@ -87,7 +92,71 @@ body {
   --sidebar-ring: oklch(0.708 0 0);
 }
 
+.df-event, .df-month-event, .df-month-event-stacked, .df-event-timed {
+  min-height: 1.8rem;
+  align-content: center;
+}
+
+.df-content-slot:has(> .df-context-menu-item)>* {
+  padding: .5rem;
+}
+
 body.dark {
+  .df-view-switcher {
+    background-color: #fff;
+    padding: .2rem;
+  }
+
+  .df-view-switcher-btn {
+    color: #000;
+    line-height: normal;
+    font-weight: 500;
+    padding: .5rem 1rem;
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.836);
+      color: #fff;
+    }
+
+    &[data-active="true"] {
+      background: #000;
+      color: #fff;
+    }
+  }
+
+  --df-color-background: #000;
+
+  .df-month-date-number{
+    line-height: normal;
+    font-weight: 500;
+    font-size: 13px;
+  }
+
+  .df-all-day-label, .df-day-content-all-day-label, .df-time-label, .df-view-header-subtitle, .df-compact-header-date-button, .df-compact-header-label-cell, .df-week-all-day-weekday-name, .df-date-number, .df-week-all-day-date-number, .df-mini-calendar-header, .df-mini-calendar-day {
+    color: hsl(0, 0%, 61%);
+    line-height: normal;
+
+    &[data-today="true"] {
+      color: #000;
+      background-color: #fff;
+    }
+
+    &[data-selected="true"] {
+      color: #000;
+      background-color: var(--text-secondary);
+    }
+  }
+
+  .df-right-panel-empty {
+    color: var(--text-secondary);
+  }
+
+  .df-content-slot>* {
+    padding: .7rem;
+  }
+
+  --df-color-border: hsla(0, 0%, 74%, 0.30);
+  --df-color-primary: #fff;
   --accent-100: hsl(12, 100%, 66%);
   --accent-200: hsl(227, 100%, 45%);
   --accent-300: hsl(17, 83%, 56%);
@@ -103,13 +172,13 @@ body.dark {
   --border-clr: hsla(0, 0%, 74%, 0.85);
 }
 
-#search:not(:placeholder-shown) + label {
+#search:not(:placeholder-shown)+label {
   opacity: 0;
 }
 
 .bg-image {
   min-height: 420px;
-  background-image: linear-gradient(hsl(0 0 0 / .2)) , url(./assets/hope.jpg);
+  background-image: linear-gradient(hsl(0 0 0 / .2)), url(./assets/hope.jpg);
   background-size: cover;
   background-position: 50% 80%;
   background-repeat: no-repeat;
@@ -196,9 +265,11 @@ body.dark {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+
   html {
     @apply font-sans;
   }
@@ -222,6 +293,7 @@ body.dark {
     z-index: -10;
     border-radius: inherit;
     anchor-name: --bg-div;
+
     &.glow {
       --_offset: 0px;
       position: absolute;

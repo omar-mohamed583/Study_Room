@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useState, type ReactNode } from "react";
 import { apiFetch } from "~/api/api";
 import { ThemeContext } from "~/context/themeContext";
 import { useLocalStorage } from "~/hooks/useLocalStorage";
@@ -135,6 +135,14 @@ export default function ThemeContextProvider({
     timerStates.timeForLongBreak,
     timerStates.timeForShortBreak,
   ]);
+
+  useLayoutEffect(() => {
+    document.body.classList.add(theme);
+  }, []);
+
+  useEffect(() => {
+    document.body.classList.replace(theme === "dark" ? "light" : "dark", theme);
+  }, [theme]);
 
   return (
     <ThemeContext

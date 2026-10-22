@@ -38,15 +38,6 @@ export default function Header() {
 
   const [isPending, startTransition] = useTransition();
 
-  useLayoutEffect(() => {
-    document.body.classList.add(theme);
-    document.body.style.overflow = "auto";
-  }, []);
-
-  useEffect(() => {
-    document.body.classList.replace(theme === "dark" ? "light" : "dark", theme);
-  }, [theme]);
-
   const PERSONAL_ITEMS = useMemo(
     () => [
       {

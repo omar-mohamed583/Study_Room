@@ -37,7 +37,6 @@ export default function focusMode() {
 
   useLayoutEffect(() => {
     theme !== "dark" ? document.body.classList.add("dark") : "";
-    document.body.style.overflow = "auto";
   }, []);
 
   return (

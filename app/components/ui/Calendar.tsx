@@ -40,6 +40,12 @@ export default function Calendar({
   events: EventType[];
   initialDate: Date;
 }) {
+  if (!window.matchMedia("(pointer: fine)").matches)
+    return (
+      <div className="font-black text-lg fixed top-1/2 left-1/2 -translate-1/2 text-center text-balance">
+        Please Open This Page On Desktop For Better Experince
+      </div>
+    );
   const calendar = useCalendarApp({
     views: [createDayView(), createWeekView(), createMonthView()],
     plugins: [createDragPlugin(), createEventsPlugin()],
