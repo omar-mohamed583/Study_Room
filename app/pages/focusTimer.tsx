@@ -12,6 +12,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ensureSession } from "~/auth/session";
 import { redirect, useNavigate, type LinksFunction, type MetaFunction } from "react-router";
 import Button from "~/components/ui/Button";
+import Footer from "~/components/layout/Footer";
 
 const FocusTimer = lazy(() => import("~/components/ui/FocusTimer"));
 
@@ -70,9 +71,9 @@ export default function FocusTimerPage() {
       <Header />
       <main
         ref={container}
-        className="mx-auto flex w-full max-w-320 flex-col gap-6 px-4 pb-20 text-(--text-primary) sm:px-6"
+        className="mx-auto flex w-full max-w-350 flex-col gap-6 px-4 pb-20 text-(--text-primary) sm:px-6"
       >
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_26rem]">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_30rem]">
           <SessionStats
             sessions={sessions ?? []}
             isPending={isLoading}
@@ -107,7 +108,7 @@ export default function FocusTimerPage() {
         />
       </main>
       <Button
-        className="fixed inset-e-8 inset-be-6 bg-orange-400/15 border hover:bg-orange-400/25 transition-[border-color,translate,background-color,box-shadow] duration-300 border-orange-400/55 hover:border-orange-400 rounded-full text-orange-600 in-[.dark]:text-orange-400 p-3 px-4 backdrop-blur-xl hover:shadow-orange-400/30 shadow-xl hover:-translate-y-2"
+        className="fixed inset-e-4 inset-be-13 bg-orange-400/15 border hover:bg-orange-400/25 transition-[border-color,translate,background-color,box-shadow] duration-300 border-orange-400/55 hover:border-orange-400 rounded-full text-orange-600 in-[.dark]:text-orange-400 p-3 px-4 backdrop-blur-xl hover:shadow-orange-400/30 shadow-xl hover:-translate-y-2"
         onClick={() => {
           document.startViewTransition(() => {
             navigate("/focus-mode");
@@ -116,6 +117,7 @@ export default function FocusTimerPage() {
       >
         Focus Mode
       </Button>
+      <Footer />
     </>
   );
 }

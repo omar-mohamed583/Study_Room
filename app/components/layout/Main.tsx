@@ -28,6 +28,7 @@ import SubjectItemsSkeleton from "../skeleton/SubjectsSkeleton";
 import { ProgressBarSkeleton } from "../skeleton/ProgressBarsSkeleton";
 import ProgressBars from "../ui/ProgressBar";
 import { ensureSession } from "~/auth/session";
+import { lazy } from "react";
 
 export const links: LinksFunction = () => [
   {
@@ -57,6 +58,8 @@ export function isToday(value: unknown) {
     date.toDateString() === new Date().toDateString()
   );
 }
+
+const Footer = lazy(() => import("./Footer"));
 
 export default function DefaultMain() {
   // Gsap Setup
@@ -325,13 +328,13 @@ export default function DefaultMain() {
             alignContentBetween
           >
               <div className="px-3">
-                <h2 className="font-medium text-3xl text-white leading-[normal] text-center capitalize">
+                <h2 className="font-medium text-3xl text-white leading-[normal] text-center">
                   {now < 20 && now > 5
                     ? "Have A Good Day"
                     : "Welcome Night Owl"}
                   <br></br>
                   <Suspense fallback={"guest"}>
-                    {user?.username}!
+                    <span className="tracking-wider capitalize">{user?.username}!</span>
                   </Suspense>
                 </h2>
               </div>
@@ -543,22 +546,7 @@ export default function DefaultMain() {
         </section>
       </main>
 
-      <footer className="flex justify-between px-5 max-w-350 mt-20 mx-auto *:text-xs *:font-medium">
-        <p>
-          &copy;{new Date().getFullYear()} All Rights Reserved For Study Planner
-          Team
-        </p>
-        <p>
-          Developed By{" "}
-          <a
-            href="https://github.com/omar-mohamed583"
-            className="visited:text-sky-600 text-blue-500 underline underline-offset-1 decoration-wavy"
-            target="_blank"
-          >
-            Omar
-          </a>
-        </p>
-      </footer>
+      <Footer />
     </>
   );
 }

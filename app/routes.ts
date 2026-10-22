@@ -7,5 +7,6 @@ export default [
   route("/tasks/:id?", "./pages/tasks.tsx"),
   route("/subject/:id?", "./pages/subjects.tsx"),
   route("/focus-timer", "./pages/focusTimer.tsx"),
+  route("/focus-mode", "./pages/focusMode.tsx"),
   route("*", "./pages/404.tsx"),
 ] satisfies RouteConfig;

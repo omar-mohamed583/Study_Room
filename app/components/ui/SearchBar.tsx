@@ -117,7 +117,7 @@ export default function SearchBar() {
       <div
         ref={togglerRef}
         style={{ anchorName } as CSSProperties}
-        className={`font-['DM_Sans'] w-30 transition-colors ${open ? "bg-zinc-600/30" : "bg-transparent"} hover:bg-zinc-600/30 tracking-[0.020em] border duration-200 border-zinc-400/40 p-1.75 px-2.5 rounded-lg flex items-center *:cursor-default *:text-[13px] *:leading-[normal] gap-1`}
+        className={`font-['Outfit'] w-30 transition-colors ${open ? "bg-zinc-600/30" : "bg-transparent"} hover:bg-zinc-600/30 tracking-[0.020em] border duration-200 border-zinc-400/40 p-1.75 px-2.5 rounded-lg flex items-center *:cursor-default *:text-[13px] *:leading-[normal] gap-1`}
         onClick={() => setOpen((prev) => !prev)}
       >
         <span className="truncate w-[90%] font-medium select-none">
