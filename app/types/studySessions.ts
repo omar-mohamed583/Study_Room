@@ -1,3 +1,4 @@
+import type { Exam } from "./examType";
 import type { Subject } from "./subjectTypes";
 import type { Task } from "./taskType";
 
@@ -39,8 +40,11 @@ export interface StudySession {
   startedAt: number;
   endedAt: number;
   duration: number;
-  subject: Subject;
-  task: Task;
+  eventType?: "subject" | "exam" | "task";
+  eventName?: string;
+  subject?: RawRelation | null;
+  exam?: RawRelation | null;
+  task?: RawRelation | null;
 }
 
 export interface SessionStats {

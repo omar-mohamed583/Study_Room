@@ -108,7 +108,7 @@ export default function FocusTimerPage() {
         />
       </main>
       <Button
-        className="fixed inset-e-4 inset-be-13 bg-orange-400/15 border hover:bg-orange-400/25 transition-[border-color,translate,background-color,box-shadow] duration-300 border-orange-400/55 hover:border-orange-400 rounded-full text-orange-600 in-[.dark]:text-orange-400 p-3 px-4 backdrop-blur-xl hover:shadow-orange-400/30 shadow-xl hover:-translate-y-2"
+        className="fixed inset-e-4 inset-be-10 bg-orange-400/15 border hover:bg-orange-400/25 transition-[border-color,translate,background-color,box-shadow] duration-300 border-orange-400/55 hover:border-orange-400 rounded-full text-orange-600 in-[.dark]:text-orange-400 p-3 px-4 backdrop-blur-xl hover:shadow-orange-400/30 shadow-xl hover:-translate-y-2"
         onClick={() => {
           document.startViewTransition(() => {
             navigate("/focus-mode");

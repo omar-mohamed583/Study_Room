@@ -252,7 +252,7 @@ function EventSection({
   onSelect: (item: SearchItem) => void;
 }) {
   return (
-    <section className="grid gap-1">
+    <section className="font-['Outfit'] grid gap-1">
       <span className="text-[12px] text-(--text-secondary)">{label}</span>
 
       <ul className="grid gap-0.5">

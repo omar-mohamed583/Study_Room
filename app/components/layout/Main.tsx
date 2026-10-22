@@ -106,10 +106,6 @@ export default function DefaultMain() {
     { scope: container },
   );
 
-  useLayoutEffect(() => {
-    document.body.style.paddingBottom = "1.5em";
-  }, []);
-
   const btns = [
     {
       svg: (

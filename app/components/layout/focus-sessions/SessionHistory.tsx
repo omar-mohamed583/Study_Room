@@ -17,8 +17,8 @@ import { FILTER_OPTIONS, SESSION_TYPE_META } from "./SessionTypeMeta";
 const ROWS_PER_STEP = 10;
 const COLUMNS = [
   "Session Type",
-  "Subject",
-  "Task",
+  "Event",
+  "Event Type",
   "Started At",
   "Duration",
   "Ended At",
@@ -186,6 +186,7 @@ export default function SessionHistory({
 function SessionRow({ session }: { session: StudySession }) {
   const kind = normalizeSessionKind(session);
   const meta = kind ? SESSION_TYPE_META[kind] : undefined;
+  const event = getSessionEvent(session);
 
   return (
     <Suspense>
@@ -202,10 +203,10 @@ function SessionRow({ session }: { session: StudySession }) {
           </span>
         </td>
         <td className="px-4 py-3">
-          <Relation value={session?.subject?.name} />
+          <Relation value={event.name} />
         </td>
         <td className="px-4 py-3">
-          <Relation value={session?.task?.title} />
+          <Relation value={event.type} />
         </td>
         <td className="px-4 py-3 whitespace-nowrap text-(--text-secondary)">
           {session?.startedAt && formatDateTime(session?.startedAt)}
@@ -232,7 +233,22 @@ function SessionRow({ session }: { session: StudySession }) {
   );
 }
 
-// Subject and Task are optional relations: show a dash instead of breaking the row.
+function getSessionEvent(session: StudySession) {
+  const relations = [
+    ["task", session.task],
+    ["exam", session.exam],
+    ["subject", session.subject],
+  ] as const;
+  const relation = relations.find(([, value]) => value != null);
+  const relationName = relation?.[1]?.name ?? relation?.[1]?.title;
+
+  return {
+    name: session.eventName || relationName || null,
+    type: session.eventType || relation?.[0] || null,
+  };
+}
+
+// Event relations are optional; show a dash when no event was linked.
 function Relation({ value }: { value: string | null }) {
   if (!value) {
     return (

@@ -1,3 +1,4 @@
+import type { Exam } from "./examType";
 import type { Subject } from "./subjectTypes";
 import type { Task } from "./taskType";
 import type { UserType } from "./userType";
@@ -9,5 +10,6 @@ export interface StudySession {
   sessionType: "shortBreak" | "longBreak" | "focusTimer";
   user?: UserType;
   subject?: Subject;
+  exam?: Exam
   task?: Task;
 }
