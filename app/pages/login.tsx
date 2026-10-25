@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import {
   useNavigate,
-  useNavigation,
   type LinksFunction,
   type MetaFunction,
 } from "react-router";
@@ -30,7 +29,6 @@ export const meta: MetaFunction = () => [
 
 export default function Login() {
   const navigate = useNavigate();
-  const navigation = useNavigation();
 
   const actionObj = {
     login: "Welcome Back",
@@ -286,11 +284,9 @@ export default function Login() {
       </form>
 
       <LoadingComponent
-        loading={
-            !(loading ||
-            isLoading ||
-            navigation.state === "loading" ||
-            navigation.state === "submitting")
+        loadingState={
+            loading ||
+            isLoading
         }
       />
     </main>

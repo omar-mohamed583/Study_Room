@@ -984,7 +984,7 @@ export default function Calendar({
   if (calendarsLoading || createCalendarMutation.isPending)
     return (
       <LoadingComponent
-        loading={calendarsLoading || createCalendarMutation.isPending}
+        loadingState={calendarsLoading || createCalendarMutation.isPending}
       />
     );
 

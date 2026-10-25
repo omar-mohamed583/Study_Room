@@ -345,7 +345,7 @@ export default function ForgetPassword() {
         />
       </form>
 
-      <LoadingComponent loading={!isLoading} />
+      <LoadingComponent loadingState={isLoading} />
     </main>
   );
 }

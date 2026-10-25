@@ -1,11 +1,21 @@
+import { useNavigation } from "react-router";
 import { ThinkingOrb } from "thinking-orbs";
 
-export default function LoadingComponent({ loading }: { loading: any}) {
+export default function LoadingComponent({
+  loadingState,
+}: {
+  loadingState: any;
+}) {
+  const { state } = useNavigation();
+
+  const loading =
+    state === "loading" || state === "submitting" || !!loadingState;
+
   return (
     <div
-      className={`loading h-screen w-screen fixed top-0 left-0 in-[.dark]:bg-black/80 bg-zinc-300/80 place-content-center place-items-center z-9999999 backdrop-blur-2xl ${!loading ? "visible opacity-100" : "invisible opacity-0"} duration-300 transition-[opacity,visibility]`}
+      className={`loading h-screen w-screen fixed top-0 left-0 in-[.dark]:bg-black/80 bg-zinc-300/80 place-content-center place-items-center z-9999999 backdrop-blur-2xl ${loading ? "visible opacity-100" : "invisible opacity-0"} duration-300 transition-[opacity,visibility]`}
     >
-      <div className="flex flex-col items-center gap-2 tracking-wider text-sm">
+      <div className="flex flex-col items-center gap-2 tracking-wide text-sm text-zinc-200">
         <ThinkingOrb
           state="solving"
           size={64}

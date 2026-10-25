@@ -37,7 +37,7 @@ export default function CalendarPage() {
   } = useStudyData();
 
   if (!tasks || !exams) {
-    return <LoadingComponent loading={tasksLoading || examsLoading} />;
+    return <LoadingComponent loadingState={tasksLoading || examsLoading} />;
   }
 
   const events: EventType[] = [
