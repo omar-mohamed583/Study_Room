@@ -76,7 +76,7 @@ function examToDeadline(exam: Exam, now: Date): Deadline | null {
     key: `exam-${exam.id}`,
     kind: "exam",
     title: exam.title,
-    subject: exam.subject?.name,
+    subject: exam.subject?.[0]?.name,
     date,
     href: `/exams/${exam.id}`,
     topicsCount: exam.exam_topics?.length,

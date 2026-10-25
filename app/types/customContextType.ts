@@ -30,7 +30,7 @@ export type Toast = {
   title: string;
   description: string;
   actionBtnText?: string;
-  icon?: string;
+  icon?: "fail" | "success" | "alert";
   onAction?: () => any | (() => null);
   fuseColor?: string;
 };

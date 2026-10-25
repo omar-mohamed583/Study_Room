@@ -14,7 +14,11 @@ export default function Button({
       className={twMerge(
         `p-2 rounded-xl cursor-pointer transition-colors duration-300 ${className} leading-[normal]`,
       )}
-      onClick={navigation?.to ? () => navigate(navigation.to) : () => ""}
+      onClick={
+        navigation?.to
+          ? () => document.startViewTransition(() => navigate(navigation.to))
+          : () => ""
+      }
       {...props}
     >
       {children}

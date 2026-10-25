@@ -297,7 +297,7 @@ export default function DefaultMain() {
                 <TaskItem
                   key={task.documentId}
                   id={task.documentId}
-                  subject={task.subject.name}
+                  subject={task?.subject?.name}
                   title={task.title}
                 />
               ))}

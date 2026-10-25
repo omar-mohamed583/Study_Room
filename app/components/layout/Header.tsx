@@ -372,14 +372,14 @@ export default function Header() {
         />
       </h1>
 
-      <div className="flex gap-3 items-center content-center *:p-3 *:px-5 p-1 px-2 *:rounded-[15px] *:transition-colors duration-300 *:hover:bg-gray-400/25 in-[.dark]:*:hover:bg-zinc-800/80 max-[870px]:hidden">
+      <div className="flex gap-3 items-center content-center *:p-3 *:px-5 p-1 px-2 *:rounded-[15px] *:transition-colors duration-300 *:hover:bg-gray-400/25 in-[.dark]:*:hover:bg-zinc-800/80 max-[950px]:hidden">
         <Link to="/dashboard">Dashboard</Link>
         <Link to="/focus-timer">Focus Timer</Link>
       </div>
 
       <div className="flex gap-3 p-2 *:not-[&>div:first-child]:bg-zinc-50 *:not-[&>div:first-child]:in-[.dark]:bg-zinc-800 *:not-[&>div:first-child]:backdrop-blur-3xl *:not-[&>div:first-child]:rounded-[15px] [&_button,&_a]:cursor-pointer [&_button,&_a]:hover:bg-gray-400/25 in-[.dark]:[&_button,&_a]:hover:bg-zinc-700/75 [&_button,&_a]:transition-colors duration-300 z-1000">
         <div
-          className={`menu-burger max-[870px]:flex-col max-[870px]:absolute [position-anchor:--menu] top-[calc(anchor(bottom)+10px)] rounded-xl bg-(--body-gray) right-[anchor(right)] translate-x-12 min-[871px]:translate-x-0 flex gap-3 *:bg-zinc-50 *:in-[.dark]:bg-zinc-800 *:backdrop-blur-3xl *:rounded-[15px] [&_button]:cursor-pointer [&_button]:hover:bg-gray-400/25 in-[.dark]:[&_button]:hover:bg-zinc-700/75 [&_button]:transition-colors duration-200 z-1000 max-[870px]:p-4 max-[870px]:border border-zinc-400/35 in-[.dark]:border-zinc-400/20 transition-[opacity,scale] ${openMenuBurger ? "pointer-events-auto opacity-100 scale-100" : "pointer-events-none opacity-0 scale-95"} min-[870px]:opacity-100 min-[870px]:scale-100 min-[870px]:pointer-events-auto origin-top-right`}
+          className={`menu-burger max-[950px]:flex-col max-[950px]:absolute [position-anchor:--menu] top-[calc(anchor(bottom)+10px)] rounded-xl bg-(--body-gray) right-[anchor(right)] translate-x-12 min-[871px]:translate-x-0 flex gap-3 *:bg-zinc-50 *:in-[.dark]:bg-zinc-800 *:backdrop-blur-3xl *:rounded-[15px] [&_button]:cursor-pointer [&_button]:hover:bg-gray-400/25 in-[.dark]:[&_button]:hover:bg-zinc-700/75 [&_button]:transition-colors duration-200 z-1000 max-[950px]:p-4 max-[950px]:border border-zinc-400/35 in-[.dark]:border-zinc-400/20 transition-[opacity,scale] ${openMenuBurger ? "pointer-events-auto opacity-100 scale-100" : "pointer-events-none opacity-0 scale-95"} min-[950px]:opacity-100 min-[950px]:scale-100 min-[950px]:pointer-events-auto origin-top-right`}
           ref={menuBurgerRef}
         >
           <div className="isolate *:rounded-full rounded-full relative z-1000">
@@ -418,7 +418,7 @@ export default function Header() {
 
           <Link
             to="/dashboard"
-            className="p-2 text-center max-[870px]:flex hidden items-center content-center gap-1 justify-center"
+            className="p-2 text-center max-[950px]:flex hidden items-center content-center gap-1 justify-center"
           >
             Dashboard
             <svg
@@ -439,7 +439,7 @@ export default function Header() {
           </Link>
           <Link
             to="/focus-timer"
-            className="p-2 text-center max-[870px]:flex hidden items-center content-center gap-1 justify-center"
+            className="p-2 text-center max-[950px]:flex hidden items-center content-center gap-1 justify-center"
           >
             Focus Timer
             <svg
@@ -460,14 +460,14 @@ export default function Header() {
           </Link>
 
           <button
-            className="grid max-[870px]:[grid-template-areas:'nn_stack'] [grid-template-areas:'stack'] *:not-[&span]:[grid-area:stack] items-center content-center in-[.dark]:[&>svg:last-of-type]:opacity-100 in-[.dark]:[&>svg:first-of-type]:opacity-0 [&>svg:last-of-type]:opacity-0 max-[870px]:w-full max-[870px]:h-auto max-[870px]:p-2 max-[870px]:gap-2 w-10 h-10 place-content-center max-[870px]:ms-auto *:transition-none"
+            className="grid max-[950px]:[grid-template-areas:'nn_stack'] [grid-template-areas:'stack'] *:not-[&span]:[grid-area:stack] items-center content-center in-[.dark]:[&>svg:last-of-type]:opacity-100 in-[.dark]:[&>svg:first-of-type]:opacity-0 [&>svg:last-of-type]:opacity-0 max-[950px]:w-full max-[950px]:h-auto max-[950px]:p-2 max-[950px]:gap-2 w-10 h-10 place-content-center max-[950px]:ms-auto *:transition-none"
             onClick={() => {
               startTransition(() => {
                 setTheme(theme === "light" ? "dark" : "light");
               });
             }}
           >
-            <span className="font-medium max-[870px]:inline-block hidden">
+            <span className="font-medium max-[950px]:inline-block hidden">
               Change Theme
             </span>
             {/* Moon */}
@@ -513,7 +513,7 @@ export default function Header() {
 
         <button
           aria-label="Show/hide Menu"
-          className="grid w-10 h-10 min-[870px]:hidden place-content-center [anchor-name:--menu] menu-burger-toggler"
+          className="grid w-10 h-10 min-[950px]:hidden place-content-center [anchor-name:--menu] menu-burger-toggler"
           onClick={() => setOpenMenuBurger((prev) => !prev)}
         >
           <svg

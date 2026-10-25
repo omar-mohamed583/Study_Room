@@ -93,17 +93,23 @@ body {
 }
 
 .df-event, .df-month-event, .df-month-event-stacked, .df-event-timed {
-  min-height: 1.8rem;
+  min-height: fit-content;
   align-content: center;
 }
 
+.df-event-timed-content {
+  z-index: 100;
+  position: relative;
+}
+
 .df-content-slot:has(> .df-context-menu-item)>* {
-  padding: .5rem;
+  padding: .4rem;
+  font-weight: 500;
 }
 
 body.dark {
   .df-view-switcher {
-    background-color: #fff;
+    background-color: #d6d1d1;
     padding: .2rem;
   }
 
@@ -114,19 +120,19 @@ body.dark {
     padding: .5rem 1rem;
 
     &:hover {
-      background-color: rgba(0, 0, 0, 0.836);
+      background-color: #000;
       color: #fff;
     }
 
     &[data-active="true"] {
-      background: #000;
+      background: var(--accent-200);
       color: #fff;
     }
   }
 
   --df-color-background: #000;
 
-  .df-month-date-number{
+  .df-month-date-number {
     line-height: normal;
     font-weight: 500;
     font-size: 13px;

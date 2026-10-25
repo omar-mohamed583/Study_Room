@@ -101,7 +101,7 @@ export default function Stepper({
         )}
 
         <Button
-          className="bg-(--accent-100) hover:brightness-75 transition-[filter] duration-300 ms-auto flex items-center content-center gap-2"
+          className="bg-zinc-500/5 border hover:brightness-350 transition-[filter] duration-300 ms-auto flex items-center content-center gap-2"
           type={"button"}
           disabled={disabled}
           onClick={

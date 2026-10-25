@@ -30,11 +30,11 @@ export default function NotificationModal() {
           className=""
           inline
           dismissible
-          icon={getIcon(toast.icon || "")}
+          icon={getIcon(toast.icon)}
           description={toast.description}
           actionLabel={toast.actionBtnText || ""}
           onAction={toast.onAction || (() => null)}
-          background={theme === "dark" ? "#27272a" : "hsl(240 4% 90% / 1)"}
+          background={theme === "dark" ? "#27272acc" : "hsl(240 4% 90% / 0.5)"}
           color={theme === "dark" ? "#f5f5f5" : "#000"}
           fuseColor={toast?.fuseColor?.trim() ?? "#f5a524"}
           width={356}

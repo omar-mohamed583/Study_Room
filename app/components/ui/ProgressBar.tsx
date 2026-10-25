@@ -32,7 +32,7 @@ function getStatics(subj: Subject, tasks: Task[]) {
     : 0;
 
   for (const task of tasks) {
-    if (task.subject.name === subj.name) {
+    if (task?.subject?.name === subj.name) {
       subjTasks.total++;
 
       if (task.completed) subjTasks.completed++;
@@ -68,7 +68,7 @@ export function ProgressBar({
           id={labelId}
           className="min-w-0 text-(--text-primary) truncate font-bold capitalize text-[15px]"
         >
-          {subj.name}
+          {subj?.name}
         </span>
         <span className="shrink-0 tabular-nums text-(--text-secondary)">
           {text}%

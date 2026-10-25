@@ -1,15 +1,12 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useLayoutEffect, useState, type ReactNode } from "react";
-import { apiFetch } from "~/api/api";
 import { ThemeContext } from "~/context/themeContext";
 import { useLocalStorage } from "~/hooks/useLocalStorage";
 import type CustomContextType from "~/types/customContextType";
 import type { TimerStates, Toast } from "~/types/customContextType";
-import { useAuth } from "./authProvider";
 
 type Theme = "light" | "dark";
 
-export const getIcon = (name: string) => {
+export const getIcon = (name: "fail" | "success" | "alert" = "alert") => {
   switch (name) {
     case "fail":
       return (

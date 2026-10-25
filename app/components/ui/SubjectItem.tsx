@@ -10,18 +10,22 @@ export default function SubjectItems({
   subjects: Subject[];
   tasks: Task[];
 }) {
+  console.table({ from: "Subject Item", subjects, tasks})
+
+  if ((subjects && !subjects?.length) || (tasks && !tasks.length))
+    return (
+      <EmptyState
+        to="/subject/new"
+        emptyStateTitle="Subjects"
+        icon="subject"
+      />
+    );
+
   const visibleItems = subjects?.length > 5 ? subjects.slice(0, 5) : subjects;
+
 
   return (
     <>
-      {subjects && !subjects?.length && (
-        <EmptyState
-          to="/subject/new"
-          emptyStateTitle="Subjects"
-          icon="subject"
-        />
-      )}
-
       {visibleItems?.length && tasks?.length && (
         <table className="w-full min-w-max">
           <thead>
@@ -42,7 +46,7 @@ export default function SubjectItems({
               };
 
               for (const task of tasks) {
-                if (task.subject.name === subject.name) {
+                if (task?.subject?.name === subject.name) {
                   subjectTasks.totalTasks++;
 
                   if (task.completed) subjectTasks.completedTasks++;
@@ -55,7 +59,9 @@ export default function SubjectItems({
                   key={subject.documentId}
                 >
                   <td className="grid p-1">
-                    <h3 className="font-medium text-[18px] capitalize">{subject.name}</h3>
+                    <h3 className="font-medium text-[18px] capitalize">
+                      {subject.name}
+                    </h3>
                     <span className="[color:var(--text-secondary)] [font-size:11px]">
                       Created at:{" "}
                       {new Date(subject.createdAt)
@@ -79,9 +85,7 @@ export default function SubjectItems({
                     ).toFixed(0)}
                     %
                   </td>
-                  <td className="text-center font-medium">
-                    {0}h
-                  </td>
+                  <td className="text-center font-medium">{0}h</td>
                   <td>
                     <Link to={`/subject/${subject?.documentId}`}>
                       <svg

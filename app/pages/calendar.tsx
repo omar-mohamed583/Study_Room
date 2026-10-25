@@ -1,56 +1,95 @@
+import { redirect, type LinksFunction, type MetaFunction } from "react-router";
+import { ensureSession } from "~/auth/session";
 import Button from "~/components/ui/Button";
 import Calendar, {
-  type CalendarType,
   type EventType,
 } from "~/components/ui/Calendar";
 import LoadingComponent from "~/components/ui/LoadingComponent";
 import useStudyData from "~/context/studyDataContext";
 
-export default function CalendarPage() {
-  const defaultCalendarId = "study-planner";
-  const calendars: CalendarType[] = [
-    {
-      id: defaultCalendarId,
-      name: "Default Calendar",
-      colors: {
-        eventColor: "#ff7452",
-        eventSelectedColor: "#e85d3d",
-        lineColor: "#ff7452",
-        textColor: "#ffffff",
-      },
-    },
-  ];
+export const links: LinksFunction = () => [
+  {
+    rel: "icon",
+    as: "image",
+    href: "../assets/logo.svg",
+  },
+];
 
+export const meta: MetaFunction = () => [
+  {
+    title: "Study Planner - Calendar",
+  },
+  {
+    name: "",
+    content: "",
+  },
+];
+
+export default function CalendarPage() {
   const {
-    tasks: { data: tasks },
-    exams: { data: exams },
+    calendars: { data: calendars, isLoading: calendarsLoading },
   } = useStudyData();
 
-  if (!tasks || !exams) return (<LoadingComponent loading={!(tasks || exams)} />);
+  const {
+    tasks: { data: tasks, isLoading: tasksLoading },
+    exams: { data: exams, isLoading: examsLoading },
+    subjects: { data: subjects, isLoading: subjectsLoading },
+  } = useStudyData();
+
+  if (!tasks || !exams) {
+    return <LoadingComponent loading={tasksLoading || examsLoading} />;
+  }
 
   const events: EventType[] = [
-    ...tasks.filter((task) => task.dueDate).map((task) => {
-      const end = new Date(task.dueDate);
-      const durationMs = Math.max(1, task.estimatedDuration || 60) * 60_000;
-      return {
-        id: `task-${task.documentId}`,
-        title: task.title,
-        start: new Date(end.getTime() - durationMs),
-        end,
-        calendarId: defaultCalendarId,
-      };
-    }),
-    ...exams.filter((exam) => exam.examDate).map((exam) => {
-      const start = new Date(exam.examDate);
-      const end = new Date(start.getTime() + 60 * 60_000);
-      return {
-        id: `exam-${exam.documentId}`,
-        title: exam.title,
-        start,
-        end,
-        calendarId: defaultCalendarId,
-      };
-    }),
+    ...tasks
+      .filter((task) => task.dueDate)
+      .map((task) => {
+        const end = new Date(task.dueDate);
+        const durationMs = Math.max(1, task.estimatedDuration || 60) * 60_000;
+        const allDay = task.calendarAllDay === true;
+        const allDayDate = new Date(
+          end.getFullYear(),
+          end.getMonth(),
+          end.getDate(),
+        );
+        return {
+          id: `task-${task.documentId}`,
+          title: task.title,
+          start: allDay ? allDayDate : new Date(end.getTime() - durationMs),
+          end: allDay ? allDayDate : end,
+          allDay,
+          calendarId:
+            task.calendars[0]?.documentId ?? task.calendars[0]?.id,
+          description: task.description,
+          meta: { entityType: "task" as const, documentId: task.documentId },
+        };
+      }),
+    ...exams
+      .filter((exam) => exam.examDate)
+      .map((exam) => {
+        const start = new Date(exam.examDate);
+        const allDay = exam.calendarAllDay === true;
+        const allDayDate = new Date(
+          start.getFullYear(),
+          start.getMonth(),
+          start.getDate(),
+        );
+        const eventStart = allDay ? allDayDate : start;
+        const end = allDay
+          ? allDayDate
+          : new Date(start.getTime() + 60 * 60_000);
+        return {
+          id: `exam-${exam.documentId}`,
+          title: exam.title,
+          start: eventStart,
+          end,
+          allDay,
+          calendarId:
+            exam.calendars[0]?.documentId ?? exam.calendars[0]?.id,
+          description: exam.description,
+          meta: { entityType: "exam" as const, documentId: exam.documentId },
+        };
+      }),
   ];
 
   return (
@@ -77,11 +116,23 @@ export default function CalendarPage() {
       </Button>
       <main>
         <Calendar
-          calendars={calendars}
+          calendars={calendars ?? []}
+          calendarsLoading={calendarsLoading}
           initialDate={new Date()}
           events={events}
+          subjects={subjects ?? []}
+          subjectsLoading={subjectsLoading}
+          tasks={tasks}
+          exams={exams}
         />
       </main>
     </>
   );
+}
+
+export const clientMiddleware = [authMiddleware];
+
+async function authMiddleware() {
+  const accessToken = await ensureSession();
+  if (!accessToken) throw redirect("/login");
 }

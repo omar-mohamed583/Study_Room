@@ -291,7 +291,7 @@ export default function SwipeToast({
 
   return (
     <div
-      className={`swipe-toast${className ? ` ${className}` : ""}`}
+      className={`swipe-toast ${className ? ` ${className}` : ""}`}
       data-phase={phase}
       data-inline={inline ? "true" : "false"}
       data-fuse={duration > 0 ? fuse : "none"}
@@ -308,11 +308,11 @@ export default function SwipeToast({
         "--st-gap": "10px",
       }}
     >
-      <div className="swipe-toast__gate">
+      <div className="swipe-toast__gate ">
         <div className="swipe-toast__lift">
           <motion.div
             ref={cardRef}
-            className="swipe-toast__card"
+            className="swipe-toast__card border border-zinc-400/30 backdrop-blur-[3px]"
             role="status"
             aria-live="polite"
             aria-atomic="true"

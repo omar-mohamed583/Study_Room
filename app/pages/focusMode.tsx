@@ -1,8 +1,8 @@
-import { useEffect, useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 import FocusTimer from "~/components/ui/FocusTimer";
 import useTheme from "~/context/themeContext";
-import video from "../assets/nature-vid.mp4";
-import image from "../assets/nature-image.webp";
+import video from "../assets/nature.mp4";
+import image from "../assets/nature.webp";
 import { createPortal } from "react-dom";
 import type { LinksFunction, MetaFunction } from "react-router";
 import logo from "../assets/logo.svg";
@@ -29,7 +29,7 @@ export const meta: MetaFunction = () => [
 export default function focusMode() {
   if (!window.matchMedia("(pointer: fine)").matches)
     return (
-      <div className="font-black text-lg fixed top-1/2 left-1/2 -translate-1/2 text-center text-balance">
+      <div className="font-black text-lg fixed top-[40%] left-1/2 -translate-1/2 text-center text-balance">
         Please Open This Page On Desktop For Better Experince
       </div>
     );
@@ -61,7 +61,7 @@ export default function focusMode() {
         </svg>
         Back
       </Button>
-      <main className="mx-auto flex max-w-7xl md:p-7 p-4 fixed inset-s-1/2 inset-bs-1/2 -translate-1/2 rounded-4xl border-2 bg-black/15 backdrop-blur-[2px] md:px-12">
+      <main className="mx-auto flex max-w-7xl md:p-7 p-4 fixed inset-s-1/2 inset-bs-1/2 -translate-1/2 rounded-4xl border-2 bg-black/5 backdrop-blur-[3px] md:px-12">
         <FocusTimer size="sm" />
       </main>
 
@@ -82,6 +82,8 @@ function VideoComponent() {
       <img
         src={image}
         alt="nature image"
+        style={{filter: "blur(10px)", transition: "opacity 150ms ease"}}
+        loading="eager"
         ref={imageRef}
       />
       <video
