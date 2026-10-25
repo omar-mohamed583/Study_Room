@@ -33,6 +33,10 @@ import CalendarEventDetailsDialog, {
 import type { Task } from "~/types/taskType";
 import type { Exam } from "~/types/examType";
 import type { Subject } from "~/types/subjectTypes";
+import {
+  dateTimeInputToDate,
+  dateToDateTimeInput,
+} from "~/components/utils/dateTime";
 
 export type CalendarType = {
   id: string;
@@ -122,22 +126,15 @@ function getEventIdentity(event: Pick<DayFlowEvent, "id" | "meta">) {
   return undefined;
 }
 
-function toDateTimeInput(value: DayFlowEvent["start"]) {
-  const date = temporalToDate(value);
-  return new Date(date.getTime() - date.getTimezoneOffset() * 60_000)
-    .toISOString()
-    .slice(0, 16);
-}
-
 function makeEventFromForm(
   event: DayFlowEvent,
   values: CalendarEventFormValues,
 ) {
-  const start = new Date(values.startDateTime);
+  const start = dateTimeInputToDate(values.startDateTime);
   const end =
     values.entityType === "exam"
       ? new Date(start.getTime() + 60 * 60_000)
-      : new Date(values.endDateTime);
+      : dateTimeInputToDate(values.endDateTime);
   const common = {
     id: event.id,
     title: values.title.trim(),
@@ -486,6 +483,27 @@ export default function Calendar({
     );
   }
 
+  function removeEventFromCalendar(eventId: string, identity: EventIdentity) {
+    eventIdentities.current.delete(eventId);
+    client.setQueryData<{ data?: Array<{ documentId?: string }> }>(
+      [`/${identity.entityType}s?populate=*`, null],
+      (current) =>
+        current?.data
+          ? {
+              ...current,
+              data: current.data.filter(
+                (record) => record.documentId !== identity.documentId,
+              ),
+            }
+          : current,
+    );
+    calendarApp.current?.applyEventsChanges(
+      { delete: [eventId] },
+      false,
+      "remote",
+    );
+  }
+
   function getCalendarDocumentId(calendarId?: string) {
     if (!calendarId) return undefined;
     return calendars.find(
@@ -506,8 +524,8 @@ export default function Calendar({
       title: event.title,
       subjectDocumentIds: [],
       calendarId: event.calendarId ?? "",
-      startDateTime: toDateTimeInput(event.start),
-      endDateTime: toDateTimeInput(event.end),
+      startDateTime: dateToDateTimeInput(temporalToDate(event.start)),
+      endDateTime: dateToDateTimeInput(temporalToDate(event.end)),
       description: event.description ?? "",
       allDay: Boolean(event.allDay),
       priority: "medium",
@@ -524,8 +542,8 @@ export default function Calendar({
       entityType: identity.entityType,
       title: event.title,
       calendarId: event.calendarId ?? "",
-      startDateTime: toDateTimeInput(event.start),
-      endDateTime: toDateTimeInput(event.end),
+      startDateTime: dateToDateTimeInput(temporalToDate(event.start)),
+      endDateTime: dateToDateTimeInput(temporalToDate(event.end)),
       description: event.description ?? "",
       allDay: Boolean(event.allDay),
     } as const;
@@ -596,7 +614,7 @@ export default function Calendar({
       warnedConferenceEvents.current.add(event.id);
       showToast(
         "Meeting details are not stored",
-        "Task and Exam records do not have a conference field, so this Dayflow value will not persist to Strapi.",
+        "Task and Exam records do not have a conference field, so this Dayflow value will not be Saved.",
         "alert",
       );
     }
@@ -701,7 +719,7 @@ export default function Calendar({
         action: "delete",
         identity,
       });
-      eventIdentities.current.delete(eventId);
+      removeEventFromCalendar(eventId, identity);
       await refreshEventData(identity.entityType);
     } catch {
       await refreshEventData(identity.entityType);
@@ -729,7 +747,7 @@ export default function Calendar({
     setDetailsDialogError(null);
     try {
       await mutateCalendarEvents.mutateAsync({ action: "delete", identity });
-      eventIdentities.current.delete(detailsDialog.event.id);
+      removeEventFromCalendar(detailsDialog.event.id, identity);
       setDetailsDialog(null);
       await refreshEventData(identity.entityType);
     } catch (error) {
@@ -765,8 +783,8 @@ export default function Calendar({
     submitEvent.preventDefault();
     if (!detailsDialog || detailsDialogSaving) return;
     const values = detailsDialog.values;
-    const start = new Date(values.startDateTime);
-    const end = new Date(values.endDateTime);
+    const start = dateTimeInputToDate(values.startDateTime);
+    const end = dateTimeInputToDate(values.endDateTime);
     if (
       !values.title.trim() ||
       Number.isNaN(start.getTime()) ||

@@ -5,6 +5,7 @@ import Calendar, {
   type EventType,
 } from "~/components/ui/Calendar";
 import LoadingComponent from "~/components/ui/LoadingComponent";
+import NotificationModal from "~/components/ui/NotificationModal";
 import useStudyData from "~/context/studyDataContext";
 
 export const links: LinksFunction = () => [
@@ -126,6 +127,7 @@ export default function CalendarPage() {
           exams={exams}
         />
       </main>
+      <NotificationModal />
     </>
   );
 }

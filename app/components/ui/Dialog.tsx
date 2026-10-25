@@ -69,8 +69,8 @@ export default function DialogComp({
                     notifyExams: user?.notifyExams,
                     notifyTasks: user?.notifyTasks,
                     sessionMinutes: +user?.sessionMinutes,
-                    shortBreakMinutes: user?.shortBreakMinutes ?? 5,
-                    longBreakMinutes: user?.longBreakMinutes ?? 15,
+                    shortBreakMinutes: user?.shortBreakMinutes,
+                    longBreakMinutes: user?.longBreakMinutes,
                     weeklyGoalHours: +user?.weeklyGoalHours,
                   }}
                 />

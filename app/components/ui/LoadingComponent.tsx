@@ -15,7 +15,7 @@ export default function LoadingComponent({
     <div
       className={`loading h-screen w-screen fixed top-0 left-0 in-[.dark]:bg-black/80 bg-zinc-300/80 place-content-center place-items-center z-9999999 backdrop-blur-2xl ${loading ? "visible opacity-100" : "invisible opacity-0"} duration-300 transition-[opacity,visibility]`}
     >
-      <div className="flex flex-col items-center gap-2 tracking-wide text-sm text-zinc-200">
+      <div className="flex flex-col items-center gap-2 tracking-wide text-sm text-(--text-primary)">
         <ThinkingOrb
           state="solving"
           size={64}

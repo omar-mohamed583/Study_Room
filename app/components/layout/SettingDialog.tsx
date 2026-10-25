@@ -189,6 +189,9 @@ export default function SettingsContent({
   isLoading?: boolean;
   onSave: (values: Preferences) => Promise<void> | void;
 }) {
+  if (!Object.values(preferences ?? {}).length)
+    return <SettingsContentSkeleton />;
+
   const { theme, setTheme, timerStates, setTimerStates } = useTheme();
   const DEFAULT_PREFERENCES: Preferences = {
     weeklyGoalHours: preferences?.weeklyGoalHours ?? 10,
@@ -420,7 +423,7 @@ export default function SettingsContent({
                       set("weeklyGoalHours", Number(e.target.value))
                     }
                     aria-describedby={`${uid}-goal-hint`}
-                    className="mt-3 w-full accent-(--accent-100)"
+                    className="mt-3 w-full accent-(--accent-100) "
                   />
                   <p
                     id={`${uid}-goal-hint`}
@@ -507,11 +510,16 @@ export default function SettingsContent({
                   <legend className="text-[16px] font-bold mb-3 text-(--text-secondary)">
                     Break durations
                   </legend>
-                  {([
-                    ["shortBreakMinutes", "Short break", "short-break"],
-                    ["longBreakMinutes", "Long break", "long-break"],
-                  ] as const).map(([key, label, id]) => (
-                    <div key={key} className="grid gap-2">
+                  {(
+                    [
+                      ["shortBreakMinutes", "Short break", "short-break"],
+                      ["longBreakMinutes", "Long break", "long-break"],
+                    ] as const
+                  ).map(([key, label, id]) => (
+                    <div
+                      key={key}
+                      className="grid gap-2"
+                    >
                       <label
                         htmlFor={`${uid}-${id}`}
                         className="text-sm font-medium"

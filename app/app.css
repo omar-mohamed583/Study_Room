@@ -2,6 +2,7 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
+@import "../styles/untitledui.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -107,6 +108,16 @@ body {
   font-weight: 500;
 }
 
+.df-calendar-wrapper .df-week-all-day-date-number.df-date-number[data-today="true"] {
+  display: grid;
+  line-height: normal;
+  place-content: center;
+}
+
+[class="origin-(--trigger-anchor-point)will-change-transform"][data-trigger="DatePicker"] {
+  will-change: auto;
+}
+
 body.dark {
   .df-view-switcher {
     background-color: #d6d1d1;
@@ -141,6 +152,7 @@ body.dark {
   .df-all-day-label, .df-day-content-all-day-label, .df-time-label, .df-view-header-subtitle, .df-compact-header-date-button, .df-compact-header-label-cell, .df-week-all-day-weekday-name, .df-date-number, .df-week-all-day-date-number, .df-mini-calendar-header, .df-mini-calendar-day {
     color: hsl(0, 0%, 61%);
     line-height: normal;
+    align-content: center;
 
     &[data-today="true"] {
       color: #000;

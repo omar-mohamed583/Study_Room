@@ -1,6 +1,14 @@
 import { Dialog } from "@base-ui/react/dialog";
 import type { FormEvent } from "react";
 import type { Subject } from "~/types/subjectTypes";
+import { DatePicker } from "../../../components/application/date-picker/date-picker";
+import {
+  addMinutesToDateTimeInput,
+  calendarDateTimeToDateTimeInput,
+  dateTimeInputAtMidnight,
+  dateTimeInputToCalendarDateTime,
+  dateTimeInputToDate,
+} from "~/components/utils/dateTime";
 
 export type CalendarEventFormValues = {
   entityType: "task" | "exam";
@@ -42,25 +50,9 @@ const FIELD_CLASS =
   "mt-2 h-11 w-full rounded-lg border border-zinc-400/40 bg-transparent px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-(--accent-100) disabled:cursor-not-allowed disabled:opacity-60";
 
 function sameItems(left: string[], right: string[]) {
-  return left.length === right.length && left.every((item) => right.includes(item));
-}
-
-function dateTimeAfterOneHour(value: string) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  date.setHours(date.getHours() + 1);
-  return new Date(date.getTime() - date.getTimezoneOffset() * 60_000)
-    .toISOString()
-    .slice(0, 16);
-}
-
-function localMidnight(value: string) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  date.setHours(0, 0, 0, 0);
-  return new Date(date.getTime() - date.getTimezoneOffset() * 60_000)
-    .toISOString()
-    .slice(0, 16);
+  return (
+    left.length === right.length && left.every((item) => right.includes(item))
+  );
 }
 
 export default function CalendarEventDetailsDialog({
@@ -95,8 +87,9 @@ export default function CalendarEventDetailsDialog({
     values.allDay !== initialValues.allDay ||
     values.priority !== initialValues.priority ||
     values.completed !== initialValues.completed;
-  const start = new Date(values.startDateTime);
-  const end = new Date(values.endDateTime);
+  const start = dateTimeInputToDate(values.startDateTime);
+  const end = dateTimeInputToDate(values.endDateTime);
+  const endPrecedesStart = start > end;
   const subjectsValid =
     (values.entityType === "exam" || values.subjectDocumentIds.length > 0) &&
     values.subjectDocumentIds.every((documentId) =>
@@ -104,7 +97,9 @@ export default function CalendarEventDetailsDialog({
     );
   const calendarValid =
     !values.calendarId ||
-    calendars.some((calendar) => (calendar.documentId ?? calendar.id) === values.calendarId);
+    calendars.some(
+      (calendar) => (calendar.documentId ?? calendar.id) === values.calendarId,
+    );
   const isValid =
     values.title.trim().length > 0 &&
     !Number.isNaN(start.getTime()) &&
@@ -113,16 +108,35 @@ export default function CalendarEventDetailsDialog({
     subjectsValid &&
     calendarValid;
 
+  function updateStartDateTime(startDateTime: string) {
+    onChange({
+      ...values,
+      startDateTime,
+      ...(values.entityType === "exam"
+        ? { endDateTime: addMinutesToDateTimeInput(startDateTime, 60) }
+        : values.allDay
+          ? { endDateTime: startDateTime }
+          : {}),
+    });
+  }
+
   return (
     <Dialog.Root
       open={open}
-      onOpenChange={(nextOpen) => {
-        if (!nextOpen && !isSaving) onCancel();
+      disablePointerDismissal
+      onOpenChange={(nextOpen, eventDetails) => {
+        if (
+          !nextOpen &&
+          !isSaving &&
+          eventDetails.reason === "close-press"
+        ) {
+          onCancel();
+        }
       }}
     >
       <Dialog.Portal>
-        <Dialog.Backdrop className="fixed inset-0 z-9999999999 bg-black/45 backdrop-blur-sm data-[starting-style]:opacity-0 data-[ending-style]:opacity-0 transition-opacity" />
-        <Dialog.Viewport className="fixed inset-0 z-99999999999 grid place-items-center p-4">
+        <Dialog.Backdrop className="fixed inset-0 z-[19999999] bg-black/45 backdrop-blur-sm data-[starting-style]:opacity-0 data-[ending-style]:opacity-0 transition-opacity" />
+        <Dialog.Viewport className="fixed inset-0 z-[20000000] grid place-items-center p-4">
           <Dialog.Popup className="relative flex max-h-[min(88dvh,52rem)] w-full max-w-2xl flex-col overflow-hidden border border-zinc-400/35 bg-white text-neutral-950 shadow-[0.25rem_0.25rem_0] shadow-black/15 dark:bg-neutral-950 dark:text-white">
             <Dialog.Close
               disabled={isSaving}
@@ -180,7 +194,7 @@ export default function CalendarEventDetailsDialog({
                               : values.subjectDocumentIds,
                           endDateTime:
                             entityType === "exam"
-                              ? dateTimeAfterOneHour(values.startDateTime)
+                              ? addMinutesToDateTimeInput(values.startDateTime, 60)
                               : values.endDateTime,
                           priority: "medium",
                           completed: false,
@@ -198,7 +212,6 @@ export default function CalendarEventDetailsDialog({
                     </p>
                   )}
                 </label>
-
                 <label className="block text-sm font-semibold">
                   Title
                   <input
@@ -212,7 +225,6 @@ export default function CalendarEventDetailsDialog({
                     }
                   />
                 </label>
-
                 <label className="block text-sm font-semibold">
                   Calendar
                   <select
@@ -237,49 +249,63 @@ export default function CalendarEventDetailsDialog({
                     })}
                   </select>
                 </label>
-
                 <label className="block text-sm font-semibold">
                   Start date and time
-                  <input
-                    className={FIELD_CLASS}
-                    type="datetime-local"
-                    value={values.startDateTime}
-                    disabled={isSaving}
-                    onChange={(event) =>
-                      onChange({
-                        ...values,
-                        startDateTime: event.target.value,
-                        ...(values.entityType === "exam"
-                          ? {
-                              endDateTime: dateTimeAfterOneHour(
-                                event.target.value,
-                              ),
-                            }
-                          : values.allDay
-                            ? { endDateTime: event.target.value }
-                            : {}),
-                      })
-                    }
-                  />
+                  <div className="mt-2 flex min-w-0 gap-2">
+                    <DatePicker
+                      className="min-w-0 flex-1"
+                      widePlacement="right"
+                      value={dateTimeInputToCalendarDateTime(values.startDateTime)}
+                      isTimeDisabled={values.allDay}
+                      isDisabled={isSaving}
+                      onChange={(date) => {
+                        if (date) {
+                          updateStartDateTime(
+                            calendarDateTimeToDateTimeInput(date),
+                          );
+                        }
+                      }}
+                    />
+                  </div>
                 </label>
-
                 <label className="block text-sm font-semibold">
                   End date and time
-                  <input
-                    className={FIELD_CLASS}
-                    type="datetime-local"
-                    value={values.endDateTime}
-                    disabled={isSaving || values.entityType === "exam"}
-                    onChange={(event) =>
-                      onChange({
-                        ...values,
-                        endDateTime: event.target.value,
-                        ...(values.allDay && values.entityType === "task"
-                          ? { startDateTime: event.target.value }
-                          : {}),
-                      })
-                    }
-                  />
+                  <div className="mt-2 flex min-w-0 gap-2">
+                    <DatePicker
+                      className="min-w-0 flex-1"
+                      widePlacement="left"
+                      value={dateTimeInputToCalendarDateTime(values.endDateTime)}
+                      minValue={dateTimeInputToCalendarDateTime(values.startDateTime)}
+                      isTimeDisabled={values.allDay}
+                      isDisabled={isSaving || values.entityType === "exam"}
+                      isInvalid={endPrecedesStart}
+                      aria-describedby={
+                        endPrecedesStart ? "end-date-time-error" : undefined
+                      }
+                      onChange={(date) => {
+                        if (!date) return;
+                        const endDateTime =
+                          calendarDateTimeToDateTimeInput(date);
+                        onChange({
+                          ...values,
+                          endDateTime,
+                          ...(values.allDay && values.entityType === "task"
+                            ? { startDateTime: endDateTime }
+                            : {}),
+                        });
+                      }}
+                    />
+                  </div>
+                  {endPrecedesStart && (
+                    <p
+                      id="end-date-time-error"
+                      className="mt-1 text-xs font-normal text-red-600 dark:text-red-400"
+                      role="alert"
+                    >
+                      End date and time must be on or after the start date and
+                      time.
+                    </p>
+                  )}
                   {values.entityType === "exam" && (
                     <span className="mt-1 block text-xs font-normal text-(--text-secondary)">
                       Exam records store the start time only. The calendar
@@ -287,7 +313,6 @@ export default function CalendarEventDetailsDialog({
                     </span>
                   )}
                 </label>
-
                 <label className="flex items-center gap-3 self-center text-sm font-medium">
                   <input
                     type="checkbox"
@@ -295,7 +320,7 @@ export default function CalendarEventDetailsDialog({
                     disabled={isSaving}
                     onChange={(event) => {
                       const allDay = event.target.checked;
-                      const day = localMidnight(values.startDateTime);
+                      const day = dateTimeInputAtMidnight(values.startDateTime);
                       onChange({
                         ...values,
                         allDay,
@@ -304,7 +329,7 @@ export default function CalendarEventDetailsDialog({
                             ? { startDateTime: day, endDateTime: day }
                             : {
                                 startDateTime: day,
-                                endDateTime: dateTimeAfterOneHour(day),
+                                endDateTime: addMinutesToDateTimeInput(day, 60),
                               }
                           : {}),
                       });
@@ -313,7 +338,6 @@ export default function CalendarEventDetailsDialog({
                   />
                   All-day event
                 </label>
-
                 <label className="block text-sm font-semibold sm:col-span-2">
                   Description
                   <textarea
@@ -325,7 +349,6 @@ export default function CalendarEventDetailsDialog({
                     }
                   />
                 </label>
-
                 {values.entityType === "task" ? (
                   <label className="block text-sm font-semibold">
                     Subject
@@ -410,7 +433,6 @@ export default function CalendarEventDetailsDialog({
                     )}
                   </fieldset>
                 )}
-
                 {values.entityType === "task" && (
                   <>
                     <label className="block text-sm font-semibold">
@@ -450,7 +472,6 @@ export default function CalendarEventDetailsDialog({
                     </label>
                   </>
                 )}
-
                 {error && (
                   <p
                     role="alert"

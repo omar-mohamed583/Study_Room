@@ -33,10 +33,10 @@ export default function focusMode() {
         Please Open This Page On Desktop For Better Experince
       </div>
     );
-  const { theme } = useTheme();
+  const { theme, setTheme } = useTheme();
 
   useLayoutEffect(() => {
-    theme !== "dark" ? document.body.classList.add("dark") : "";
+    setTheme("dark")
   }, []);
 
   return (

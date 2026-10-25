@@ -10,8 +10,6 @@ export default function SubjectItems({
   subjects: Subject[];
   tasks: Task[];
 }) {
-  console.table({ from: "Subject Item", subjects, tasks})
-
   if ((subjects && !subjects?.length) || (tasks && !tasks.length))
     return (
       <EmptyState
@@ -22,7 +20,6 @@ export default function SubjectItems({
     );
 
   const visibleItems = subjects?.length > 5 ? subjects.slice(0, 5) : subjects;
-
 
   return (
     <>
