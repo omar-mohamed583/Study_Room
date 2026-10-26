@@ -27,17 +27,18 @@ function getStatics(subj: Subject, tasks: Task[]) {
     total: 0,
     completed: 0,
   };
-  const raw = subjTasks.total
-    ? (subjTasks.completed / subjTasks.total) * 100
-    : 0;
 
   for (const task of tasks) {
-    if (task?.subject?.name === subj.name) {
+    if (task?.subject?.documentId === subj.documentId) {
       subjTasks.total++;
 
       if (task.completed) subjTasks.completed++;
     }
   }
+
+  const raw = subjTasks.total
+    ? (subjTasks.completed / subjTasks.total) * 100
+    : 0;
 
   return {
     percentage: Number.isFinite(raw) ? Math.min(100, Math.max(0, raw)) : 0,

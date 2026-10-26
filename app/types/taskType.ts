@@ -5,13 +5,13 @@ import type { StudySession } from "./studySessionType";
 export interface Task {
   title: string;
   description: string;
-  dueDate: string;
+  dueDate: string | null;
   priority: "medium" | "low" | "high";
   estimatedDuration: number;
   completed: boolean;
-  completedAt: string;
+  completedAt: string | null;
   calendarAllDay: boolean;
-  subject: Subject;
+  subject: Subject | null;
   studySessions: StudySession[];
   calendars: CalendarType[];
   createdAt: string;

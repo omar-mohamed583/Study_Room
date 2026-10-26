@@ -5,11 +5,13 @@ import {
   type MetaFunction,
 } from "react-router";
 import { ensureSession } from "~/auth/session";
+import type { Task } from "~/types/taskType";
 import { DialMenu } from "../../components/ovio/dial-menu/dial-menu";
 import Calendar, { type EventType } from "~/components/ui/Calendar";
 import LoadingComponent from "~/components/ui/LoadingComponent";
 import NotificationModal from "~/components/ui/NotificationModal";
 import useStudyData from "~/context/studyDataContext";
+import useTheme from "~/context/themeContext";
 import { useMemo, useTransition } from "react";
 
 export const links: LinksFunction = () => [
@@ -32,6 +34,7 @@ export const meta: MetaFunction = () => [
 
 export default function CalendarPage() {
   const navigate = useNavigate();
+  const { theme, setTheme } = useTheme();
   const [pending, startTransition] = useTransition();
   const {
     calendars: { data: calendars, isLoading: calendarsLoading },
@@ -45,7 +48,7 @@ export default function CalendarPage() {
 
   const events: EventType[] = [
     ...(tasks ?? [])
-      .filter((task) => task.dueDate)
+      .filter((task): task is Task & { dueDate: string } => Boolean(task.dueDate))
       .map((task) => {
         const end = new Date(task.dueDate);
         const durationMs = Math.max(1, task.estimatedDuration || 60) * 60_000;
@@ -263,8 +266,45 @@ export default function CalendarPage() {
           </svg>
         ),
       },
+      {
+        id: "toggle-theme",
+        label: theme === "light" ? "Dark Theme" : "Light Theme",
+        icon:
+          theme === "light" ? (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="lucide lucide-moon preview-icon"
+            >
+              <path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6.5 6.5 0 0 0 8.268 8.268c.344-.215.825-.003.803.401" />
+            </svg>
+          ) : (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="lucide lucide-sun preview-icon"
+            >
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+            </svg>
+          ),
+      },
     ],
-    [],
+    [theme],
   );
 
   if (!tasks || !exams) {
@@ -276,19 +316,27 @@ export default function CalendarPage() {
       <DialMenu
         variant="minimal"
         trigger="click"
-        placement="above-trigger"
+        placement="pointer"
         items={dialMenuData}
-        onSelect={(item) => startTransition(() => navigate(item.id))}
+        onSelect={(item) => {
+          if (item.id === "toggle-theme") {
+            startTransition(() =>
+              setTheme((current) => (current === "light" ? "dark" : "light")),
+            );
+            return;
+          }
+
+          startTransition(() => navigate(item.id));
+        }}
       >
         <button
           type="button"
           aria-label="Open navigation menu"
           disabled={pending}
           aria-busy={pending || undefined}
-          className="fixed right-5 bottom-5 z-50 grid size-12 place-items-center rounded-full border border-(--secondary-gray) bg-(--body-gray) text-(--text-primary) shadow-lg transition-colors hover:bg-(--secondary-gray) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--text-primary) disabled:cursor-wait disabled:opacity-70"
+          className="fixed right-13 bottom-10 z-[30000001] grid size-12 place-items-center place-content-center rounded-full border border-(--secondary-gray) bg-(--body-gray) text-(--text-primary) shadow-lg transition-colors hover:bg-(--secondary-gray) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--text-primary) disabled:cursor-wait disabled:opacity-70"
         >
           <svg
-            aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
             width="24"
             height="24"
@@ -297,9 +345,15 @@ export default function CalendarPage() {
             stroke="currentColor"
             strokeWidth="2"
             strokeLinecap="round"
+            strokeLinejoin="round"
+            className="lucide lucide-compass preview-icon"
           >
-            <path d="M12 5v14" />
-            <path d="M5 12h14" />
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+            />
+            <path d="m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z" />
           </svg>
         </button>
       </DialMenu>

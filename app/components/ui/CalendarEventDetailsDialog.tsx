@@ -52,7 +52,18 @@ type Props = {
 };
 
 const FIELD_CLASS =
-  "mt-2 h-11 w-full rounded-lg border border-zinc-400/40 bg-transparent px-3 text-sm transition-[border-color,box-shadow] duration-200 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-(--accent-100) disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none";
+  "mt-2 h-11 w-full rounded-lg border border-zinc-400/40 bg-transparent px-3 text-sm transition-[border-color,box-shadow] duration-200 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-violet-500 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none";
+
+function RequiredMarker() {
+  return (
+    <span
+      aria-hidden="true"
+      className="ml-0.5 text-red-600 dark:text-red-400"
+    >
+      *
+    </span>
+  );
+}
 
 type SelectOption = {
   value: string;
@@ -257,6 +268,7 @@ export default function CalendarEventDetailsDialog({
               <div className="grid min-h-0 gap-5 overflow-y-auto px-5 py-5 sm:grid-cols-2 sm:px-6">
                 <label className="block text-sm font-semibold">
                   Event type
+                  {isCreate && <RequiredMarker />}
                   {isCreate ? (
                     <DialogSelect
                       ariaLabel="Event type"
@@ -298,6 +310,7 @@ export default function CalendarEventDetailsDialog({
                 </label>
                 <label className="block text-sm font-semibold">
                   Title
+                  <RequiredMarker />
                   <input
                     className={FIELD_CLASS}
                     type="text"
@@ -329,6 +342,7 @@ export default function CalendarEventDetailsDialog({
                 </label>
                 <label className="block text-sm font-semibold">
                   Start date and time
+                  <RequiredMarker />
                   <div className="mt-2 flex min-w-0 gap-2">
                     <DatePicker
                       className="min-w-0 flex-1"
@@ -350,6 +364,7 @@ export default function CalendarEventDetailsDialog({
                 </label>
                 <label className="block text-sm font-semibold">
                   End date and time
+                  {values.entityType === "task" && <RequiredMarker />}
                   <div className="mt-2 flex min-w-0 gap-2 items-center">
                     <DatePicker
                       className="min-w-0 flex-1"
@@ -428,7 +443,7 @@ export default function CalendarEventDetailsDialog({
                 <label className="block text-sm font-semibold sm:col-span-2">
                   Description
                   <textarea
-                    className="mt-2 min-h-28 w-full rounded-lg border border-zinc-400/40 bg-transparent px-3 py-2 text-sm transition-[border-color,box-shadow] duration-200 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-(--accent-100) disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none field-sizing-content resize-none"
+                    className="mt-2 min-h-28 w-full rounded-lg border border-zinc-400/40 bg-transparent px-3 py-2 text-sm transition-[border-color,box-shadow] duration-200 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-violet-500 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none field-sizing-content resize-none"
                     value={values.description}
                     disabled={isSaving}
                     onChange={(event) =>
@@ -439,6 +454,7 @@ export default function CalendarEventDetailsDialog({
                 {values.entityType === "task" ? (
                   <label className="block text-sm font-semibold">
                     Subject
+                    <RequiredMarker />
                     <DialogSelect
                       ariaLabel="Subject"
                       value={values.subjectDocumentIds[0] ?? ""}
@@ -476,7 +492,7 @@ export default function CalendarEventDetailsDialog({
                   </label>
                 ) : (
                   <fieldset className="grid gap-2">
-                    <legend className="text-sm font-semibold">
+                    <legend className="text-sm font-semibold mb-2">
                       Subjects (optional)
                     </legend>
                     {subjectsLoading ? (
@@ -488,7 +504,7 @@ export default function CalendarEventDetailsDialog({
                         No subjects available.
                       </p>
                     ) : (
-                      <div className="grid max-h-40 gap-2 overflow-y-auto rounded-lg border border-zinc-400/35 p-3">
+                      <div className="grid max-h-40 gap-2 overflow-y-auto rounded-lg border border-zinc-400/35 p-3 [&_label]:min-w-full">
                         {subjects.map((subject) => (
                           <Checkbox
                             key={subject.documentId}
@@ -616,7 +632,7 @@ export default function CalendarEventDetailsDialog({
                       !isValid ||
                       (!isCreate && !isDirty)
                     }
-                    className="h-10 rounded-lg bg-(--accent-100) px-5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="h-10 cursor-pointer rounded-lg bg-violet-500 px-5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {isSaving
                       ? "Saving..."

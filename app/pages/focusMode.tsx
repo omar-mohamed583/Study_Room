@@ -7,6 +7,7 @@ import { createPortal } from "react-dom";
 import type { LinksFunction, MetaFunction } from "react-router";
 import logo from "../assets/logo.svg";
 import Button from "~/components/ui/Button";
+import DesktopNotice from "~/components/ui/DesktopNotice";
 
 export const links: LinksFunction = () => [
   {
@@ -28,11 +29,7 @@ export const meta: MetaFunction = () => [
 
 export default function focusMode() {
   if (!window.matchMedia("(pointer: fine)").matches)
-    return (
-      <div className="font-black text-lg fixed top-[40%] left-1/2 -translate-1/2 text-center text-balance">
-        Please Open This Page On Desktop For Better Experince
-      </div>
-    );
+    return <DesktopNotice page="Focus Mode" />;
   const { theme, setTheme } = useTheme();
 
   useLayoutEffect(() => {

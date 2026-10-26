@@ -77,11 +77,10 @@ export default function DefaultMain() {
   const subjects = subjectsQuery.data;
   const exams = examsQuery.data;
 
-  const todayTasks = tasks?.filter((task) => isToday(task.dueDate)).slice(0, 4);
-  const inLimitTodayTasks =
-    todayTasks?.length && todayTasks?.length > 4
-      ? todayTasks?.slice(0, 4)
-      : todayTasks;
+  const todayTasks = (tasks ?? []).filter(
+    (task) => !task.completed && isToday(task.dueDate),
+  );
+  const inLimitTodayTasks = todayTasks.slice(0, 4);
 
   const now = new Date().getHours();
 
@@ -260,7 +259,7 @@ export default function DefaultMain() {
       >
         <section className="gs-animate">
           <DefaultMainSection
-            seeMore={Boolean(inLimitTodayTasks?.length)}
+            seeMore={todayTasks.length > 4}
             sectionDescription="Tasks you need to complete today"
             sectionTitleLogo={
               <svg
@@ -279,12 +278,12 @@ export default function DefaultMain() {
               </svg>
             }
             sectionTitle="Today Tasks"
-            to="/tasks/today"
+            to="/tasks"
           >
             {tasksQuery.isLoading &&
               [1, 2, 3, 4, 5].map((item) => <TaskItemSkeleton key={item} />)}
 
-            {!tasksQuery.isLoading && !inLimitTodayTasks?.length && (
+            {!tasksQuery.isLoading && !inLimitTodayTasks.length && (
               <EmptyState
                 message="No tasks due today."
                 icon="task"
@@ -292,13 +291,11 @@ export default function DefaultMain() {
             )}
 
             {!tasksQuery.isLoading &&
-              Boolean(inLimitTodayTasks?.length) &&
-              inLimitTodayTasks?.map((task) => (
+              Boolean(inLimitTodayTasks.length) &&
+              inLimitTodayTasks.map((task) => (
                 <TaskItem
                   key={task.documentId}
-                  id={task.documentId}
-                  subject={task?.subject?.name}
-                  title={task.title}
+                  task={task}
                 />
               ))}
           </DefaultMainSection>

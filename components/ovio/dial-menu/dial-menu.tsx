@@ -99,7 +99,7 @@ export function DialMenu({
             {open && origin && (
               <div
                 key="dial-menu"
-                className="fixed inset-0 z-1000 touch-none select-none"
+                className="fixed inset-0 z-[30000002] touch-none select-none"
                 onContextMenu={(e) => e.preventDefault()}
               >
                 <div

@@ -27,6 +27,7 @@ import {
   type SubmitEvent,
 } from "react";
 import LoadingComponent from "./LoadingComponent";
+import DesktopNotice from "./DesktopNotice";
 import CalendarEventDetailsDialog, {
   type CalendarEventFormValues,
 } from "./CalendarEventDetailsDialog";
@@ -1165,11 +1166,7 @@ export default function Calendar({
   }
 
   if (!isDesktop)
-    return (
-      <div className="font-black text-lg fixed top-1/2 left-1/2 -translate-1/2 text-center text-balance">
-        Please Open This Page On Desktop For Better Experince
-      </div>
-    );
+    return <DesktopNotice page="Calendar" />;
 
   if (calendarsLoading || createCalendarMutation.isPending)
     return (
