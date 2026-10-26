@@ -24,7 +24,7 @@ import {
   useEffect,
   useRef,
   useState,
-  type FormEvent,
+  type SubmitEvent,
 } from "react";
 import LoadingComponent from "./LoadingComponent";
 import CalendarEventDetailsDialog, {
@@ -58,7 +58,7 @@ export type UnFormattedCalendarType = {
   eventColor: string;
   eventSelectedColor: string;
   textColor: string;
-}
+};
 
 type EventEntityType = "task" | "exam";
 
@@ -79,6 +79,16 @@ export type EventType = {
 type EventIdentity = {
   entityType: EventEntityType;
   documentId: string;
+};
+
+type EventQueryRecord = {
+  documentId?: string;
+  [field: string]: unknown;
+};
+
+type EventQueryResponse = {
+  data?: EventQueryRecord[];
+  [field: string]: unknown;
 };
 
 type CalendarEventMutation =
@@ -102,6 +112,10 @@ type StudyDetailsDialogState = {
   values: CalendarEventFormValues;
   initialValues: CalendarEventFormValues;
 };
+
+function getEntityLabel(entityType: EventEntityType) {
+  return entityType === "task" ? "Task" : "Exam";
+}
 
 function getEventIdentity(event: Pick<DayFlowEvent, "id" | "meta">) {
   const entityType = event.meta?.entityType;
@@ -145,8 +159,16 @@ function makeEventFromForm(
   };
 
   if (values.allDay) {
-    const allDayStart = new Date(start.getFullYear(), start.getMonth(), start.getDate());
-    const allDayEnd = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+    const allDayStart = new Date(
+      start.getFullYear(),
+      start.getMonth(),
+      start.getDate(),
+    );
+    const allDayEnd = new Date(
+      end.getFullYear(),
+      end.getMonth(),
+      end.getDate(),
+    );
     return createAllDayEvent({
       ...common,
       start: allDayStart,
@@ -178,7 +200,7 @@ function getNewRecordData(
   const start = temporalToDate(event.start);
   const end = temporalToDate(event.end);
   const subjectRelation = values.subjectDocumentIds.length
-    ? { subject: { connect: values.subjectDocumentIds } }
+    ? { subject: values.subjectDocumentIds[0] }
     : {};
   const calendarRelation = calendarDocumentId
     ? { calendars: { connect: [calendarDocumentId] } }
@@ -225,10 +247,16 @@ function getEventMutationData(
   if (!previousEvent || event.title !== previousEvent.title) {
     data.title = event.title;
   }
-  if (!previousEvent || (event.description ?? "") !== previousEvent.description) {
+  if (
+    !previousEvent ||
+    (event.description ?? "") !== previousEvent.description
+  ) {
     data.description = event.description ?? "";
   }
-  if (!previousEvent || Boolean(event.allDay) !== Boolean(previousEvent.allDay)) {
+  if (
+    !previousEvent ||
+    Boolean(event.allDay) !== Boolean(previousEvent.allDay)
+  ) {
     data.calendarAllDay = Boolean(event.allDay);
   }
   if (previousEvent && event.calendarId !== previousEvent.calendarId) {
@@ -250,7 +278,10 @@ function getEventMutationData(
   if (!previousEvent || end.getTime() !== previousEnd) {
     data.dueDate = end.toISOString();
   }
-  const duration = Math.max(1, Math.round((end.getTime() - start.getTime()) / 60_000));
+  const duration = Math.max(
+    1,
+    Math.round((end.getTime() - start.getTime()) / 60_000),
+  );
   const previousDuration =
     previousStart === undefined || previousEnd === undefined
       ? undefined
@@ -270,7 +301,8 @@ function getEventDetailsPatch(
   const data: Record<string, unknown> = {};
 
   const sameSubjects =
-    values.subjectDocumentIds.length === initialValues.subjectDocumentIds.length &&
+    values.subjectDocumentIds.length ===
+      initialValues.subjectDocumentIds.length &&
     values.subjectDocumentIds.every((documentId) =>
       initialValues.subjectDocumentIds.includes(documentId),
     );
@@ -290,7 +322,9 @@ function getEventDetailsPatch(
   return data;
 }
 
-function getSubjectDocumentIds(subject: Subject | Subject[] | null | undefined) {
+function getSubjectDocumentIds(
+  subject: Subject | Subject[] | null | undefined,
+) {
   const subjects = Array.isArray(subject) ? subject : subject ? [subject] : [];
   return subjects.map((item) => item.documentId).filter(Boolean);
 }
@@ -362,7 +396,9 @@ export default function Calendar({
         client.setQueryData<UnFormattedCalendarType[]>(
           ["/calendars?populate=*", null],
           (current = []) =>
-            current.some((calendar) => calendar.documentId === createdCalendar.documentId)
+            current.some(
+              (calendar) => calendar.documentId === createdCalendar.documentId,
+            )
               ? current
               : [...current, createdCalendar],
         );
@@ -430,11 +466,15 @@ export default function Calendar({
           : mutation.action === "update"
             ? "update"
             : "delete";
+      const entityType =
+        mutation.action === "create"
+          ? mutation.values.entityType
+          : mutation.identity.entityType;
       setToasts((previous) => [
         ...previous,
         {
           id: crypto.randomUUID(),
-          title: `Event ${action} failed`,
+          title: `${getEntityLabel(entityType)} ${action} failed`,
           description: error.message,
           actionBtnText: "Dismiss",
           icon: "fail",
@@ -473,13 +513,55 @@ export default function Calendar({
     );
   }
 
+  function showMutationSuccess(
+    action: "created" | "updated" | "deleted",
+    entityType: EventEntityType,
+    title?: string,
+  ) {
+    const label = getEntityLabel(entityType);
+    showToast(
+      `${label} ${action}`,
+      title ? `“${title}” was ${action}.` : `${label} was ${action}.`,
+      "success",
+    );
+  }
+
   async function refreshEventData(entityType: EventEntityType) {
     await Promise.all(
       [
-        `/${entityType}s?populate=*`,
-        "/subjects?populate=*",
-        "/study-sessions?populate=*",
-      ].map((queryKey) => client.invalidateQueries({ queryKey: [queryKey] })),
+        {
+          queryKey: [`/${entityType}s?populate=*`, null],
+          exact: true,
+        },
+        { queryKey: ["/subjects?populate=*"] },
+        { queryKey: ["/study-sessions?populate=*"] },
+      ].map((filters) =>
+        client.invalidateQueries({ ...filters, refetchType: "all" }),
+      ),
+    );
+  }
+
+  function upsertEventQueryRecord(
+    entityType: EventEntityType,
+    record: EventQueryRecord,
+  ) {
+    if (!record.documentId) return;
+
+    client.setQueryData<EventQueryResponse>(
+      [`/${entityType}s?populate=*`, null],
+      (current) => {
+        if (!current || !Array.isArray(current.data)) return current;
+
+        return {
+          ...current,
+          data: [
+            ...current.data.filter(
+              (item) => item.documentId !== record.documentId,
+            ),
+            record,
+          ],
+        };
+      },
     );
   }
 
@@ -531,7 +613,12 @@ export default function Calendar({
       priority: "medium",
       completed: false,
     };
-    setDetailsDialog({ mode: "create", event, values: initialValues, initialValues });
+    setDetailsDialog({
+      mode: "create",
+      event,
+      values: initialValues,
+      initialValues,
+    });
   }
 
   function getExistingValues(
@@ -549,7 +636,9 @@ export default function Calendar({
     } as const;
 
     if (identity.entityType === "task") {
-      const task = tasks.find((item) => item.documentId === identity.documentId);
+      const task = tasks.find(
+        (item) => item.documentId === identity.documentId,
+      );
       return {
         ...eventValues,
         entityType: "task",
@@ -570,7 +659,8 @@ export default function Calendar({
   }
 
   function handleEventClick(event: DayFlowEvent) {
-    const identity = getEventIdentity(event) ?? eventIdentities.current.get(event.id);
+    const identity =
+      getEventIdentity(event) ?? eventIdentities.current.get(event.id);
     if (!identity) {
       showMissingEventToast();
       return;
@@ -598,7 +688,8 @@ export default function Calendar({
       return;
     }
 
-    const identity = getEventIdentity(event) ?? eventIdentities.current.get(event.id);
+    const identity =
+      getEventIdentity(event) ?? eventIdentities.current.get(event.id);
 
     if (!identity) {
       showMissingEventToast();
@@ -606,7 +697,8 @@ export default function Calendar({
     }
 
     const previousEvent = events.find(
-      (candidate) => candidate.id === event.id ||
+      (candidate) =>
+        candidate.id === event.id ||
         (candidate.meta.entityType === identity.entityType &&
           candidate.meta.documentId === identity.documentId),
     );
@@ -630,7 +722,9 @@ export default function Calendar({
     } catch (error) {
       showToast(
         "Event update failed",
-        error instanceof Error ? error.message : "The selected calendar could not be saved.",
+        error instanceof Error
+          ? error.message
+          : "The selected calendar could not be saved.",
       );
       return;
     }
@@ -639,7 +733,8 @@ export default function Calendar({
       ? previousEvent.end.getTime() - previousEvent.start.getTime()
       : null;
     const nextDuration =
-      temporalToDate(event.end).getTime() - temporalToDate(event.start).getTime();
+      temporalToDate(event.end).getTime() -
+      temporalToDate(event.start).getTime();
     if (
       identity.entityType === "exam" &&
       previousDuration !== null &&
@@ -667,6 +762,7 @@ export default function Calendar({
         data: eventData,
       });
       eventIdentities.current.set(event.id, identity);
+      showMutationSuccess("updated", identity.entityType, event.title);
       await refreshEventData(identity.entityType);
     } catch {
       await refreshEventData(identity.entityType);
@@ -691,7 +787,9 @@ export default function Calendar({
     if (temporaryEventIds.current.delete(eventId)) {
       temporaryEvents.current.delete(eventId);
       setDetailsDialog((current) =>
-        current?.mode === "create" && current.event.id === eventId ? null : current,
+        current?.mode === "create" && current.event.id === eventId
+          ? null
+          : current,
       );
       return;
     }
@@ -719,6 +817,7 @@ export default function Calendar({
         action: "delete",
         identity,
       });
+      showMutationSuccess("deleted", identity.entityType, originalEvent?.title);
       removeEventFromCalendar(eventId, identity);
       await refreshEventData(identity.entityType);
     } catch {
@@ -747,12 +846,19 @@ export default function Calendar({
     setDetailsDialogError(null);
     try {
       await mutateCalendarEvents.mutateAsync({ action: "delete", identity });
+      showMutationSuccess(
+        "deleted",
+        identity.entityType,
+        detailsDialog.event.title,
+      );
       removeEventFromCalendar(detailsDialog.event.id, identity);
       setDetailsDialog(null);
       await refreshEventData(identity.entityType);
     } catch (error) {
       setDetailsDialogError(
-        error instanceof Error ? error.message : "The event could not be deleted.",
+        error instanceof Error
+          ? error.message
+          : "The event could not be deleted.",
       );
     } finally {
       pendingMutationIds.current.delete(mutationId);
@@ -764,7 +870,10 @@ export default function Calendar({
     const current = detailsDialog;
     if (!current || detailsDialogSaving) return;
 
-    if (current.mode === "create" && temporaryEventIds.current.delete(current.event.id)) {
+    if (
+      current.mode === "create" &&
+      temporaryEventIds.current.delete(current.event.id)
+    ) {
       temporaryEvents.current.delete(current.event.id);
       calendarApp.current?.applyEventsChanges(
         { delete: [current.event.id] },
@@ -778,7 +887,7 @@ export default function Calendar({
   }
 
   async function handleDetailsSubmit(
-    submitEvent: FormEvent<HTMLFormElement>,
+    submitEvent: SubmitEvent<HTMLFormElement>,
   ) {
     submitEvent.preventDefault();
     if (!detailsDialog || detailsDialogSaving) return;
@@ -794,15 +903,14 @@ export default function Calendar({
       setDetailsDialogError("Enter a title and a valid event time range.");
       return;
     }
-    if (
-      values.entityType === "task" &&
-      !values.subjectDocumentIds[0]
-    ) {
+    if (values.entityType === "task" && !values.subjectDocumentIds[0]) {
       setDetailsDialogError("Select a subject before saving.");
       return;
     }
     if (detailsDialog.mode === "edit" && !detailsDialog.identity) {
-      setDetailsDialogError("This event is missing its Strapi record identity.");
+      setDetailsDialogError(
+        "This event is missing its Strapi record identity.",
+      );
       return;
     }
 
@@ -820,7 +928,8 @@ export default function Calendar({
     try {
       const sourceEvent =
         detailsDialog.mode === "create"
-          ? temporaryEvents.current.get(detailsDialog.event.id) ?? detailsDialog.event
+          ? (temporaryEvents.current.get(detailsDialog.event.id) ??
+            detailsDialog.event)
           : detailsDialog.event;
       const eventFromForm = makeEventFromForm(sourceEvent, values);
       const submittedEvent: DayFlowEvent =
@@ -837,10 +946,14 @@ export default function Calendar({
 
       if (detailsDialog.mode === "create") {
         if (!calendarApp.current) {
-          throw new Error("The calendar is still initializing. Try saving again.");
+          throw new Error(
+            "The calendar is still initializing. Try saving again.",
+          );
         }
 
-        const calendarDocumentId = getCalendarDocumentId(submittedEvent.calendarId);
+        const calendarDocumentId = getCalendarDocumentId(
+          submittedEvent.calendarId,
+        );
         if (submittedEvent.calendarId && !calendarDocumentId) {
           throw new Error("The selected calendar has no Strapi documentId.");
         }
@@ -854,13 +967,62 @@ export default function Calendar({
         createResponseReceived = true;
         const documentId = response?.data?.documentId;
         if (typeof documentId !== "string" || documentId.length === 0) {
-          throw new Error("Strapi did not return a documentId for the new event.");
+          throw new Error(
+            "Strapi did not return a documentId for the new event.",
+          );
         }
 
         createdIdentity = {
           entityType: values.entityType,
           documentId,
         };
+        const start = temporalToDate(submittedEvent.start);
+        const end = temporalToDate(submittedEvent.end);
+        const selectedCalendar = submittedEvent.calendarId
+          ? calendars.find(
+              (calendar) =>
+                calendar.documentId === submittedEvent.calendarId ||
+                calendar.id === submittedEvent.calendarId,
+            )
+          : undefined;
+        const selectedSubjects = subjects.filter((subject) =>
+          values.subjectDocumentIds.includes(subject.documentId),
+        );
+        const createdRecord: EventQueryRecord = {
+          ...response.data,
+          documentId,
+          title: submittedEvent.title,
+          description: submittedEvent.description ?? "",
+          calendarAllDay: Boolean(submittedEvent.allDay),
+          ...(values.entityType === "exam"
+            ? { examDate: start.toISOString() }
+            : {
+                dueDate: end.toISOString(),
+                estimatedDuration: submittedEvent.allDay
+                  ? 60
+                  : Math.max(
+                      1,
+                      Math.round((end.getTime() - start.getTime()) / 60_000),
+                    ),
+                priority: values.priority,
+                completed: values.completed,
+              }),
+          ...(selectedCalendar ? { calendars: [selectedCalendar] } : {}),
+          ...(selectedSubjects.length > 0
+            ? {
+                subject:
+                  values.entityType === "task"
+                    ? selectedSubjects[0]
+                    : selectedSubjects,
+              }
+            : {}),
+        };
+        upsertEventQueryRecord(createdIdentity.entityType, createdRecord);
+        showMutationSuccess(
+          "created",
+          createdIdentity.entityType,
+          submittedEvent.title,
+        );
         const persistedEvent: DayFlowEvent = {
           ...submittedEvent,
           id: `${createdIdentity.entityType}-${documentId}`,
@@ -883,13 +1045,16 @@ export default function Calendar({
         await refreshEventData(createdIdentity.entityType);
       } else if (detailsDialog.identity) {
         const identity = detailsDialog.identity;
-        const previousEvent = events.find(
-          (candidate) =>
-            candidate.id === detailsDialog.event.id ||
-            (candidate.meta.entityType === identity.entityType &&
-              candidate.meta.documentId === identity.documentId),
-        ) ?? toEventType(detailsDialog.event, identity);
-        const calendarDocumentId = getCalendarDocumentId(submittedEvent.calendarId);
+        const previousEvent =
+          events.find(
+            (candidate) =>
+              candidate.id === detailsDialog.event.id ||
+              (candidate.meta.entityType === identity.entityType &&
+                candidate.meta.documentId === identity.documentId),
+          ) ?? toEventType(detailsDialog.event, identity);
+        const calendarDocumentId = getCalendarDocumentId(
+          submittedEvent.calendarId,
+        );
         if (submittedEvent.calendarId && !calendarDocumentId) {
           throw new Error("The selected calendar has no Strapi documentId.");
         }
@@ -911,6 +1076,11 @@ export default function Calendar({
             identity,
             data,
           });
+          showMutationSuccess(
+            "updated",
+            identity.entityType,
+            submittedEvent.title,
+          );
           eventIdentities.current.set(submittedEvent.id, identity);
           try {
             calendarApp.current?.applyEventsChanges(
@@ -973,7 +1143,9 @@ export default function Calendar({
         );
       } else {
         setDetailsDialogError(
-          error instanceof Error ? error.message : "The event could not be saved.",
+          error instanceof Error
+            ? error.message
+            : "The event could not be saved.",
         );
       }
     } finally {

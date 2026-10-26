@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useDeferredValue,
   useId,
   useMemo,
   useRef,
@@ -38,6 +39,7 @@ export default function SearchBar() {
   const [mounted, setMounted] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [inpValue, setInpValue] = useState("");
+  const deferredInpValue = useDeferredValue(inpValue);
   const [filter, setFilter] = useState<Filter>("");
 
   const togglerRef = useRef<HTMLDivElement>(null);
@@ -77,7 +79,7 @@ export default function SearchBar() {
   }, []);
 
   const groups = useMemo(() => {
-    const q = inpValue.trim().toLowerCase();
+    const q = deferredInpValue.trim().toLowerCase();
 
     const all: Record<EventType, SearchItem[]> = {
       task: (tasks.data ?? []).map(
@@ -105,7 +107,7 @@ export default function SearchBar() {
         ),
       }))
       .filter((group) => group.items.length > 0);
-  }, [tasks.data, subjects.data, exams.data, inpValue, filter]);
+  }, [tasks.data, subjects.data, exams.data, deferredInpValue, filter]);
 
   function handleSelect(item: SearchItem) {
     setValue({ eventId: String(item.id), name: item.name, type: item.type });
@@ -160,7 +162,7 @@ export default function SearchBar() {
                   type="text"
                   value={inpValue}
                   placeholder="Search by name..."
-                  className="text-sm leading-[normal] border border-zinc-500/80 w-full rounded-[10px] p-2 focus:ring-violet-500 outline-0 focus:border-transparent ring-3 ring-transparent transition-all duration-200"
+                  className="text-sm leading-[normal] border border-zinc-500/80 w-full rounded-[10px] p-2 focus:ring-violet-500 outline-0 focus:border-transparent ring-3 ring-transparent transition-all duration-200 motion-reduce:transition-none"
                   onChange={(e) => setInpValue(e.target.value)}
                 />
 

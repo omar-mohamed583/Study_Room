@@ -386,7 +386,7 @@ export default function Header() {
             <input
               type="text"
               id="search"
-              className="bg-transparent ring-2 ring-transparent focus:ring-zinc-700 border-0 focus-visible:shadow-zinc-700 pl-10 p-2 outline-0 "
+              className="bg-transparent ring-2 ring-transparent focus:ring-zinc-700 border-0 focus-visible:shadow-zinc-700 pl-10 p-2 outline-0 transition-[border-color,box-shadow] duration-200 motion-reduce:transition-none"
               placeholder=" "
             />
             <label

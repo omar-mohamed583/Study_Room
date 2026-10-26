@@ -15,7 +15,8 @@ export default function NotificationModal() {
         bottom: "1.5rem",
         flexDirection: "column",
         alignItems: "flex-end",
-        zIndex: 10000,
+        // Keep notifications above every site overlay, including portaled dialogs.
+        zIndex: 2_147_483_647,
         gap: 10,
       }}
     >

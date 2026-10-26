@@ -1,6 +1,11 @@
 import { Dialog } from "@base-ui/react/dialog";
-import type { FormEvent } from "react";
+import type { SubmitEvent } from "react";
+import { ChevronDown } from "@untitledui/icons";
+import { Checkbox } from "@heroui/react";
+import type { Key } from "react-aria-components";
 import type { Subject } from "~/types/subjectTypes";
+import { Button } from "../../../components/base/buttons/button";
+import { Dropdown } from "../../../components/base/dropdown/dropdown";
 import { DatePicker } from "../../../components/application/date-picker/date-picker";
 import {
   addMinutesToDateTimeInput,
@@ -40,14 +45,94 @@ type Props = {
   isSaving: boolean;
   error: string | null;
   onChange: (values: CalendarEventFormValues) => void;
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onSubmit: (event: SubmitEvent<HTMLFormElement>) => void;
   onCancel: () => void;
   onDelete: () => void;
   onReset: () => void;
 };
 
 const FIELD_CLASS =
-  "mt-2 h-11 w-full rounded-lg border border-zinc-400/40 bg-transparent px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-(--accent-100) disabled:cursor-not-allowed disabled:opacity-60";
+  "mt-2 h-11 w-full rounded-lg border border-zinc-400/40 bg-transparent px-3 text-sm transition-[border-color,box-shadow] duration-200 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-(--accent-100) disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none";
+
+type SelectOption = {
+  value: string;
+  label: string;
+  key?: string;
+  isDisabled?: boolean;
+};
+
+function DialogSelect({
+  ariaLabel,
+  value,
+  options,
+  placeholder,
+  isDisabled = false,
+  isInvalid = false,
+  onChange,
+}: {
+  ariaLabel: string;
+  value: string;
+  options: SelectOption[];
+  placeholder: string;
+  isDisabled?: boolean;
+  isInvalid?: boolean;
+  onChange: (value: string) => void;
+}) {
+  const selectedOption = options.find((option) => option.value === value);
+  const selectedKey = selectedOption?.key ?? selectedOption?.value;
+  const selectedKeys = selectedKey
+    ? new Set<Key>([selectedKey])
+    : new Set<Key>();
+
+  return (
+    <Dropdown.Root>
+      <Button
+        aria-label={ariaLabel}
+        aria-invalid={isInvalid || undefined}
+        size="md"
+        color="secondary"
+        iconTrailing={ChevronDown}
+        isDisabled={isDisabled}
+        className="mt-2 h-11 w-full justify-between rounded-lg px-3 text-left text-sm font-normal"
+      >
+        <span className={!selectedOption ? "text-placeholder" : "truncate"}>
+          {selectedOption?.label ?? placeholder}
+        </span>
+      </Button>
+      <Dropdown.Popover
+        className="max-h-64 w-64"
+        style={{ zIndex: 20_000_002 }}
+      >
+        <Dropdown.Menu
+          aria-label={ariaLabel}
+          selectionMode="single"
+          selectedKeys={selectedKeys}
+          onSelectionChange={(selection) => {
+            if (selection === "all") return;
+            const [key] = selection;
+            const option = options.find(
+              (item) => (item.key ?? item.value) === String(key),
+            );
+            if (option && !option.isDisabled) onChange(option.value);
+          }}
+        >
+          <Dropdown.Section>
+            {options.map((option) => (
+              <Dropdown.Item
+                key={option.key ?? option.value}
+                id={option.key ?? option.value}
+                textValue={option.label}
+                isDisabled={option.isDisabled}
+              >
+                {option.label}
+              </Dropdown.Item>
+            ))}
+          </Dropdown.Section>
+        </Dropdown.Menu>
+      </Dropdown.Popover>
+    </Dropdown.Root>
+  );
+}
 
 function sameItems(left: string[], right: string[]) {
   return (
@@ -125,18 +210,14 @@ export default function CalendarEventDetailsDialog({
       open={open}
       disablePointerDismissal
       onOpenChange={(nextOpen, eventDetails) => {
-        if (
-          !nextOpen &&
-          !isSaving &&
-          eventDetails.reason === "close-press"
-        ) {
+        if (!nextOpen && !isSaving && eventDetails.reason === "close-press") {
           onCancel();
         }
       }}
     >
       <Dialog.Portal>
-        <Dialog.Backdrop className="fixed inset-0 z-[19999999] bg-black/45 backdrop-blur-sm data-[starting-style]:opacity-0 data-[ending-style]:opacity-0 transition-opacity" />
-        <Dialog.Viewport className="fixed inset-0 z-[20000000] grid place-items-center p-4">
+        <Dialog.Backdrop className="fixed inset-0 z-19999999 bg-black/45 backdrop-blur-sm data-starting-style:opacity-0 data-ending-style:opacity-0 transition-opacity" />
+        <Dialog.Viewport className="fixed inset-0 z-20000000 grid place-items-center p-4">
           <Dialog.Popup className="relative flex max-h-[min(88dvh,52rem)] w-full max-w-2xl flex-col overflow-hidden border border-zinc-400/35 bg-white text-neutral-950 shadow-[0.25rem_0.25rem_0] shadow-black/15 dark:bg-neutral-950 dark:text-white">
             <Dialog.Close
               disabled={isSaving}
@@ -177,14 +258,17 @@ export default function CalendarEventDetailsDialog({
                 <label className="block text-sm font-semibold">
                   Event type
                   {isCreate ? (
-                    <select
-                      className={FIELD_CLASS}
+                    <DialogSelect
+                      ariaLabel="Event type"
                       value={values.entityType}
-                      disabled={isSaving}
-                      onChange={(event) => {
-                        const entityType = event.target.value as
-                          | "task"
-                          | "exam";
+                      placeholder="Select event type"
+                      isDisabled={isSaving}
+                      options={[
+                        { value: "task", label: "Task" },
+                        { value: "exam", label: "Exam" },
+                      ]}
+                      onChange={(nextEntityType) => {
+                        const entityType = nextEntityType as "task" | "exam";
                         onChange({
                           ...values,
                           entityType,
@@ -194,16 +278,16 @@ export default function CalendarEventDetailsDialog({
                               : values.subjectDocumentIds,
                           endDateTime:
                             entityType === "exam"
-                              ? addMinutesToDateTimeInput(values.startDateTime, 60)
+                              ? addMinutesToDateTimeInput(
+                                  values.startDateTime,
+                                  60,
+                                )
                               : values.endDateTime,
                           priority: "medium",
                           completed: false,
                         });
                       }}
-                    >
-                      <option value="task">Task</option>
-                      <option value="exam">Exam</option>
-                    </select>
+                    />
                   ) : (
                     <p
                       className={`${FIELD_CLASS} flex items-center capitalize`}
@@ -227,27 +311,21 @@ export default function CalendarEventDetailsDialog({
                 </label>
                 <label className="block text-sm font-semibold">
                   Calendar
-                  <select
-                    className={FIELD_CLASS}
+                  <DialogSelect
+                    ariaLabel="Calendar"
                     value={values.calendarId}
-                    disabled={isSaving || calendars.length === 0}
-                    onChange={(event) =>
-                      onChange({ ...values, calendarId: event.target.value })
+                    placeholder="Select a calendar"
+                    isDisabled={isSaving || calendars.length === 0}
+                    options={[
+                      ...calendars.map((calendar) => {
+                        const id = calendar.documentId ?? calendar.id;
+                        return { value: id, label: calendar.name };
+                      }),
+                    ]}
+                    onChange={(calendarId) =>
+                      onChange({ ...values, calendarId })
                     }
-                  >
-                    <option value="">No calendar</option>
-                    {calendars.map((calendar) => {
-                      const id = calendar.documentId ?? calendar.id;
-                      return (
-                        <option
-                          key={id}
-                          value={id}
-                        >
-                          {calendar.name}
-                        </option>
-                      );
-                    })}
-                  </select>
+                  />
                 </label>
                 <label className="block text-sm font-semibold">
                   Start date and time
@@ -255,7 +333,9 @@ export default function CalendarEventDetailsDialog({
                     <DatePicker
                       className="min-w-0 flex-1"
                       widePlacement="right"
-                      value={dateTimeInputToCalendarDateTime(values.startDateTime)}
+                      value={dateTimeInputToCalendarDateTime(
+                        values.startDateTime,
+                      )}
                       isTimeDisabled={values.allDay}
                       isDisabled={isSaving}
                       onChange={(date) => {
@@ -270,12 +350,16 @@ export default function CalendarEventDetailsDialog({
                 </label>
                 <label className="block text-sm font-semibold">
                   End date and time
-                  <div className="mt-2 flex min-w-0 gap-2">
+                  <div className="mt-2 flex min-w-0 gap-2 items-center">
                     <DatePicker
                       className="min-w-0 flex-1"
                       widePlacement="left"
-                      value={dateTimeInputToCalendarDateTime(values.endDateTime)}
-                      minValue={dateTimeInputToCalendarDateTime(values.startDateTime)}
+                      value={dateTimeInputToCalendarDateTime(
+                        values.endDateTime,
+                      )}
+                      minValue={dateTimeInputToCalendarDateTime(
+                        values.startDateTime,
+                      )}
                       isTimeDisabled={values.allDay}
                       isDisabled={isSaving || values.entityType === "exam"}
                       isInvalid={endPrecedesStart}
@@ -313,35 +397,38 @@ export default function CalendarEventDetailsDialog({
                     </span>
                   )}
                 </label>
-                <label className="flex items-center gap-3 self-center text-sm font-medium">
-                  <input
-                    type="checkbox"
-                    checked={values.allDay}
-                    disabled={isSaving}
-                    onChange={(event) => {
-                      const allDay = event.target.checked;
-                      const day = dateTimeInputAtMidnight(values.startDateTime);
-                      onChange({
-                        ...values,
-                        allDay,
-                        ...(allDay
-                          ? values.entityType === "task"
-                            ? { startDateTime: day, endDateTime: day }
-                            : {
-                                startDateTime: day,
-                                endDateTime: addMinutesToDateTimeInput(day, 60),
-                              }
-                          : {}),
-                      });
-                    }}
-                    className="size-4 accent-(--accent-100)"
-                  />
-                  All-day event
-                </label>
+                <Checkbox
+                  name="allDay"
+                  isSelected={values.allDay}
+                  isDisabled={isSaving}
+                  className="self-center mt-[1.65rem] mx-auto"
+                  onChange={(allDay) => {
+                    const day = dateTimeInputAtMidnight(values.startDateTime);
+                    onChange({
+                      ...values,
+                      allDay,
+                      ...(allDay
+                        ? values.entityType === "task"
+                          ? { startDateTime: day, endDateTime: day }
+                          : {
+                              startDateTime: day,
+                              endDateTime: addMinutesToDateTimeInput(day, 60),
+                            }
+                        : {}),
+                    });
+                  }}
+                >
+                  <Checkbox.Content>
+                    <Checkbox.Control>
+                      <Checkbox.Indicator />
+                    </Checkbox.Control>
+                    All-day event
+                  </Checkbox.Content>
+                </Checkbox>
                 <label className="block text-sm font-semibold sm:col-span-2">
                   Description
                   <textarea
-                    className="mt-2 min-h-28 w-full resize-y rounded-lg border border-zinc-400/40 bg-transparent px-3 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-(--accent-100) disabled:cursor-not-allowed disabled:opacity-60"
+                    className="mt-2 min-h-28 w-full rounded-lg border border-zinc-400/40 bg-transparent px-3 py-2 text-sm transition-[border-color,box-shadow] duration-200 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-(--accent-100) disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none field-sizing-content resize-none"
                     value={values.description}
                     disabled={isSaving}
                     onChange={(event) =>
@@ -352,36 +439,40 @@ export default function CalendarEventDetailsDialog({
                 {values.entityType === "task" ? (
                   <label className="block text-sm font-semibold">
                     Subject
-                    <select
-                      className={FIELD_CLASS}
+                    <DialogSelect
+                      ariaLabel="Subject"
                       value={values.subjectDocumentIds[0] ?? ""}
-                      disabled={
+                      placeholder={
+                        subjectsLoading
+                          ? "Loading subjects..."
+                          : "Select a subject"
+                      }
+                      isDisabled={
                         isSaving || subjectsLoading || subjects.length === 0
                       }
-                      required
-                      onChange={(event) =>
+                      isInvalid={values.subjectDocumentIds.length === 0}
+                      options={[
+                        {
+                          key: "no-subject",
+                          value: "",
+                          label: subjectsLoading
+                            ? "Loading subjects..."
+                            : "No Subject",
+                        },
+                        ...subjects.map((subject) => ({
+                          value: subject.documentId,
+                          label: subject.name,
+                        })),
+                      ]}
+                      onChange={(subjectDocumentId) =>
                         onChange({
                           ...values,
-                          subjectDocumentIds: event.target.value
-                            ? [event.target.value]
+                          subjectDocumentIds: subjectDocumentId
+                            ? [subjectDocumentId]
                             : [],
                         })
                       }
-                    >
-                      <option value="">
-                        {subjectsLoading
-                          ? "Loading subjects..."
-                          : "Select a subject"}
-                      </option>
-                      {subjects.map((subject) => (
-                        <option
-                          key={subject.documentId}
-                          value={subject.documentId}
-                        >
-                          {subject.name}
-                        </option>
-                      ))}
-                    </select>
+                    />
                   </label>
                 ) : (
                   <fieldset className="grid gap-2">
@@ -399,35 +490,37 @@ export default function CalendarEventDetailsDialog({
                     ) : (
                       <div className="grid max-h-40 gap-2 overflow-y-auto rounded-lg border border-zinc-400/35 p-3">
                         {subjects.map((subject) => (
-                          <label
+                          <Checkbox
                             key={subject.documentId}
-                            className="flex items-center gap-3 text-sm"
+                            name="subjectDocumentIds"
+                            value={subject.documentId}
+                            isSelected={values.subjectDocumentIds.includes(
+                              subject.documentId,
+                            )}
+                            isDisabled={isSaving}
+                            onChange={(isSelected) => {
+                              const nextSubjects = isSelected
+                                ? [
+                                    ...values.subjectDocumentIds,
+                                    subject.documentId,
+                                  ]
+                                : values.subjectDocumentIds.filter(
+                                    (documentId) =>
+                                      documentId !== subject.documentId,
+                                  );
+                              onChange({
+                                ...values,
+                                subjectDocumentIds: nextSubjects,
+                              });
+                            }}
                           >
-                            <input
-                              type="checkbox"
-                              checked={values.subjectDocumentIds.includes(
-                                subject.documentId,
-                              )}
-                              disabled={isSaving}
-                              onChange={(event) => {
-                                const nextSubjects = event.target.checked
-                                  ? [
-                                      ...values.subjectDocumentIds,
-                                      subject.documentId,
-                                    ]
-                                  : values.subjectDocumentIds.filter(
-                                      (documentId) =>
-                                        documentId !== subject.documentId,
-                                    );
-                                onChange({
-                                  ...values,
-                                  subjectDocumentIds: nextSubjects,
-                                });
-                              }}
-                              className="size-4 accent-(--accent-100)"
-                            />
-                            {subject.name}
-                          </label>
+                            <Checkbox.Content>
+                              <Checkbox.Control>
+                                <Checkbox.Indicator />
+                              </Checkbox.Control>
+                              {subject.name}
+                            </Checkbox.Content>
+                          </Checkbox>
                         ))}
                       </div>
                     )}
@@ -437,39 +530,42 @@ export default function CalendarEventDetailsDialog({
                   <>
                     <label className="block text-sm font-semibold">
                       Priority
-                      <select
-                        className={FIELD_CLASS}
+                      <DialogSelect
+                        ariaLabel="Priority"
                         value={values.priority}
-                        disabled={isSaving}
-                        onChange={(event) =>
+                        placeholder="Select priority"
+                        isDisabled={isSaving}
+                        options={[
+                          { value: "high", label: "High" },
+                          { value: "medium", label: "Medium" },
+                          { value: "low", label: "Low" },
+                        ]}
+                        onChange={(priority) =>
                           onChange({
                             ...values,
-                            priority: event.target
-                              .value as CalendarEventFormValues["priority"],
+                            priority:
+                              priority as CalendarEventFormValues["priority"],
                           })
                         }
-                      >
-                        <option value="low">Low</option>
-                        <option value="medium">Medium</option>
-                        <option value="high">High</option>
-                      </select>
+                      />
                     </label>
 
-                    <label className="flex items-center gap-3 text-sm font-medium">
-                      <input
-                        type="checkbox"
-                        checked={values.completed}
-                        disabled={isSaving}
-                        onChange={(event) =>
-                          onChange({
-                            ...values,
-                            completed: event.target.checked,
-                          })
-                        }
-                        className="size-4 accent-(--accent-100)"
-                      />
-                      Mark task as completed
-                    </label>
+                    <Checkbox
+                      name="completed"
+                      className={"content-center"}
+                      isSelected={values.completed}
+                      isDisabled={isSaving}
+                      onChange={(completed) =>
+                        onChange({ ...values, completed })
+                      }
+                    >
+                      <Checkbox.Content>
+                        <Checkbox.Control>
+                          <Checkbox.Indicator />
+                        </Checkbox.Control>
+                        Mark task as completed
+                      </Checkbox.Content>
+                    </Checkbox>
                   </>
                 )}
                 {error && (

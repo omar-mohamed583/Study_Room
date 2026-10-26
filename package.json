@@ -15,6 +15,8 @@
     "@dayflow/react": "^3.7.3",
     "@fontsource-variable/geist": "^5.3.0",
     "@gsap/react": "^2.1.2",
+    "@heroui/react": "^3.2.6",
+    "@heroui/styles": "^3.2.6",
     "@hugeicons/core-free-icons": "^4.3.5",
     "@hugeicons/react": "^1.1.10",
     "@internationalized/date": "^3.12.4",

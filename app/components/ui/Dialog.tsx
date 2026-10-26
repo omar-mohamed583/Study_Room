@@ -42,8 +42,8 @@ export default function DialogComp({
         {svg}
       </Dialog.Trigger>
       <Dialog.Portal>
-        <Dialog.Backdrop className="fixed inset-0 min-h-dvh bg-black/20 dark:bg-black/50 transition-opacity duration-150 data-starting-style:opacity-0 data-ending-style:opacity-0 supports-[-webkit-touch-callout:none]:absolute z-9999999999" />
-        <Dialog.Viewport className="fixed inset-0 grid place-items-center px-4 py-12 xl:py-6 z-999999999999">
+        <Dialog.Backdrop className="fixed inset-0 min-h-dvh bg-black/20 dark:bg-black/50 transition-opacity duration-150 data-starting-style:opacity-0 data-ending-style:opacity-0 supports-[-webkit-touch-callout:none]:absolute z-29999999" />
+        <Dialog.Viewport className="fixed inset-0 grid place-items-center px-4 py-12 xl:py-6 z-30000000">
           <Dialog.Popup className="group/popup relative flex h-full w-full max-w-280 xl:max-w-none justify-center pointer-events-none transition-opacity duration-150 data-starting-style:opacity-0 data-ending-style:opacity-0">
             <Dialog.Close
               className="cursor-pointer absolute right-0 -top-10 flex h-8 w-8 items-center justify-center border border-neutral-950 dark:border-zinc-400/35 bg-white dark:bg-neutral-950 text-neutral-950 dark:text-white shadow-[0.25rem_0.25rem_0] shadow-black/12 dark:shadow-none hover:bg-neutral-100 dark:hover:bg-neutral-800 active:bg-neutral-200 dark:active:bg-neutral-700 xl:top-0 pointer-events-auto focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-neutral-950 dark:focus-visible:outline-white"

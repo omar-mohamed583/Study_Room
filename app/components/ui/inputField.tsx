@@ -71,7 +71,7 @@ export default function InputComponent({
           title={`Please enter your ${type}`}
           {...inpProps}
           value={value}
-          className={`peer focus:outline-none p-2 border-b  w-full text-[15px] ${error ? "border-b-red-500" : "border-b-gray-400"}`}
+          className={`peer focus:outline-none p-2 border-b w-full text-[15px] transition-[border-color,box-shadow] duration-200 motion-reduce:transition-none ${error ? "border-b-red-500" : "border-b-gray-400"}`}
         />
         <label
           htmlFor={slug}

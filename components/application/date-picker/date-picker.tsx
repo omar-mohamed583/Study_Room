@@ -6,7 +6,7 @@ import {
   today,
   type CalendarDateTime,
 } from "@internationalized/date";
-import { Calendar as CalendarIcon, Clock } from "@untitledui/icons";
+import { Calendar as CalendarIcon, ChevronDown, Clock } from "@untitledui/icons";
 import { useDateFormatter } from "react-aria";
 import type { DatePickerProps as AriaDatePickerProps, DateValue, Key } from "react-aria-components";
 import {
@@ -20,16 +20,17 @@ import {
   Button,
   type ButtonProps,
 } from "../../../components/base/buttons/button";
+import { Dropdown } from "../../base/dropdown/dropdown";
 import { InputDateBase } from "../../../components/base/input/input-date";
 import { cx } from "../../../utils/cx";
 import { Calendar } from "./calendar";
 
 /** 27 slots from 9:00 AM through 10:00 PM, in 30-minute intervals. */
-const TIME_SLOTS = Array.from({ length: 47 }, (_, index) => {
+const TIME_SLOTS = Array.from({ length: 48 }, (_, index) => {
   const totalMinutes = 1 * 60 + index * 30;
   const hour = Math.floor(totalMinutes / 60);
   const minute = totalMinutes % 60;
-  const period = hour >= 12 ? "PM" : "AM";
+  const period = hour >= 12 && hour < 24 ? "PM" : "AM";
   const hour12 = hour % 12 || 12;
   const minuteText = String(minute).padStart(2, "0");
 
@@ -196,7 +197,7 @@ export const DatePicker = ({
         style={{ zIndex: 20_000_001 }}
         className={({ isEntering, isExiting }) =>
           cx(
-            "z-[20000001] max-h-[calc(100dvh_-_2rem)] overflow-y-auto overscroll-contain origin-(--trigger-anchor-point) will-change-transform",
+            "z-[20000001] max-h-[calc(100dvh_-_2rem)] overflow-y-auto overscroll-contain origin-(--trigger-anchor-point)",
             isEntering &&
               "duration-150 ease-out animate-in fade-in placement-right:slide-in-from-left-0.5 placement-top:slide-in-from-bottom-0.5 placement-bottom:slide-in-from-top-0.5",
             isExiting &&
@@ -206,7 +207,7 @@ export const DatePicker = ({
       >
         <AriaDialog
           aria-label="Choose date and time"
-          className="rounded-2xl bg-primary shadow-xl ring ring-secondary_alt"
+          className="rounded-2xl bg-primary shadow-xl ring ring-secondary_alt border-3"
         >
           {({ close }) => (
             <>
@@ -234,34 +235,58 @@ export const DatePicker = ({
                           Today
                         </Button>
                       </div>
-                      <label className="flex flex-1 items-center gap-2 rounded-lg border border-secondary bg-primary px-3 text-sm shadow-xs">
-                        <Clock className="size-4 shrink-0 text-quaternary" />
-                        <span className="sr-only">Time</span>
-                        <select
+                      <Dropdown.Root>
+                        <Button
+                          slot={null}
                           aria-label="Time"
-                          className="min-w-0 flex-1 bg-transparent py-2 text-(--text-primary) outline-hidden [color-scheme:light] disabled:cursor-not-allowed disabled:opacity-50 dark:[color-scheme:dark]"
-                          value={currentTimeKey}
-                          disabled={isTimeDisabled}
-                          onChange={(event) => handleTimeClick(event.target.value)}
+                          size="sm"
+                          color="secondary"
+                          iconLeading={Clock}
+                          iconTrailing={ChevronDown}
+                          isDisabled={isTimeDisabled}
+                          className="w-full flex-1 justify-between"
                         >
-                          {!TIME_SLOTS.some((slot) => slot.id === currentTimeKey) && (
-                            <option value={currentTimeKey} disabled>
-                              {draftValue
-                                ? timeFormatter.format(draftValue.toDate(getLocalTimeZone()))
-                                : "Choose time"}
-                            </option>
-                          )}
-                          {TIME_SLOTS.map((slot) => (
-                            <option
-                              key={slot.id}
-                              value={slot.id}
-                              disabled={isTimeSlotBeforeMinimum(slot)}
-                            >
-                              {slot.label}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
+                          {TIME_SLOTS.find((slot) => slot.id === currentTimeKey)
+                            ?.label ??
+                            (draftValue
+                              ? timeFormatter.format(
+                                  draftValue.toDate(getLocalTimeZone()),
+                                )
+                              : "Choose time")}
+                        </Button>
+                        <Dropdown.Popover
+                          className="max-h-60 w-64"
+                          style={{ zIndex: 20_000_002 }}
+                        >
+                          <Dropdown.Menu
+                            aria-label="Available times"
+                            selectionMode="single"
+                            selectedKeys={
+                              currentTimeKey
+                                ? new Set<Key>([currentTimeKey])
+                                : new Set<Key>()
+                            }
+                            onSelectionChange={(selection) => {
+                              if (selection === "all") return;
+                              const [key] = selection;
+                              if (key !== undefined) handleTimeClick(key);
+                            }}
+                          >
+                            <Dropdown.Section>
+                              {TIME_SLOTS.map((slot) => (
+                                <Dropdown.Item
+                                  key={slot.id}
+                                  id={slot.id}
+                                  textValue={slot.label}
+                                  isDisabled={isTimeSlotBeforeMinimum(slot)}
+                                >
+                                  {slot.label}
+                                </Dropdown.Item>
+                              ))}
+                            </Dropdown.Section>
+                          </Dropdown.Menu>
+                        </Dropdown.Popover>
+                      </Dropdown.Root>
                     </div>
                   </Calendar>
                 </div>

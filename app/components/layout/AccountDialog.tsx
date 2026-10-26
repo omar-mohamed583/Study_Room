@@ -5,7 +5,7 @@ import DialogPanel, { Icon } from "../ui/DialogPanel";
 import type { UserType } from "~/types/userType";
 
 const FIELD_CLASS =
-  "h-10 w-full rounded-lg border border-zinc-400/40 bg-transparent px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-(--accent-100)";
+  "h-10 w-full rounded-lg border border-zinc-400/40 bg-transparent px-3 text-sm transition-[border-color,box-shadow] duration-200 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-(--accent-100) motion-reduce:transition-none";
 
 const HINT_CLASS = "mt-1 text-(--text-secondary) [font-size:var(--sm-text)]";
 

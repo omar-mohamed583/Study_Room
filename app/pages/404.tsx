@@ -28,12 +28,11 @@ export default function NotFound() {
   const { theme } = useTheme();
 
   useLayoutEffect(() => {
-    !document.body.classList.contains(theme) && document.body.classList.add(theme)
-    document.body.style.overflow = "hidden";
+    !document.body.classList.contains(theme) && document.body.classList.add(theme);
   }, []);
 
   return (
-    <main className="mt-27 grid content-center *:text-center justify-center min-h-full">
+    <main className="grid place-content-center *:text-center justify-center min-h-dvh ">
       <Particles
         particleColors={[theme === "dark" ? "#fff" : "#838383"]}
         particleCount={800}
