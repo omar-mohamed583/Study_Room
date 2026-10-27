@@ -25,8 +25,11 @@ const FocusTimer = lazy(() => import("~/components/ui/FocusTimer"));
 export const links: LinksFunction = () => [
   {
     rel: "icon",
-    type: "image/svg+xml",
-    href: logo,
+    as: "image",
+    href:
+      window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? darkLogo
+        : lightLogo,
   },
 ];
 

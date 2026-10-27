@@ -6,7 +6,7 @@ import {
 } from "react-router";
 import { ensureSession } from "~/auth/session";
 import type { Task } from "~/types/taskType";
-import { DialMenu } from "../../components/ovio/dial-menu/dial-menu";
+import { DialMenu } from "~/components/ovio/dial-menu/dial-menu";
 import Calendar, { type EventType } from "~/components/ui/Calendar";
 import LoadingComponent from "~/components/ui/LoadingComponent";
 import NotificationModal from "~/components/ui/NotificationModal";

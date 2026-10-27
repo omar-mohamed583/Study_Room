@@ -355,7 +355,7 @@ export default function Header() {
   });
 
   return (
-    <header className="header w-fit rounded-[26px] bg-[hsl(from_var(--sect-bg)_h_s_l_/.6)] backdrop-blur-2xl flex gap-4 p-3 *:bg-(--body-gray) *:border-t *:border-t-gray-400/10 *:shadow-(--xl-shadow) *:rounded-[20px] shadow-(--xs-shadow) mx-auto my-6 z-10000 relative">
+    <header className="header w-fit rounded-full bg-[hsl(from_var(--sect-bg)_h_s_l_/.6)] backdrop-blur-2xl flex gap-4 p-3 *:bg-(--body-gray) *:border-t *:border-t-gray-400/10 *:shadow-(--xl-shadow) *:rounded-[20px] shadow-(--xs-shadow) mx-auto my-6 z-10000 relative">
       <h1 className="font-bold text-lg leading-[normal] cursor-pointer p-4 px-5 md:px-8 flex items-center tracking-wide">
         <div ref={h1TextRef}>
           <ShinyText

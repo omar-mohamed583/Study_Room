@@ -4,9 +4,9 @@ import { ChevronDown } from "@untitledui/icons";
 import { Checkbox } from "@heroui/react";
 import type { Key } from "react-aria-components";
 import type { Subject } from "~/types/subjectTypes";
-import { Button } from "../../../components/base/buttons/button";
-import { Dropdown } from "../../../components/base/dropdown/dropdown";
-import { DatePicker } from "../../../components/application/date-picker/date-picker";
+import { Button } from "~/components/base/buttons/button";
+import { Dropdown } from "~/components/base/dropdown/dropdown";
+import { DatePicker } from "./date-picker/date-picker";
 import {
   addMinutesToDateTimeInput,
   calendarDateTimeToDateTimeInput,
