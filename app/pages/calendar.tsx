@@ -147,7 +147,7 @@ export default function CalendarPage() {
         ),
       },
       {
-        id: "/subjects",
+        id: "/subject",
         label: "Subjects",
         icon: (
           <svg

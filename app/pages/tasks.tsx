@@ -2,6 +2,7 @@ import lightLogo from "~/assets/light-logo.svg";
 import darkLogo from "~/assets/dark-logo.svg";
 import type { MetaFunction } from "react-router";
 import type { LinksFunction } from "react-router";
+import Header from "~/components/layout/Header";
 
 export const links: LinksFunction = () => [
   {
@@ -26,8 +27,11 @@ export const meta: MetaFunction = () => [
 
 export default function Tasks() {
   return (
-    <main className="grid gap-4 p-5">
-      <h1>Tasks</h1>
-    </main>
-  )
+    <>
+      <Header />
+      <main className="mx-auto grid w-full max-w-350 gap-4 px-4 pb-10 pt-28 md:px-8">
+        <h1 className="text-2xl font-black">Tasks</h1>
+      </main>
+    </>
+  );
 }

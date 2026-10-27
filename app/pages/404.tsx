@@ -6,6 +6,7 @@ import WarpText from "~/components/ui/WarpText";
 import useTheme from "~/context/themeContext";
 import lightLogo from "~/assets/light-logo.svg";
 import darkLogo from "~/assets/dark-logo.svg";
+import Header from "~/components/layout/Header";
 
 export const links: LinksFunction = () => [
   {
@@ -37,8 +38,10 @@ export default function NotFound() {
   }, []);
 
   return (
-    <main className="grid place-content-center *:text-center justify-center min-h-dvh ">
-      <Particles
+    <>
+      <Header />
+      <main className="grid min-h-dvh place-content-center justify-center pb-10 pt-28 *:text-center">
+        <Particles
         particleColors={[theme === "dark" ? "#fff" : "#838383"]}
         particleCount={800}
         particleSpread={10}
@@ -109,6 +112,7 @@ export default function NotFound() {
           <path d="M2 12H22" />
         </svg>
       </Button>
-    </main>
+      </main>
+    </>
   );
 }

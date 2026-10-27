@@ -259,7 +259,7 @@ export default function DefaultMain() {
       <Header />
       <main
         ref={container}
-        className="relative grid grid-cols-2 gap-7 max-w-350 mx-auto px-4 md:px-8 *:grid *:gap-10 *:bg-(--sect-bg) *:p-3 *:rounded-[20px] *:overflow-auto max-[1010px]:grid-cols-1 *:shadow-[0_0_8px_0_var(--contrast-text)] *:min-h-120"
+        className="relative grid grid-cols-2 gap-7 max-w-350 mx-auto px-4 md:px-8 pt-28 pb-10 *:grid *:gap-10 *:bg-(--sect-bg) *:p-3 *:rounded-[20px] *:overflow-auto max-[1010px]:grid-cols-1 *:shadow-[0_0_8px_0_var(--contrast-text)] *:min-h-120"
       >
         <section className="gs-animate">
           <DefaultMainSection

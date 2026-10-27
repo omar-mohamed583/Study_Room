@@ -12,6 +12,7 @@ import LoadingComponent from "~/components/ui/LoadingComponent";
 import Stepper from "~/components/ui/stepper";
 import lightLogo from "~/assets/light-logo.svg";
 import darkLogo from "~/assets/dark-logo.svg";
+import Header from "~/components/layout/Header";
 
 export const links: LinksFunction = () => [
   {
@@ -287,8 +288,10 @@ export default function ForgetPassword() {
   }
 
   return (
-    <main className="grid place-content-center min-h-screen relative">
-      <GradientWaves
+    <>
+      <Header />
+      <main className="relative grid min-h-dvh place-content-center pb-10 pt-28">
+        <GradientWaves
         horizonColor={"#0032e6"}
         waveColor={"#ff7452"}
         crestColor={"#FFFFFF"}
@@ -351,6 +354,7 @@ export default function ForgetPassword() {
       </form>
 
       <LoadingComponent loadingState={isLoading} />
-    </main>
+      </main>
+    </>
   );
 }

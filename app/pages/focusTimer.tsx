@@ -80,7 +80,7 @@ export default function FocusTimerPage() {
       <Header />
       <main
         ref={container}
-        className="mx-auto flex w-full max-w-350 flex-col gap-6 px-4 pb-20 text-(--text-primary) sm:px-6"
+        className="mx-auto flex w-full max-w-350 flex-col gap-6 px-4 pb-20 pt-28 text-(--text-primary) sm:px-6"
       >
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_30rem]">
           <SessionStats

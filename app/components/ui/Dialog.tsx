@@ -12,10 +12,14 @@ export default function DialogComp({
   dialogType,
   svg,
   className,
+  open,
+  onOpenChange,
 }: {
   dialogType: string;
-  svg: ReactNode;
-  className: string;
+  svg?: ReactNode;
+  className?: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
   const { user, logout }: { user: UserType, logout: () => void } = useAuth();
 
@@ -30,17 +34,26 @@ export default function DialogComp({
     onSuccess: () => client.invalidateQueries({ queryKey: ["user"] }),
   });
 
+  // When `open` is controlled the trigger is rendered by the caller, so the
+  // built-in trigger is only used for the uncontrolled (legacy) usage.
+  const isControlled = open !== undefined;
+
   return (
-    <Dialog.Root>
-      <Dialog.Trigger
-        className={twMerge(
-          "flex items-center justify-between gap-2 px-3 focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-neutral-950 dark:focus-visible:outline-white capitalize",
-          className,
-        )}
-      >
-        {dialogType}
-        {svg}
-      </Dialog.Trigger>
+    <Dialog.Root
+      open={open}
+      onOpenChange={onOpenChange}
+    >
+      {!isControlled && (
+        <Dialog.Trigger
+          className={twMerge(
+            "flex items-center justify-between gap-2 px-3 focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-neutral-950 dark:focus-visible:outline-white capitalize",
+            className,
+          )}
+        >
+          {dialogType}
+          {svg}
+        </Dialog.Trigger>
+      )}
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 min-h-dvh bg-black/20 dark:bg-black/50 transition-opacity duration-150 data-starting-style:opacity-0 data-ending-style:opacity-0 supports-[-webkit-touch-callout:none]:absolute z-29999999" />
         <Dialog.Viewport className="fixed inset-0 grid place-items-center px-4 py-12 xl:py-6 z-30000000">

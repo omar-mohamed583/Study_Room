@@ -1,652 +1,414 @@
+"use client";
+import { useEffect, useState, useTransition } from "react";
+import { useLocation, useNavigate } from "react-router";
+import { useMotionValueEvent, useScroll } from "motion/react";
+import {
+  CalendarDays,
+  ChartPie,
+  ClipboardList,
+  House,
+  LibraryBig,
+  ListTodo,
+  Moon,
+  Settings,
+  Sun,
+  Timer,
+  UserRoundPen,
+} from "lucide-react";
+import { cn } from "~/lib/utils";
 import ShinyText from "../ui/ShinyText";
 import useTheme from "~/context/themeContext";
-import {
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-  useTransition,
-} from "react";
-import { Link } from "react-router";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
+import { useAuth } from "~/components/providers/authProvider";
 import DialogComp from "../ui/Dialog";
+import {
+  Navbar,
+  NavBody,
+  NavItems,
+  MobileNav,
+  MobileNavHeader,
+  MobileNavToggle,
+  MobileNavMenu,
+  NAVBAR_SCROLL_THRESHOLD,
+} from "~/components/ui/resizable-navbar";
+import lightLogo from "~/assets/light-logo.svg";
 
-export const GS_Duration = 0.8;
-export const GS_DELAY = 0.1;
+const navItems = [
+  { name: "Home", link: "/", icon: House },
+  { name: "Dashboard", link: "/dashboard", icon: ChartPie },
+  { name: "Subjects", link: "/subject", icon: LibraryBig },
+  { name: "Tasks", link: "/tasks", icon: ListTodo },
+  { name: "Exams", link: "/exams", icon: ClipboardList },
+  { name: "Calendar", link: "/calendar", icon: CalendarDays },
+  { name: "Focus Timer", link: "/focus-timer", icon: Timer },
+];
+
+const ICON_BUTTON_CLASS =
+  "grid size-9 shrink-0 place-content-center rounded-full text-(--text-primary) transition-[background-color,scale] duration-200 hover:bg-[hsl(from_var(--text-primary)_h_s_l_/.08)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--text-primary) active:scale-95";
+
+const PROFILE_BUTTON_CLASS =
+  "flex h-9 max-w-56 shrink-0 items-center gap-2 rounded-full border border-[hsl(from_var(--text-primary)_h_s_l_/.12)] bg-[hsl(from_var(--text-primary)_h_s_l_/.06)] px-2.5 text-sm font-medium text-(--text-primary) transition-[background-color,scale] duration-200 hover:bg-[hsl(from_var(--text-primary)_h_s_l_/.1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--text-primary) active:scale-[0.98]";
 
 export default function Header() {
-  // Gsap Setup
-  if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    useGSAP(() => {
-      gsap.from(".header", {
-        opacity: 0,
-        translateY: -30,
-        delay: GS_DELAY,
-        duration: GS_Duration,
-      });
-    }, []);
-  }
-
   const { theme, setTheme } = useTheme();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [dialog, setDialog] = useState<"account" | "setting" | null>(null);
+  const [, startTransition] = useTransition();
 
-  const h1TextRef = useRef<null | HTMLDivElement>(null);
+  const { scrollY } = useScroll();
+  const [isShrunk, setIsShrunk] = useState(false);
 
-  const [openMenu, setOpenMenu] = useState(false);
-  const [openMenuBurger, setOpenMenuBurger] = useState(false);
-
-  const menuBurgerRef = useRef<null | HTMLDivElement>(null);
-
-  const [isPending, startTransition] = useTransition();
-
-  const PERSONAL_ITEMS = useMemo(
-    () => [
-      {
-        id: crypto.randomUUID(),
-        name: "Account",
-        svg: (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="lucide lucide-user-pen preview-icon"
-          >
-            <path d="M11.5 15H7a4 4 0 0 0-4 4v2" />
-            <path d="M21.378 16.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z" />
-            <circle
-              cx="10"
-              cy="7"
-              r="4"
-            />
-          </svg>
-        ),
-        toLocation: "/",
-      },
-      {
-        id: crypto.randomUUID(),
-        name: "Setting",
-        svg: (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="lucide lucide-settings preview-icon"
-          >
-            <path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915" />
-            <circle
-              cx="12"
-              cy="12"
-              r="3"
-            />
-          </svg>
-        ),
-        toLocation: "/",
-      },
-    ],
-    [],
-  );
-
-  const MAIN_ITEMS = useMemo(
-    () => [
-      {
-        name: "Home",
-        svg: (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="lucide lucide-house preview-icon"
-          >
-            <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
-            <path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-          </svg>
-        ),
-        id: crypto.randomUUID(),
-        toLocation: "/",
-      },
-      {
-        id: crypto.randomUUID(),
-        name: "Dashboard",
-        svg: (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="lucide lucide-chart-pie preview-icon"
-          >
-            {" "}
-            <path d="M21 12c.552 0 1.005-.449.95-.998a10 10 0 0 0-8.953-8.951c-.55-.055-.998.398-.998.95v8a1 1 0 0 0 1 1z" />{" "}
-            <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />{" "}
-          </svg>
-        ),
-        toLocation: "/dashboard",
-      },
-      {
-        id: crypto.randomUUID(),
-        name: "Subjects",
-        svg: (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="lucide lucide-library-big preview-icon"
-          >
-            <rect
-              width="8"
-              height="18"
-              x="3"
-              y="3"
-              rx="1"
-            />
-            <path d="M7 3v18" />
-            <path d="M20.4 18.9c.2.5-.1 1.1-.6 1.3l-1.9.7c-.5.2-1.1-.1-1.3-.6L11.1 5.1c-.2-.5.1-1.1.6-1.3l1.9-.7c.5-.2 1.1.1 1.3.6Z" />
-          </svg>
-        ),
-        toLocation: "/subjects",
-      },
-      {
-        id: crypto.randomUUID(),
-        name: "Tasks",
-        svg: (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="lucide lucide-list-todo preview-icon"
-          >
-            {" "}
-            <path d="M13 5h8" /> <path d="M13 12h8" /> <path d="M13 19h8" />{" "}
-            <path d="m3 17 2 2 4-4" />{" "}
-            <rect
-              x="3"
-              y="4"
-              width="6"
-              height="6"
-              rx="1"
-            />{" "}
-          </svg>
-        ),
-        toLocation: "/tasks",
-      },
-      {
-        id: crypto.randomUUID(),
-        name: "Exams",
-        svg: (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="lucide lucide-clipboard-list preview-icon"
-          >
-            {" "}
-            <rect
-              width="8"
-              height="4"
-              x="8"
-              y="2"
-              rx="1"
-              ry="1"
-            />{" "}
-            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />{" "}
-            <path d="M12 11h4" /> <path d="M12 16h4" /> <path d="M8 11h.01" />{" "}
-            <path d="M8 16h.01" />{" "}
-          </svg>
-        ),
-        toLocation: "/exams",
-      },
-      {
-        id: crypto.randomUUID(),
-        name: "Calendar",
-        svg: (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="lucide lucide-calendar-days preview-icon"
-          >
-            {" "}
-            <path d="M8 2v3" /> <path d="M16 2v3" />{" "}
-            <rect
-              x="3"
-              y="3"
-              width="18"
-              height="18"
-              rx="2"
-            />{" "}
-            <path d="M3 9h18" /> <path d="M8 13h.01" /> <path d="M12 13h.01" />{" "}
-            <path d="M16 13h.01" /> <path d="M8 17h.01" />{" "}
-            <path d="M12 17h.01" /> <path d="M16 17h.01" />{" "}
-          </svg>
-        ),
-        toLocation: "/calendar",
-      },
-      {
-        id: crypto.randomUUID(),
-        name: "Focus Timer",
-        svg: (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="lucide lucide-timer preview-icon"
-          >
-            {" "}
-            <line
-              x1="10"
-              x2="14"
-              y1="2"
-              y2="2"
-            />{" "}
-            <line
-              x1="12"
-              x2="15"
-              y1="14"
-              y2="11"
-            />{" "}
-            <circle
-              cx="12"
-              cy="14"
-              r="8"
-            />{" "}
-          </svg>
-        ),
-        toLocation: "/focus-timer",
-      },
-    ],
-    [],
-  );
-
-  const menuRef = useRef<null | HTMLDivElement>(null);
-
-  function toggleMenu(e: any) {
-    if (!menuRef.current) return;
-
-    if (
-      e.target !== menuRef.current &&
-      !e.target.closest(".menu") &&
-      !e.target.closest(".menu-toggler") &&
-      !e.target.classList.contains("menu-toggler") &&
-      openMenu
-    ) {
-      setOpenMenu(false);
-    }
-  }
-
-  function toggleMenuBurger(e: any) {
-    if (!menuBurgerRef.current) return;
-
-    if (
-      e.target !== menuBurgerRef.current &&
-      !e.target.closest(".menu-burger") &&
-      !e.target.closest(".menu-burger-toggler") &&
-      !e.target.classList.contains("menu-burger-toggler") &&
-      openMenuBurger
-    ) {
-      setOpenMenuBurger(false);
-    }
-  }
-
-  useEffect(() => {
-    document.addEventListener("click", (e) => {
-      toggleMenu(e);
-      toggleMenuBurger(e);
-    });
-
-    return () =>
-      document.addEventListener("click", (e) => {
-        toggleMenu(e);
-        toggleMenuBurger(e);
-      });
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    setIsShrunk(latest > NAVBAR_SCROLL_THRESHOLD);
   });
 
+  const pathname = location.pathname;
+
+  const activeLink =
+    navItems.find((item) =>
+      item.link === "/"
+        ? pathname === "/"
+        : pathname === item.link || pathname.startsWith(`${item.link}/`),
+    )?.link ?? "";
+
+  const isAuthenticated = Boolean(user);
+  const accountLabel = user?.email || user?.username || "Account";
+
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+    setDialog(null);
+  }, [location.pathname]);
+
+  const closeMobileMenu = () => setIsMobileMenuOpen(false);
+
+  const toggleTheme = () => {
+    startTransition(() => {
+      setTheme((current) => (current === "light" ? "dark" : "light"));
+    });
+  };
+
+  const openDialog = (type: "account" | "setting") => {
+    setDialog(type);
+    closeMobileMenu();
+  };
+
   return (
-    <header className="header w-fit rounded-full bg-[hsl(from_var(--sect-bg)_h_s_l_/.6)] backdrop-blur-2xl flex gap-4 p-3 *:bg-(--body-gray) *:border-t *:border-t-gray-400/10 *:shadow-(--xl-shadow) *:rounded-[20px] shadow-(--xs-shadow) mx-auto my-6 z-10000 relative">
-      <h1 className="font-bold text-lg leading-[normal] cursor-pointer p-4 px-5 md:px-8 flex items-center tracking-wide">
-        <div ref={h1TextRef}>
-          <ShinyText
-            text="Study Room"
-            speed={2.5}
-            delay={0.2}
-            color={theme === "light" ? "#1b1b1b" : "#bbbbbb"}
-            shineColor={
-              theme === "light" ? "hsl(0, 0%, 50%)" : "hsl(0, 0%, 100%)"
-            }
-            spread={150}
-            direction="left"
-            yoyo={false}
-            className=""
-            pauseOnHover={false}
-            disabled={false}
-          />
-        </div>
-      </h1>
-
-      <div className="flex gap-3 items-center content-center *:p-3 *:px-5 p-1 px-2 *:rounded-[15px] *:transition-colors duration-300 *:hover:bg-gray-400/25 in-[.dark]:*:hover:bg-zinc-800/80 max-[950px]:hidden">
-        <Link to="/dashboard">Dashboard</Link>
-        <Link to="/focus-timer">Focus Timer</Link>
-      </div>
-
-      <div className="flex gap-3 p-2 *:not-[&>div:first-child]:bg-zinc-50 *:not-[&>div:first-child]:in-[.dark]:bg-zinc-800 *:not-[&>div:first-child]:backdrop-blur-3xl *:not-[&>div:first-child]:rounded-[15px] [&_button,&_a]:cursor-pointer [&_button,&_a]:hover:bg-gray-400/25 in-[.dark]:[&_button,&_a]:hover:bg-zinc-700/75 [&_button,&_a]:transition-colors duration-300 z-1000">
-        <div
-          className={`menu-burger max-[950px]:flex-col max-[950px]:absolute [position-anchor:--menu] top-[calc(anchor(bottom)+10px)] rounded-xl bg-(--body-gray) right-[anchor(right)] translate-x-12 min-[871px]:translate-x-0 flex gap-3 *:bg-zinc-50 *:in-[.dark]:bg-zinc-800 *:backdrop-blur-3xl *:rounded-[15px] [&_button]:cursor-pointer [&_button]:hover:bg-gray-400/25 in-[.dark]:[&_button]:hover:bg-zinc-700/75 [&_button]:transition-colors duration-200 z-1000 max-[950px]:p-4 max-[950px]:border border-zinc-400/35 in-[.dark]:border-zinc-400/20 transition-[opacity,scale] ${openMenuBurger ? "pointer-events-auto opacity-100 scale-100" : "pointer-events-none opacity-0 scale-95"} min-[950px]:opacity-100 min-[950px]:scale-100 min-[950px]:pointer-events-auto origin-top-right`}
-          ref={menuBurgerRef}
-        >
-          <div className="isolate *:rounded-full rounded-full relative z-1000">
-            <input
-              type="text"
-              id="search"
-              className="bg-transparent ring-2 ring-transparent focus:ring-zinc-700 border-0 focus-visible:shadow-zinc-700 pl-10 p-2 outline-0 transition-[border-color,box-shadow] duration-200 motion-reduce:transition-none"
-              placeholder=" "
-            />
-            <label
-              htmlFor="search"
-              className="text-(--pale-text) absolute top-1/2 left-2.5 -translate-y-1/2 pointer-events-none items-end content-center flex gap-1.5 text-sm leading-[normal] "
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="lucide lucide-search"
-              >
-                <path d="m21 21-4.34-4.34" />
-                <circle
-                  cx="11"
-                  cy="11"
-                  r="8"
-                />
-              </svg>
-              Search here...
-            </label>
-          </div>
-
-          <Link
-            to="/dashboard"
-            className="p-2 text-center max-[950px]:flex hidden items-center content-center gap-1 justify-center"
-          >
-            Dashboard
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="lucide lucide-move-up-right preview-icon"
-            >
-              <path d="M13 5H19V11" />
-              <path d="M19 5L5 19" />
-            </svg>
-          </Link>
-          <Link
-            to="/focus-timer"
-            className="p-2 text-center max-[950px]:flex hidden items-center content-center gap-1 justify-center"
-          >
-            Focus Timer
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="lucide lucide-move-up-right preview-icon"
-            >
-              <path d="M13 5H19V11" />
-              <path d="M19 5L5 19" />
-            </svg>
-          </Link>
-
+    <header className="relative w-full">
+      <Navbar visible={isShrunk}>
+        <NavBody>
           <button
-            className="grid max-[950px]:[grid-template-areas:'nn_stack'] [grid-template-areas:'stack'] *:not-[&span]:[grid-area:stack] items-center content-center in-[.dark]:[&>svg:last-of-type]:opacity-100 in-[.dark]:[&>svg:first-of-type]:opacity-0 [&>svg:last-of-type]:opacity-0 max-[950px]:w-full max-[950px]:h-auto max-[950px]:p-2 max-[950px]:gap-2 w-10 h-10 place-content-center max-[950px]:ms-auto *:transition-none"
-            onClick={() => {
-              startTransition(() => {
-                setTheme(theme === "light" ? "dark" : "light");
-              });
-            }}
+            type="button"
+            onClick={() => navigate("/")}
+            aria-label="Study Room home"
+            className={cn(
+              "relative z-20 flex shrink-0 items-center rounded-full p-0.5 text-(--text-primary) transition-opacity duration-200 hover:opacity-85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--text-primary)",
+              isShrunk ? "gap-0 pr-0.5" : "gap-2 pr-2",
+            )}
           >
-            <span className="font-medium max-[950px]:inline-block hidden">
-              Change Theme
-            </span>
-            {/* Moon */}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="24px"
-              viewBox="0 -960 960 960"
-              width="24px"
-              className="fill-(--text-primary)"
-            >
-              <path d="M600-640 480-760l120-120 120 120-120 120Zm200 120-80-80 80-80 80 80-80 80ZM483-80q-84 0-157.5-32t-128-86.5Q143-253 111-326.5T79-484q0-146 93-257.5T409-880q-18 99 11 193.5T520-521q71 71 165.5 100T879-410q-26 144-138 237T483-80Zm0-80q88 0 163-44t118-121q-86-8-163-43.5T463-465q-61-61-97-138t-43-163q-77 43-120.5 118.5T159-484q0 135 94.5 229.5T483-160Zm-20-305Z" />
-            </svg>
-
-            {/* Sun */}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="lucide lucide-sun"
-            >
-              <circle
-                cx="12"
-                cy="12"
-                r="4"
+            <span className="grid size-10 shrink-0 place-items-center rounded-full bg-white shadow-[0_2px_10px_rgba(0,0,0,0.16)] ring-1 ring-black/10">
+              <img
+                src={lightLogo}
+                alt=""
+                aria-hidden="true"
+                className="size-6"
               />
-              <path d="M12 2v2" />
-              <path d="M12 20v2" />
-              <path d="m4.93 4.93 1.41 1.41" />
-              <path d="m17.66 17.66 1.41 1.41" />
-              <path d="M2 12h2" />
-              <path d="M20 12h2" />
-              <path d="m6.34 17.66-1.41 1.41" />
-              <path d="m19.07 4.93-1.41 1.41" />
-            </svg>
+            </span>
+            <span
+              className={cn(
+                "inline-block max-w-48 overflow-hidden whitespace-nowrap transition-[max-width,opacity] duration-300 ease-out",
+                isShrunk && "max-w-0 opacity-0",
+              )}
+            >
+              <ShinyText
+                text="Study Room"
+                speed={2.5}
+                delay={0.2}
+                color={theme === "light" ? "#1b1b1b" : "#bbbbbb"}
+                shineColor={
+                  theme === "light" ? "hsl(0, 0%, 50%)" : "hsl(0, 0%, 100%)"
+                }
+                spread={150}
+                direction="left"
+                yoyo={false}
+                className="font-bold tracking-wide"
+                pauseOnHover={false}
+                disabled={false}
+              />
+            </span>
           </button>
-        </div>
 
-        <button
-          aria-label="Show/hide Menu"
-          className="grid w-10 h-10 min-[950px]:hidden place-content-center [anchor-name:--menu] menu-burger-toggler"
-          onClick={() => setOpenMenuBurger((prev) => !prev)}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="lucide lucide-menu preview-icon"
-          >
-            <path d="M4 5h16" />
-            <path d="M4 12h16" />
-            <path d="M4 19h16" />
-          </svg>
-        </button>
-
-        <button
-          className="menu-toggler w-10 h-10 grid place-content-center [anchor-name:--anc]"
-          onClick={() => {
-            setOpenMenu((prev) => !prev);
-          }}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="lucide lucide-user"
-          >
-            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-            <circle
-              cx="12"
-              cy="7"
-              r="4"
-            />
-          </svg>
-        </button>
-      </div>
-
-      <div
-        className={`menu transition-[opacity,scale] duration-200 ${openMenu ? "pointer-events-auto opacity-100 scale-100" : "pointer-events-none opacity-0 scale-95"} origin-top-right absolute top-[calc(anchor(bottom)+6px)] right-[anchor(right)] [position-anchor:--anc] z-100000 shadow-(--text-primary)/20 border-gray-400/10 border shadow-[0_0_10px_3px_var(--tw-shadow)]`}
-        ref={menuRef}
-      >
-        <ul className="min-w-58 pt-2">
-          <ContainerListItem
-            heading="Personal"
-            items={PERSONAL_ITEMS}
+          <NavItems
+            items={navItems}
+            activeLink={activeLink}
+            onNavigate={(link) => navigate(link)}
           />
 
-          <ContainerListItem
-            items={MAIN_ITEMS}
-            heading="MAin"
-          />
-        </ul>
-      </div>
-    </header>
-  );
-}
+          <div className="flex shrink-0 items-center gap-1">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              aria-label={
+                theme === "light"
+                  ? "Switch to dark theme"
+                  : "Switch to light theme"
+              }
+              title={
+                theme === "light"
+                  ? "Switch to dark theme"
+                  : "Switch to light theme"
+              }
+              className={ICON_BUTTON_CLASS}
+            >
+              {theme === "light" ? (
+                <Moon
+                  className="size-5"
+                  aria-hidden="true"
+                />
+              ) : (
+                <Sun
+                  className="size-5"
+                  aria-hidden="true"
+                />
+              )}
+            </button>
 
-function ContainerListItem({
-  items,
-  heading,
-}: {
-  items: {
-    id: string;
-    name: string;
-    svg: React.JSX.Element;
-    toLocation: string;
-  }[];
-  heading: string;
-}) {
-  return (
-    <li className="pt-2">
-      <div className="flex items-center gap-2 text-xs font-semibold lowercase tracking-widest text-(--pale-text)">
-        <span className="h-px flex-1 bg-current/30"></span>
-        <span>{heading}</span>
-        <span className="h-px flex-1 bg-current/30"></span>
-      </div>
-      <ul className="[&_a]:py-3 [&_a]:px-4 *:min-w-50 cursor-pointer *:hover:bg-zinc-400/20 *:font-medium *:transition-colors *:duration-300 *:text-[15px]">
-        {items.map((item) => {
-          if (
-            item.name.toLowerCase() === "account" ||
-            item.name.toLowerCase() === "setting"
-          ) {
-            if (item.name.toLowerCase() === "account")
-              return (
-                <li key={item.id}>
-                  <DialogComp
-                    className="py-3 px-4 min-w-50 cursor-pointer hover:bg-zinc-400/20 font-medium transition-colors duration-300 text-[15px] w-full"
-                    dialogType="account"
-                    svg={item.svg}
-                  />
-                </li>
-              );
-            else {
-              return (
-                <li key={item.id}>
-                  <DialogComp
-                    className="py-3 px-4 min-w-50 cursor-pointer hover:bg-zinc-400/20 font-medium transition-colors duration-300 text-[15px] w-full"
-                    dialogType="setting"
-                    svg={item.svg}
-                  />
-                </li>
-              );
-            }
-          } else {
-            return (
-              <li key={item.id}>
-                <Link
-                  to={item.toLocation}
-                  className="flex items-center content-center justify-between"
+            {isAuthenticated ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setDialog("account")}
+                  aria-label={`Open account${user?.email ? ` for ${user.email}` : ""}`}
+                  aria-haspopup="dialog"
+                  title={accountLabel}
+                  className={PROFILE_BUTTON_CLASS}
                 >
-                  {item.name}
-                  {item.svg}
-                </Link>
-              </li>
-            );
-          }
-        })}
-      </ul>
-    </li>
+                  <UserRoundPen
+                    className="size-4 shrink-0"
+                    aria-hidden="true"
+                  />
+                  <span
+                    className={cn(
+                      "max-w-32 truncate",
+                      isShrunk ? "hidden" : "hidden xl:inline",
+                    )}
+                  >
+                    {accountLabel}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setDialog("setting")}
+                  aria-label="Open settings"
+                  aria-haspopup="dialog"
+                  title="Settings"
+                  className={ICON_BUTTON_CLASS}
+                >
+                  <Settings
+                    className="size-5"
+                    aria-hidden="true"
+                  />
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={() => navigate("/login")}
+                aria-label="Log in"
+                className={PROFILE_BUTTON_CLASS}
+              >
+                <UserRoundPen
+                  className="size-4 shrink-0"
+                  aria-hidden="true"
+                />
+                <span className="hidden xl:inline">Log in</span>
+              </button>
+            )}
+          </div>
+        </NavBody>
+
+        <MobileNav>
+          <MobileNavHeader>
+            <button
+              type="button"
+              onClick={() => navigate("/")}
+              aria-label="Study Room home"
+              className={cn(
+                "relative z-20 flex min-w-0 shrink items-center rounded-full p-0.5 text-(--text-primary) transition-opacity duration-200 hover:opacity-85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--text-primary)",
+                isShrunk ? "gap-0 pr-0.5" : "gap-2 pr-1",
+              )}
+            >
+              <span className="grid size-10 shrink-0 place-items-center rounded-full bg-white shadow-[0_2px_10px_rgba(0,0,0,0.16)] ring-1 ring-black/10">
+                <img
+                  src={lightLogo}
+                  alt=""
+                  aria-hidden="true"
+                  className="size-6"
+                />
+              </span>
+              <span
+                className={cn(
+                  "inline-block max-w-48 overflow-hidden whitespace-nowrap transition-[max-width,opacity] duration-300 ease-out",
+                  isShrunk && "max-w-0 opacity-0",
+                )}
+              >
+                <ShinyText
+                  text="Study Room"
+                  speed={2.5}
+                  delay={0.2}
+                  color={theme === "light" ? "#1b1b1b" : "#bbbbbb"}
+                  shineColor={
+                    theme === "light" ? "hsl(0, 0%, 50%)" : "hsl(0, 0%, 100%)"
+                  }
+                  spread={150}
+                  direction="left"
+                  yoyo={false}
+                  className="font-bold tracking-wide"
+                  pauseOnHover={false}
+                  disabled={false}
+                />
+              </span>
+            </button>
+
+            <MobileNavToggle
+              isOpen={isMobileMenuOpen}
+              onClick={() => setIsMobileMenuOpen((open) => !open)}
+            />
+          </MobileNavHeader>
+
+          <MobileNavMenu
+            isOpen={isMobileMenuOpen}
+            onClose={closeMobileMenu}
+          >
+            <p className="px-3 pb-1 pt-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-(--pale-text)">
+              Menu
+            </p>
+
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = item.link === activeLink;
+
+              return (
+                <button
+                  key={item.link}
+                  type="button"
+                  onClick={() => {
+                    navigate(item.link);
+                    closeMobileMenu();
+                  }}
+                  aria-current={isActive ? "page" : undefined}
+                  className={cn(
+                    "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--text-primary)",
+                    isActive
+                      ? "bg-[hsl(from_var(--text-primary)_h_s_l_/.1)] text-(--text-primary)"
+                      : "text-(--pale-text) hover:bg-[hsl(from_var(--text-primary)_h_s_l_/.06)] hover:text-(--text-primary)",
+                  )}
+                >
+                  <Icon
+                    className="size-4 shrink-0"
+                    aria-hidden="true"
+                  />
+                  <span>{item.name}</span>
+                </button>
+              );
+            })}
+
+            <div className="my-1 h-px bg-[hsl(from_var(--text-primary)_h_s_l_/.1)]" />
+
+            <p className="px-3 pb-1 pt-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-(--pale-text)">
+              Personal
+            </p>
+
+            <button
+              type="button"
+              onClick={() => {
+                toggleTheme();
+                closeMobileMenu();
+              }}
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-(--pale-text) transition-colors duration-200 hover:bg-[hsl(from_var(--text-primary)_h_s_l_/.06)] hover:text-(--text-primary) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--text-primary)"
+            >
+              {theme === "light" ? (
+                <Moon
+                  className="size-4 shrink-0"
+                  aria-hidden="true"
+                />
+              ) : (
+                <Sun
+                  className="size-4 shrink-0"
+                  aria-hidden="true"
+                />
+              )}
+              <span>
+                {theme === "light"
+                  ? "Switch to dark mode"
+                  : "Switch to light mode"}
+              </span>
+            </button>
+
+            {!isAuthPage &&
+              (isAuthenticated ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => openDialog("account")}
+                    aria-haspopup="dialog"
+                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-(--pale-text) transition-colors duration-200 hover:bg-[hsl(from_var(--text-primary)_h_s_l_/.06)] hover:text-(--text-primary) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--text-primary)"
+                  >
+                    <UserRoundPen
+                      className="size-4 shrink-0"
+                      aria-hidden="true"
+                    />
+                    <span>Account</span>
+                    <span className="ml-auto max-w-32 truncate text-xs text-(--pale-text)">
+                      {accountLabel}
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => openDialog("setting")}
+                    aria-haspopup="dialog"
+                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-(--pale-text) transition-colors duration-200 hover:bg-[hsl(from_var(--text-primary)_h_s_l_/.06)] hover:text-(--text-primary) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--text-primary)"
+                  >
+                    <Settings
+                      className="size-4 shrink-0"
+                      aria-hidden="true"
+                    />
+                    <span>Settings</span>
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigate("/login");
+                    closeMobileMenu();
+                  }}
+                  className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-(--pale-text) transition-colors duration-200 hover:bg-[hsl(from_var(--text-primary)_h_s_l_/.06)] hover:text-(--text-primary) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--text-primary)"
+                >
+                  <UserRoundPen
+                    className="size-4 shrink-0"
+                    aria-hidden="true"
+                  />
+                  <span>Log in</span>
+                </button>
+              ))}
+          </MobileNavMenu>
+        </MobileNav>
+      </Navbar>
+
+      <DialogComp
+        dialogType="account"
+        open={dialog === "account"}
+        onOpenChange={(open) => setDialog(open ? "account" : null)}
+      />
+      <DialogComp
+        dialogType="setting"
+        open={dialog === "setting"}
+        onOpenChange={(open) => setDialog(open ? "setting" : null)}
+      />
+    </header>
   );
 }

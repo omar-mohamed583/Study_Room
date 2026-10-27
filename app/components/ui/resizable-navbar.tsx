@@ -1,19 +1,13 @@
 "use client";
 import { cn } from "~/lib/utils";
-import { Menu as IconMenu2, X as IconX } from "lucide-react";
-import {
-  motion,
-  AnimatePresence,
-  useScroll,
-  useMotionValueEvent,
-} from "motion/react";
+import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "motion/react";
 
-import React, { useRef, useState } from "react";
-
+import React, { useEffect, useRef, useState } from "react";
 
 interface NavbarProps {
   children: React.ReactNode;
   className?: string;
+  visible?: boolean;
 }
 
 interface NavBodyProps {
@@ -29,6 +23,8 @@ interface NavItemsProps {
   }[];
   className?: string;
   onItemClick?: () => void;
+  onNavigate?: (link: string) => void;
+  activeLink?: string;
 }
 
 interface MobileNavProps {
@@ -49,27 +45,28 @@ interface MobileNavMenuProps {
   onClose: () => void;
 }
 
-export const Navbar = ({ children, className }: NavbarProps) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollY } = useScroll({
-    target: ref,
-    offset: ["start start", "end start"],
-  });
-  const [visible, setVisible] = useState<boolean>(false);
+export const NAVBAR_SCROLL_THRESHOLD = 100;
+
+export const Navbar = ({
+  children,
+  className,
+  visible: controlledVisible,
+}: NavbarProps) => {
+  const { scrollY } = useScroll();
+  const [scrolled, setScrolled] = useState<boolean>(false);
 
   useMotionValueEvent(scrollY, "change", (latest) => {
-    if (latest > 100) {
-      setVisible(true);
-    } else {
-      setVisible(false);
-    }
+    setScrolled(latest > NAVBAR_SCROLL_THRESHOLD);
   });
+
+  const visible = controlledVisible ?? scrolled;
 
   return (
     <motion.div
-      ref={ref}
-      // IMPORTANT: Change this to class of `fixed` if you want the navbar to be fixed
-      className={cn("sticky inset-x-0 top-20 z-40 w-full", className)}
+      className={cn(
+        "fixed inset-x-0 top-0 z-50 w-full px-2 pt-3 md:px-4",
+        className,
+      )}
     >
       {React.Children.map(children, (child) =>
         React.isValidElement(child)
@@ -87,24 +84,15 @@ export const NavBody = ({ children, className, visible }: NavBodyProps) => {
   return (
     <motion.div
       animate={{
-        backdropFilter: visible ? "blur(10px)" : "none",
         boxShadow: visible
-          ? "0 0 24px rgba(34, 42, 53, 0.06), 0 1px 1px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(34, 42, 53, 0.04), 0 0 4px rgba(34, 42, 53, 0.08), 0 16px 68px rgba(47, 48, 55, 0.05), 0 1px 0 rgba(255, 255, 255, 0.1) inset"
-          : "none",
+          ? "0 18px 50px -20px rgba(0, 0, 0, 0.5)"
+          : "0 4px 20px -12px rgba(0, 0, 0, 0.3)",
         width: visible ? "40%" : "100%",
         y: visible ? 20 : 0,
       }}
-      transition={{
-        type: "spring",
-        stiffness: 200,
-        damping: 50,
-      }}
-      style={{
-        minWidth: "800px",
-      }}
+      transition={{ type: "spring", stiffness: 200, damping: 50 }}
       className={cn(
-        "relative z-[60] mx-auto hidden w-full max-w-7xl flex-row items-center justify-between self-start rounded-full bg-transparent px-4 py-2 lg:flex dark:bg-transparent",
-        visible && "bg-white/80 dark:bg-neutral-950/80",
+        "relative z-[60] mx-auto hidden w-full min-w-[800px] max-w-[1200px] flex-row items-center justify-between gap-2 rounded-full border border-[hsl(from_var(--text-primary)_h_s_l_/.1)] bg-[hsl(from_var(--sect-bg)_h_s_l_/.78)] px-2 py-2 text-(--text-primary) backdrop-blur-xl lg:flex",
         className,
       )}
     >
@@ -113,34 +101,60 @@ export const NavBody = ({ children, className, visible }: NavBodyProps) => {
   );
 };
 
-export const NavItems = ({ items, className, onItemClick }: NavItemsProps) => {
+export const NavItems = ({
+  items,
+  className,
+  onItemClick,
+  onNavigate,
+  activeLink,
+}: NavItemsProps) => {
   const [hovered, setHovered] = useState<number | null>(null);
+  const activeIndex = items.findIndex((item) => item.link === activeLink);
+  const highlighted = hovered ?? (activeIndex >= 0 ? activeIndex : null);
 
   return (
     <motion.div
+      role="navigation"
+      aria-label="Primary"
       onMouseLeave={() => setHovered(null)}
       className={cn(
-        "absolute inset-0 hidden flex-1 flex-row items-center justify-center space-x-2 text-sm font-medium text-zinc-600 transition duration-200 hover:text-zinc-800 lg:flex lg:space-x-2",
+        "relative hidden flex-1 flex-row items-center justify-center gap-0.5 text-[13px] font-medium lg:flex xl:gap-1 xl:text-sm",
         className,
       )}
     >
-      {items.map((item, idx) => (
-        <a
-          onMouseEnter={() => setHovered(idx)}
-          onClick={onItemClick}
-          className="relative px-4 py-2 text-neutral-600 dark:text-neutral-300"
-          key={`link-${idx}`}
-          href={item.link}
-        >
-          {hovered === idx && (
-            <motion.div
-              layoutId="hovered"
-              className="absolute inset-0 h-full w-full rounded-full bg-gray-100 dark:bg-neutral-800"
-            />
-          )}
-          <span className="relative z-20">{item.name}</span>
-        </a>
-      ))}
+      {items.map((item, idx) => {
+        const isActive = idx === activeIndex;
+
+        return (
+          <button
+            key={`link-${idx}`}
+            type="button"
+            onMouseEnter={() => setHovered(idx)}
+            onFocus={() => setHovered(idx)}
+            onBlur={() => setHovered(null)}
+            onClick={() => {
+              onItemClick?.();
+              onNavigate?.(item.link);
+            }}
+            aria-current={isActive ? "page" : undefined}
+            className={cn(
+              "relative shrink-0 rounded-full px-2.5 py-2 transition-colors duration-200 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--text-primary) xl:px-3.5",
+              isActive
+                ? "text-(--text-primary)"
+                : "text-(--pale-text) hover:text-(--text-primary)",
+            )}
+          >
+            {highlighted === idx && (
+              <motion.span
+                layoutId="nav-highlight"
+                transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                className="absolute inset-0 rounded-full bg-[hsl(from_var(--text-primary)_h_s_l_/.08)]"
+              />
+            )}
+            <span className="relative z-10">{item.name}</span>
+          </button>
+        );
+      })}
     </motion.div>
   );
 };
@@ -149,24 +163,16 @@ export const MobileNav = ({ children, className, visible }: MobileNavProps) => {
   return (
     <motion.div
       animate={{
-        backdropFilter: visible ? "blur(10px)" : "none",
         boxShadow: visible
-          ? "0 0 24px rgba(34, 42, 53, 0.06), 0 1px 1px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(34, 42, 53, 0.04), 0 0 4px rgba(34, 42, 53, 0.08), 0 16px 68px rgba(47, 48, 55, 0.05), 0 1px 0 rgba(255, 255, 255, 0.1) inset"
-          : "none",
+          ? "0 18px 50px -20px rgba(0, 0, 0, 0.5)"
+          : "0 4px 20px -12px rgba(0, 0, 0, 0.3)",
         width: visible ? "90%" : "100%",
-        paddingRight: visible ? "12px" : "0px",
-        paddingLeft: visible ? "12px" : "0px",
-        borderRadius: visible ? "4px" : "2rem",
+        borderRadius: visible ? "1.5rem" : "9999px",
         y: visible ? 20 : 0,
       }}
-      transition={{
-        type: "spring",
-        stiffness: 200,
-        damping: 50,
-      }}
+      transition={{ type: "spring", stiffness: 200, damping: 50 }}
       className={cn(
-        "relative z-50 mx-auto flex w-full max-w-[calc(100vw-2rem)] flex-col items-center justify-between bg-transparent px-0 py-2 lg:hidden",
-        visible && "bg-white/80 dark:bg-neutral-950/80",
+        "relative z-50 mx-auto flex w-full max-w-[1200px] flex-col items-center justify-between rounded-full border border-[hsl(from_var(--text-primary)_h_s_l_/.1)] bg-[hsl(from_var(--sect-bg)_h_s_l_/.78)] px-2 py-2 text-(--text-primary) backdrop-blur-xl lg:hidden",
         className,
       )}
     >
@@ -182,7 +188,7 @@ export const MobileNavHeader = ({
   return (
     <div
       className={cn(
-        "flex w-full flex-row items-center justify-between",
+        "flex w-full flex-row items-center justify-between gap-2 px-1",
         className,
       )}
     >
@@ -197,20 +203,55 @@ export const MobileNavMenu = ({
   isOpen,
   onClose,
 }: MobileNavMenuProps) => {
+  const menuRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+        document
+          .querySelector<HTMLElement>("[data-mobile-nav-toggle]")
+          ?.focus();
+      }
+    };
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (!target) return;
+      if (menuRef.current?.contains(target)) return;
+      if (target.closest("[data-mobile-nav-toggle]")) return;
+      onClose();
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("pointerdown", handlePointerDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, [isOpen, onClose]);
+
   return (
     <AnimatePresence>
       {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+        <motion.nav
+          ref={menuRef}
+          id="mobile-nav-menu"
+          aria-label="Mobile navigation"
+          initial={{ opacity: 0, y: -8, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -8, scale: 0.98 }}
+          transition={{ duration: 0.18, ease: "easeOut" }}
           className={cn(
-            "absolute inset-x-0 top-16 z-50 flex w-full flex-col items-start justify-start gap-4 rounded-lg bg-white px-4 py-8 shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset] dark:bg-neutral-950",
+            "absolute inset-x-0 top-full z-50 mt-2 flex max-h-[calc(100dvh_-_6rem)] w-full origin-top flex-col items-stretch gap-1 overflow-y-auto rounded-[1.5rem] border border-[hsl(from_var(--text-primary)_h_s_l_/.1)] bg-[hsl(from_var(--sect-bg)_h_s_l_/.98)] p-3 text-(--text-primary) shadow-[0_24px_70px_-20px_rgba(0,0,0,0.55)] backdrop-blur-2xl",
             className,
           )}
         >
           {children}
-        </motion.div>
+        </motion.nav>
       )}
     </AnimatePresence>
   );
@@ -223,10 +264,40 @@ export const MobileNavToggle = ({
   isOpen: boolean;
   onClick: () => void;
 }) => {
-  return isOpen ? (
-    <IconX className="text-black dark:text-white" onClick={onClick} />
-  ) : (
-    <IconMenu2 className="text-black dark:text-white" onClick={onClick} />
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
+      aria-expanded={isOpen}
+      aria-controls="mobile-nav-menu"
+      data-mobile-nav-toggle
+      className="grid size-11 shrink-0 place-content-center rounded-full border border-[hsl(from_var(--text-primary)_h_s_l_/.12)] bg-[hsl(from_var(--text-primary)_h_s_l_/.06)] p-2.5 text-(--text-primary) transition-[background-color,scale] duration-200 hover:bg-[hsl(from_var(--text-primary)_h_s_l_/.1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--text-primary) active:scale-95"
+    >
+      <span
+        aria-hidden="true"
+        className="relative block h-4 w-5"
+      >
+        <span
+          className={cn(
+            "absolute inset-x-0 top-0 h-0.5 rounded-full bg-current transition-transform duration-300",
+            isOpen && "translate-y-[7px] rotate-45",
+          )}
+        />
+        <span
+          className={cn(
+            "absolute inset-x-0 top-1/2 h-0.5 -translate-y-1/2 rounded-full bg-current transition-opacity duration-200",
+            isOpen && "opacity-0",
+          )}
+        />
+        <span
+          className={cn(
+            "absolute inset-x-0 bottom-0 h-0.5 rounded-full bg-current transition-transform duration-300",
+            isOpen && "-translate-y-[7px] -rotate-45",
+          )}
+        />
+      </span>
+    </button>
   );
 };
 

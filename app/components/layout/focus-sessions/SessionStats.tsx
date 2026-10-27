@@ -61,22 +61,18 @@ export default function SessionStats({
       {isPending ? (
         <SessionStatsSkeleton />
       ) : (
-        <ul
-          className="grid flex-1 grid-cols-2 gap-5 md:grid-cols-4 lg:grid-cols-2"
-        >
+        <ul className="grid flex-1 grid-cols-2 gap-5 md:grid-cols-4 lg:grid-cols-2">
           {tiles.map((tile) => (
             <li
               key={tile.label}
-              className="flex min-h-28 flex-col justify-between gap-6 rounded-2xl bg-muted transition-[box-shadow,translate,background-color] duration-300 hover:-translate-y-2 in-[.dark]:bg-muted/40 ring-3 ring-transparent focus-visible:ring-sky-500 hover:ring-sky-500 backdrop-blur-xl p-3 sm:p-4 in-[.dark]:hover:bg-muted/60 relative isolate overflow-clip"
+              className="flex min-h-28 flex-col justify-between gap-6 rounded-2xl bg-muted/10 transition-[box-shadow,translate,background-color] duration-300 hover:-translate-y-2 in-[.dark]:bg-muted/40 ring-3 ring-transparent focus-visible:ring-sky-500 hover:ring-sky-500 backdrop-blur-xl p-3 sm:p-4 in-[.dark]:hover:bg-muted/60 relative isolate overflow-clip"
             >
               <span className="grid size-8 place-items-center rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-300">
                 {tile.icon}
               </span>
               <div className="relative z-10">
                 <p className="text-sm text-(--text-secondary)">{tile.label}</p>
-                <p
-                  className="mt-1 text-xl font-medium tracking-tight sm:text-2xl"
-                >
+                <p className="mt-1 text-xl font-medium tracking-tight sm:text-2xl">
                   {hasError ? "—" : tile.value}
                 </p>
               </div>
