@@ -13,12 +13,17 @@ import NotificationModal from "~/components/ui/NotificationModal";
 import useStudyData from "~/context/studyDataContext";
 import useTheme from "~/context/themeContext";
 import { useMemo, useTransition } from "react";
+import lightLogo from "~/assets/light-logo.svg";
+import darkLogo from "~/assets/dark-logo.svg";
 
 export const links: LinksFunction = () => [
   {
     rel: "icon",
     as: "image",
-    href: "../assets/logo.svg",
+    href:
+      window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? darkLogo
+        : lightLogo,
   },
 ];
 

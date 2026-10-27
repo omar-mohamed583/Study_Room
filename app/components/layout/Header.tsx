@@ -31,6 +31,8 @@ export default function Header() {
 
   const { theme, setTheme } = useTheme();
 
+  const h1TextRef = useRef<null | HTMLDivElement>(null);
+
   const [openMenu, setOpenMenu] = useState(false);
   const [openMenuBurger, setOpenMenuBurger] = useState(false);
 
@@ -355,21 +357,23 @@ export default function Header() {
   return (
     <header className="header w-fit rounded-[26px] bg-[hsl(from_var(--sect-bg)_h_s_l_/.6)] backdrop-blur-2xl flex gap-4 p-3 *:bg-(--body-gray) *:border-t *:border-t-gray-400/10 *:shadow-(--xl-shadow) *:rounded-[20px] shadow-(--xs-shadow) mx-auto my-6 z-10000 relative">
       <h1 className="font-bold text-lg leading-[normal] cursor-pointer p-4 px-5 md:px-8 flex items-center tracking-wide">
-        <ShinyText
-          text="Study Room"
-          speed={2.5}
-          delay={0.2}
-          color={theme === "light" ? "#1b1b1b" : "#bbbbbb"}
-          shineColor={
-            theme === "light" ? "hsl(0, 0%, 50%)" : "hsl(0, 0%, 100%)"
-          }
-          spread={150}
-          direction="left"
-          yoyo={false}
-          className=""
-          pauseOnHover={false}
-          disabled={false}
-        />
+        <div ref={h1TextRef}>
+          <ShinyText
+            text="Study Room"
+            speed={2.5}
+            delay={0.2}
+            color={theme === "light" ? "#1b1b1b" : "#bbbbbb"}
+            shineColor={
+              theme === "light" ? "hsl(0, 0%, 50%)" : "hsl(0, 0%, 100%)"
+            }
+            spread={150}
+            direction="left"
+            yoyo={false}
+            className=""
+            pauseOnHover={false}
+            disabled={false}
+          />
+        </div>
       </h1>
 
       <div className="flex gap-3 items-center content-center *:p-3 *:px-5 p-1 px-2 *:rounded-[15px] *:transition-colors duration-300 *:hover:bg-gray-400/25 in-[.dark]:*:hover:bg-zinc-800/80 max-[950px]:hidden">

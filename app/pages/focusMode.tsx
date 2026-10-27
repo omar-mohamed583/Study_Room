@@ -5,7 +5,8 @@ import video from "../assets/nature.mp4";
 import image from "../assets/nature.webp";
 import { createPortal } from "react-dom";
 import type { LinksFunction, MetaFunction } from "react-router";
-import logo from "../assets/logo.svg";
+import lightLogo from "~/assets/light-logo.svg";
+import darkLogo from "~/assets/dark-logo.svg";
 import Button from "~/components/ui/Button";
 import DesktopNotice from "~/components/ui/DesktopNotice";
 
@@ -13,7 +14,10 @@ export const links: LinksFunction = () => [
   {
     rel: "icon",
     type: "image/svg+xml",
-    href: logo,
+    href:
+      window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? darkLogo
+        : lightLogo,
   },
 ];
 
@@ -33,7 +37,7 @@ export default function focusMode() {
   const { theme, setTheme } = useTheme();
 
   useLayoutEffect(() => {
-    setTheme("dark")
+    setTheme("dark");
   }, []);
 
   return (
@@ -79,7 +83,7 @@ function VideoComponent() {
       <img
         src={image}
         alt="nature image"
-        style={{filter: "blur(10px)", transition: "opacity 150ms ease"}}
+        style={{ filter: "blur(10px)", transition: "opacity 150ms ease" }}
         loading="eager"
         ref={imageRef}
       />

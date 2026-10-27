@@ -2,11 +2,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router";
 import { apiFetch } from "~/api/api";
 import useTheme from "~/context/themeContext";
-import type TaskItemType from "~/types/taskItemTypes";
 
 const TASKS_QUERY_KEY = ["/tasks?populate=*", null] as const;
 
-export default function TaskItem({ task }: TaskItemType) {
+export default function TaskItem({ task }: { task: any }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { setSelectEventValue } = useTheme();
@@ -31,15 +30,16 @@ export default function TaskItem({ task }: TaskItemType) {
   });
 
   const dueDate = task.dueDate ? new Date(task.dueDate) : null;
-  const dueLabel = !dueDate || Number.isNaN(dueDate.getTime())
-    ? "No due date"
-    : task.calendarAllDay ||
-        (dueDate.getHours() === 0 && dueDate.getMinutes() === 0)
-      ? "Due today"
-      : `Due ${dueDate.toLocaleTimeString([], {
-          hour: "numeric",
-          minute: "2-digit",
-        })}`;
+  const dueLabel =
+    !dueDate || Number.isNaN(dueDate.getTime())
+      ? "No due date"
+      : task.calendarAllDay ||
+          (dueDate.getHours() === 0 && dueDate.getMinutes() === 0)
+        ? "Due today"
+        : `Due ${dueDate.toLocaleTimeString([], {
+            hour: "numeric",
+            minute: "2-digit",
+          })}`;
 
   function startFocusTimer() {
     setSelectEventValue({
@@ -70,7 +70,10 @@ export default function TaskItem({ task }: TaskItemType) {
           <span className="text-xs text-(--text-secondary)">No subject</span>
         )}
         <h3 className="mt-1 truncate text-base font-semibold capitalize">
-          <Link to="/tasks" className="hover:underline">
+          <Link
+            to="/tasks"
+            className="hover:underline"
+          >
             {task.title}
           </Link>
         </h3>
@@ -147,7 +150,10 @@ export default function TaskItem({ task }: TaskItemType) {
         </button>
       </div>
       {taskAction.error && (
-        <p role="alert" className="col-span-full text-xs text-red-600 dark:text-red-400">
+        <p
+          role="alert"
+          className="col-span-full text-xs text-red-600 dark:text-red-400"
+        >
           {taskAction.error.message}
         </p>
       )}

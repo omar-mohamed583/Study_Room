@@ -8,12 +8,17 @@ import { useAuth } from "~/components/providers/authProvider";
 import GradientWaves from "~/components/ui/GradientWaves";
 import InputComponent, { useInputStates } from "~/components/ui/inputField";
 import LoadingComponent from "~/components/ui/LoadingComponent";
+import lightLogo from "~/assets/light-logo.svg";
+import darkLogo from "~/assets/dark-logo.svg";
 
 export const links: LinksFunction = () => [
   {
     rel: "icon",
     as: "image",
-    href: "../assets/logo.svg",
+    href:
+      window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? darkLogo
+        : lightLogo,
   },
 ];
 

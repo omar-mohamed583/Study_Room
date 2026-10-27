@@ -1,6 +1,7 @@
 import { lazy, Suspense, useRef } from "react";
 import SectionCard from "~/components/layout/focus-sessions/SectionCard";
-import logo from "~/assets/logo.svg";
+import lightLogo from "~/assets/light-logo.svg";
+import darkLogo from "~/assets/dark-logo.svg";
 import SessionHistory from "~/components/layout/focus-sessions/SessionHistory";
 import SessionStats from "~/components/layout/focus-sessions/SessionStats";
 import Header from "~/components/layout/Header";
@@ -10,7 +11,12 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ensureSession } from "~/auth/session";
-import { redirect, useNavigate, type LinksFunction, type MetaFunction } from "react-router";
+import {
+  redirect,
+  useNavigate,
+  type LinksFunction,
+  type MetaFunction,
+} from "react-router";
 import Button from "~/components/ui/Button";
 import Footer from "~/components/layout/Footer";
 

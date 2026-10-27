@@ -16,7 +16,8 @@ import FocusTimer from "../ui/FocusTimer";
 import UpcomingDeadlines from "../ui/UpcomingDeadlineComponent";
 import MyPie from "../ui/PieChart";
 import gsap from "gsap";
-import logo from "~/assets/logo.svg";
+import lightLogo from "~/assets/light-logo.svg";
+import darkLogo from "~/assets/dark-logo.svg";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import EmptyState from "../ui/EmptyState";
@@ -34,7 +35,10 @@ export const links: LinksFunction = () => [
   {
     rel: "icon",
     type: "image/svg+xml",
-    href: logo,
+    href:
+      window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? darkLogo
+        : lightLogo,
   },
 ];
 
@@ -320,17 +324,17 @@ export default function DefaultMain() {
             className="border-0"
             alignContentBetween
           >
-              <div className="px-3">
-                <h2 className="font-medium text-3xl text-white leading-[normal] text-center">
-                  {now < 20 && now > 5
-                    ? "Have A Good Day"
-                    : "Welcome Night Owl"}
-                  <br></br>
-                  <Suspense fallback={"guest"}>
-                    <span className="tracking-wider capitalize">{user?.username}!</span>
-                  </Suspense>
-                </h2>
-              </div>
+            <div className="px-3">
+              <h2 className="font-medium text-3xl text-white leading-[normal] text-center">
+                {now < 20 && now > 5 ? "Have A Good Day" : "Welcome Night Owl"}
+                <br></br>
+                <Suspense fallback={"guest"}>
+                  <span className="tracking-wider capitalize">
+                    {user?.username}!
+                  </span>
+                </Suspense>
+              </h2>
+            </div>
 
             <div className="px-3 pb-10">
               <h4 className="text-2xl text-center leading-[normal] text-white mb-5 text-shadow-lg text-shadow-blue-800/40">

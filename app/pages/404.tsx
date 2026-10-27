@@ -4,12 +4,17 @@ import Button from "~/components/ui/Button";
 import Particles from "~/components/ui/Particles";
 import WarpText from "~/components/ui/WarpText";
 import useTheme from "~/context/themeContext";
+import lightLogo from "~/assets/light-logo.svg";
+import darkLogo from "~/assets/dark-logo.svg";
 
 export const links: LinksFunction = () => [
   {
     rel: "icon",
     as: "image",
-    href: "../assets/logo.svg",
+    href:
+      window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? darkLogo
+        : lightLogo,
   },
 ];
 
