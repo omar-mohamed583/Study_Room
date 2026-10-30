@@ -172,7 +172,7 @@ export const MobileNav = ({ children, className, visible }: MobileNavProps) => {
       }}
       transition={{ type: "spring", stiffness: 200, damping: 50 }}
       className={cn(
-        "relative z-50 mx-auto flex w-full max-w-[1200px] flex-col items-center justify-between rounded-full border border-[hsl(from_var(--text-primary)_h_s_l_/.1)] bg-[hsl(from_var(--sect-bg)_h_s_l_/.78)] px-2 py-2 text-(--text-primary) backdrop-blur-xl lg:hidden",
+        "relative z-50 mx-auto flex w-full max-w-300 flex-col items-center justify-between rounded-full border border-[hsl(from_var(--text-primary)_h_s_l_/.1)] bg-[hsl(from_var(--sect-bg)_h_s_l_/.78)] px-2 py-2 text-(--text-primary) backdrop-blur-[3px] lg:hidden",
         className,
       )}
     >

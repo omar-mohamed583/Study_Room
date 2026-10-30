@@ -347,54 +347,53 @@ export default function Header() {
               </span>
             </button>
 
-            {!isAuthPage &&
-              (isAuthenticated ? (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => openDialog("account")}
-                    aria-haspopup="dialog"
-                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-(--pale-text) transition-colors duration-200 hover:bg-[hsl(from_var(--text-primary)_h_s_l_/.06)] hover:text-(--text-primary) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--text-primary)"
-                  >
-                    <UserRoundPen
-                      className="size-4 shrink-0"
-                      aria-hidden="true"
-                    />
-                    <span>Account</span>
-                    <span className="ml-auto max-w-32 truncate text-xs text-(--pale-text)">
-                      {accountLabel}
-                    </span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => openDialog("setting")}
-                    aria-haspopup="dialog"
-                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-(--pale-text) transition-colors duration-200 hover:bg-[hsl(from_var(--text-primary)_h_s_l_/.06)] hover:text-(--text-primary) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--text-primary)"
-                  >
-                    <Settings
-                      className="size-4 shrink-0"
-                      aria-hidden="true"
-                    />
-                    <span>Settings</span>
-                  </button>
-                </>
-              ) : (
+            {isAuthenticated ? (
+              <>
                 <button
                   type="button"
-                  onClick={() => {
-                    navigate("/login");
-                    closeMobileMenu();
-                  }}
+                  onClick={() => openDialog("account")}
+                  aria-haspopup="dialog"
                   className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-(--pale-text) transition-colors duration-200 hover:bg-[hsl(from_var(--text-primary)_h_s_l_/.06)] hover:text-(--text-primary) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--text-primary)"
                 >
                   <UserRoundPen
                     className="size-4 shrink-0"
                     aria-hidden="true"
                   />
-                  <span>Log in</span>
+                  <span>Account</span>
+                  <span className="ml-auto max-w-32 truncate text-xs text-(--pale-text)">
+                    {accountLabel}
+                  </span>
                 </button>
-              ))}
+
+                <button
+                  type="button"
+                  onClick={() => openDialog("setting")}
+                  aria-haspopup="dialog"
+                  className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-(--pale-text) transition-colors duration-200 hover:bg-[hsl(from_var(--text-primary)_h_s_l_/.06)] hover:text-(--text-primary) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--text-primary)"
+                >
+                  <Settings
+                    className="size-4 shrink-0"
+                    aria-hidden="true"
+                  />
+                  <span>Settings</span>
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  navigate("/login");
+                  closeMobileMenu();
+                }}
+                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-(--pale-text) transition-colors duration-200 hover:bg-[hsl(from_var(--text-primary)_h_s_l_/.06)] hover:text-(--text-primary) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--text-primary)"
+              >
+                <UserRoundPen
+                  className="size-4 shrink-0"
+                  aria-hidden="true"
+                />
+                <span>Log in</span>
+              </button>
+            )}
           </MobileNavMenu>
         </MobileNav>
       </Navbar>
