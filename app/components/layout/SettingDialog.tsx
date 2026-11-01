@@ -394,7 +394,7 @@ export default function SettingsContent({
             )}
 
             {section === "study" && (
-              <div className="grid gap-8">
+              <div className="grid gap-8 overflow-y-auto">
                 {/* Study goal */}
                 <div>
                   <div className="flex items-baseline justify-between gap-4">

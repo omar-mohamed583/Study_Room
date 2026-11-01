@@ -4,7 +4,12 @@ import type { MetaFunction } from "react-router";
 import type { LinksFunction } from "react-router";
 import LaserFlow from "~/components/ui/LaserFlow";
 import { useMemo, useRef, type ReactNode } from "react";
-import { ArrowDownRight, ArrowUpRight, ChevronDown } from "lucide-react";
+import {
+  ArrowDownRight,
+  ArrowUpRight,
+  ChevronDown,
+  CircleAlert,
+} from "lucide-react";
 import {
   AreaSparkline,
   useSparklineHover,
@@ -46,7 +51,7 @@ export default function Tasks() {
       {
         title: "completed",
         children: "",
-        chartData: Array.from({ length: 30 }, (_, i) => ({
+        chartData: Array.from({ length: 6 }, (_, i) => ({
           day: `Day ${i + 1}`,
           value: Math.round(4200 + 40 * i + Math.sin(i * 0.7) * 500),
         })),
@@ -74,14 +79,14 @@ export default function Tasks() {
           intensity={1.5}
           flare={1}
           spread={1.5}
-          spill={1}
-          fog={0.2}
-          dust={1}
+          spill={1.1}
+          fog={0.1}
+          dust={1.4}
           revealRadius={260}
           revealOpacity={0}
           beamWidth={2}
-          streaks={1.3}
-          dots={1}
+          streaks={1.4}
+          dots={1.3}
           pulse={1.2}
           speed={1.95}
           seed={10}
@@ -91,16 +96,28 @@ export default function Tasks() {
 
         <section
           ref={cardRef}
-          className="mx-auto grid w-full backdrop-blur-lg max-w-[min(95dvw,89rem)] p-4 absolute top-30 bottom-0 left-1/2 -translate-x-1/2 rounded-t-[30px] border border-zinc-400/5 grid-cols-4 grid-rows-3 gap-3"
+          className="mx-auto grid w-full backdrop-blur-lg max-w-[min(95dvw,89rem)] p-4 absolute top-30 bottom-0 left-1/2 -translate-x-1/2 rounded-t-[30px] border border-zinc-400/5 grid-cols-4 md:grid-rows-[11rem_20rem_1fr] gap-3 overflow-y-auto scrollbar-thin"
         >
           {sectionInfo.map((sec) => (
             <TasksChart
-              chartData={sec.chartData}
+              chartData={sec.chartData ?? []}
               key={sec.title}
               title={sec.title}
               children={sec.children}
             />
           ))}
+          <section className="border row-span-2 rounded-2xl border-zinc-400/60 in-[.dark]:border-zinc-400/15 flex flex-col p-3 gap-2">
+            <div className="rounded-xl gap-2 grid grid-cols-2 border p-3 *:py-2 *:px-2.5 *:cursor-pointer *:rounded-[8px] *:transition-colors *:duration-200 *:text-sm *:leading-[normal] *:grid *:place-content-center">
+              <button className="bg-rose-500 hover:bg-rose-500/70 font-heading">
+                Reset
+              </button>
+              <button className="bg-(--accent-200) hover:bg-(--accent-200)/70">
+                Create Task
+              </button>
+            </div>
+          </section>
+          <section className="border col-span-3 rounded-2xl border-zinc-400/60 in-[.dark]:border-zinc-400/15"></section>
+          <section className="border col-span-3 h-30 rounded-2xl border-zinc-400/60 in-[.dark]:border-zinc-400/15"></section>
         </section>
       </main>
     </>
@@ -114,6 +131,24 @@ function percentChange(from: number, to: number) {
   return ((to - from) / Math.abs(from)) * 100;
 }
 
+type DayRatio = {
+  value: number;
+};
+
+function getDayRatio(chartData: Row[]): DayRatio {
+  const days = chartData.length;
+  if (!days) return { value: 0 };
+
+  const total = Math.abs(
+    chartData.reduce((sum, row) => sum + (row.value - sum), 0),
+  );
+  const perDay = total / days;
+
+  return {
+    value: Math.round(perDay * 10) / 10,
+  };
+}
+
 function TasksChart({
   title,
   chartData,
@@ -125,12 +160,13 @@ function TasksChart({
   const hover = useSparklineHover<Row>();
   const shown = hover.datum ?? chartData.at(-1)!;
 
-  const change = percentChange(chartData[0].value, shown.value);
-  const isUp = change >= 0;
+  const change = percentChange(chartData[0]?.value, shown?.value);
+  const isUp = isNaN(change) ? null : change >= 0;
   const Arrow = isUp ? ArrowUpRight : ArrowDownRight;
+  const { value } = getDayRatio(chartData);
 
   return (
-    <section className="p-4 border border-zinc-400/15 bg-muted/10 backdrop-blur-md rounded-2xl hover:bg-muted/30 transition-colors duration-200 hover:border-zinc-400/30 grid gap-2">
+    <section className="[background:linear-gradient(to_top,oklch(82.8%_0.189_84.429/0.28),rgb(159_159_169/0.2))] in-[.dark]:[background:linear-gradient(to_top,oklch(82.8%_0.189_84.429/0.04),rgb(159_159_169/0.01))] hover:saturate-150 p-4 border border-zinc-400/60 in-[.dark]:border-zinc-400/15 backdrop-blur-md rounded-2xl transition-colors duration-200 hover:border-amber-500/90 grid gap-2">
       <header>
         <h3 className="uppercase tracking-[-0.01em] font-heading text-[14px] leading-[normal] text-(--text-secondary)">
           {title}
@@ -138,12 +174,21 @@ function TasksChart({
       </header>
       <main className="grid gap-4 *:flex *:justify-between *:items-center">
         <div>
-          <span className="text-[40px] leading-[normal]">{shown.value}</span>
+          <span className="text-[40px] leading-[normal]">
+            {shown?.value || 0}
+          </span>
           <AreaSparkline
             className="w-1/2"
             color="#f97316"
             crosshair="gradient"
-            data={chartData}
+            data={
+              chartData.length
+                ? chartData
+                : [
+                    { value: 0, day: "0" },
+                    { value: 0, day: "0" },
+                  ]
+            }
             dataKey="value"
             springConfig={{ stiffness: 600, damping: 45 }}
             {...hover.sparklineProps}
@@ -152,19 +197,27 @@ function TasksChart({
 
         <div>
           <span
-            className={`rounded-full py-1 px-2 bg-muted/60 text-sm leading-[normal] flex gap-0.5 items-center hover:bg-muted transition-colors duration-200 font-heading ${
-              isUp ? "text-green-500" : "text-red-500"
+            className={`rounded-full py-1 px-2 bg-muted in-[.dark]:bg-muted/60 text-sm leading-[normal] flex gap-0.5 items-center in-[.dark]:hover:bg-muted transition-colors duration-200 font-heading ${
+              isUp
+                ? "text-emerald-400 in-[.dark]:text-green-500"
+                : isUp !== null
+                  ? "text-rose-400 in-[.dark]:text-red-500"
+                  : "text-(--text-secondary)"
             }`}
           >
-            {Math.abs(change).toFixed(1)}%
-            <Arrow
-              strokeWidth={1.75}
-              height={15}
-              width={15}
-            />
+            {change ? Math.abs(change).toFixed(1) : 0}%
+            {change ? (
+              <Arrow
+                strokeWidth={1.75}
+                height={15}
+                width={15}
+              />
+            ) : (
+              ""
+            )}
           </span>
-          <span className="flex gap-1 items-center text-(--text-secondary)">
-            since. 20 nov
+          <span className="text-sm leading-[normal] text-(--text-secondary)">
+            {value} / day
           </span>
         </div>
       </main>

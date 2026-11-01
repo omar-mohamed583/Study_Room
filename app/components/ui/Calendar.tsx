@@ -904,10 +904,6 @@ export default function Calendar({
       setDetailsDialogError("Enter a title and a valid event time range.");
       return;
     }
-    if (values.entityType === "task" && !values.subjectDocumentIds[0]) {
-      setDetailsDialogError("Select a subject before saving.");
-      return;
-    }
     if (detailsDialog.mode === "edit" && !detailsDialog.identity) {
       setDetailsDialogError(
         "This event is missing its Strapi record identity.",
@@ -1012,9 +1008,11 @@ export default function Calendar({
           ...(selectedSubjects.length > 0
             ? {
                 subject:
-                  values.entityType === "task"
+                  values.entityType === "task" && selectedSubjects.length
                     ? selectedSubjects[0]
-                    : selectedSubjects,
+                    : values.entityType === "task"
+                      ? selectedSubjects
+                      : undefined,
               }
             : {}),
         };
@@ -1165,8 +1163,7 @@ export default function Calendar({
     );
   }
 
-  if (!isDesktop)
-    return <DesktopNotice page="Calendar" />;
+  if (!isDesktop) return <DesktopNotice page="Calendar" />;
 
   if (calendarsLoading || createCalendarMutation.isPending)
     return (

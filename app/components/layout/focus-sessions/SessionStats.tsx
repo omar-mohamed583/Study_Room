@@ -61,7 +61,7 @@ export default function SessionStats({
       {isPending ? (
         <SessionStatsSkeleton />
       ) : (
-        <ul className="grid flex-1 grid-cols-2 gap-5 md:grid-cols-4 lg:grid-cols-2">
+        <ul className="grid flex-1 gap-3 grid-cols-[repeat(auto-fit,minmax(300px,1fr))]">
           {tiles.map((tile) => (
             <li
               key={tile.label}
