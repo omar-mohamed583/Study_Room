@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import Breadcrumb from "../layout/BreadCrumb";
-import Button from "./Button";
+import Button from "./global/Button";
 import type { BreadcrumbItem } from "../layout/BreadCrumb";
 
 /** Small lucide-style inline icon wrapper, shared by the dialog contents. */

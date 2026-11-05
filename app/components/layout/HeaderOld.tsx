@@ -1,4 +1,4 @@
-import ShinyText from "../ui/ShinyText";
+import ShinyText from "../ui/header/ShinyText";
 import useTheme from "~/context/themeContext";
 import {
   useEffect,

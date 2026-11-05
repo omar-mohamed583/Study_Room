@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 import type { Subject } from "~/types/subjectTypes";
-import EmptyState from "./EmptyState";
+import EmptyState from "../global/EmptyState";
 import type { Task } from "~/types/taskType";
 
 export default function SubjectItems({
@@ -25,12 +25,39 @@ export default function SubjectItems({
     <table className="w-full min-w-max">
       <thead>
         <tr className="*:text-(--text-secondary) *:font-semibold *:text-[15px] **:p-4 bg-(--stripping-color) border-b border-b-zinc-500">
-          <th scope="col" className="text-start">Subject</th>
-          <th scope="col" className="text-center">Tasks</th>
-          <th scope="col" className="text-center">Completed</th>
-          <th scope="col" className="text-center">Progress</th>
-          <th scope="col" className="text-center">Time Spent</th>
-          <th scope="col"><span className="sr-only">Open subject</span></th>
+          <th
+            scope="col"
+            className="text-start"
+          >
+            Subject
+          </th>
+          <th
+            scope="col"
+            className="text-center"
+          >
+            Tasks
+          </th>
+          <th
+            scope="col"
+            className="text-center"
+          >
+            Completed
+          </th>
+          <th
+            scope="col"
+            className="text-center"
+          >
+            Progress
+          </th>
+          <th
+            scope="col"
+            className="text-center"
+          >
+            Time Spent
+          </th>
+          <th scope="col">
+            <span className="sr-only">Open subject</span>
+          </th>
         </tr>
       </thead>
       <tbody className="*:not-[tr:last-child]:border-b border-b-zinc-400 *:even:bg-(--stripping-color)">
@@ -51,7 +78,10 @@ export default function SubjectItems({
           const focusMinutes = Math.floor((focusSeconds % 3600) / 60);
 
           return (
-            <tr className="*:p-2" key={subject.documentId}>
+            <tr
+              className="*:p-2"
+              key={subject.documentId}
+            >
               <td className="grid p-1">
                 <h3 className="font-medium text-[18px] capitalize">
                   {subject.name}
@@ -71,7 +101,8 @@ export default function SubjectItems({
               <td className="text-center font-medium">
                 {subjectTasks.length
                   ? Math.round((completedTasks / subjectTasks.length) * 100)
-                  : 0}%
+                  : 0}
+                %
               </td>
               <td className="text-center font-medium">
                 {focusHours ? `${focusHours}h ` : ""}

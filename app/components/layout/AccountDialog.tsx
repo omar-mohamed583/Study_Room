@@ -1,6 +1,6 @@
 import { useEffect, useId, useState } from "react";
 import AccountContentSkeleton from "../skeleton/AccountDialogSkeleton";
-import Button from "../ui/Button";
+import Button from "../ui/global/Button";
 import DialogPanel, { Icon } from "../ui/DialogPanel";
 import type { UserType } from "~/types/userType";
 

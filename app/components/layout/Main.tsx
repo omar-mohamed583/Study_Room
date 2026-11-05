@@ -1,4 +1,4 @@
-import { Suspense, useLayoutEffect, useRef } from "react";
+import { Suspense, useRef } from "react";
 import {
   Link,
   redirect,
@@ -6,28 +6,28 @@ import {
   type MetaFunction,
 } from "react-router";
 import type DefaultMainSecType from "~/types/defaultMain";
-import Button from "../ui/Button";
+import Button from "../ui/global/Button";
 import Header from "./Header";
 import { useAuth } from "../providers/authProvider";
 import { twMerge } from "cn";
-import SmallParticles from "../ui/smallParticles";
-import TaskItem from "../ui/TaskItem";
-import FocusTimer from "../ui/FocusTimer";
-import UpcomingDeadlines from "../ui/UpcomingDeadlineComponent";
+import SmallParticles from "../ui/global/smallParticles";
+import TaskItem from "../ui/main page/TaskItem";
+import FocusTimer from "../ui/focus timer/FocusTimer";
+import UpcomingDeadlines from "../ui/main page/UpcomingDeadlineComponent";
 import MyPie from "../ui/PieChart";
 import gsap from "gsap";
 import lightLogo from "~/assets/light-logo.svg";
 import darkLogo from "~/assets/dark-logo.svg";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import EmptyState from "../ui/EmptyState";
+import EmptyState from "../ui/global/EmptyState";
 import useStudyData from "~/context/studyDataContext";
-import SubjectItems from "../ui/SubjectItem";
+import SubjectItems from "../ui/main page/SubjectItem";
 import TaskItemSkeleton from "../skeleton/TodayTasksSkeleton";
 import DeadlineItemSkeleton from "../skeleton/UpcomingDeadlinesSkeleton";
 import SubjectItemsSkeleton from "../skeleton/SubjectsSkeleton";
 import { ProgressBarSkeleton } from "../skeleton/ProgressBarsSkeleton";
-import ProgressBars from "../ui/ProgressBar";
+import ProgressBars from "../ui/main page/ProgressBar";
 import { ensureSession } from "~/auth/session";
 import { lazy } from "react";
 
@@ -35,10 +35,9 @@ export const links: LinksFunction = () => [
   {
     rel: "icon",
     type: "image/svg+xml",
-    href:
-      window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? darkLogo
-        : lightLogo,
+    href: window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? darkLogo
+      : lightLogo,
   },
 ];
 

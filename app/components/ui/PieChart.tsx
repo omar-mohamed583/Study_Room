@@ -1,9 +1,7 @@
 import { Pie } from "@nivo/pie";
 import useTheme from "~/context/themeContext";
-import EmptyState from "./EmptyState";
+import EmptyState from "./global/EmptyState";
 import type { Subject } from "~/types/subjectTypes";
-import type { StudySession } from "~/types/studySessionType";
-import { useMemo } from "react";
 
 export type PieData = {
   id: string;
@@ -25,14 +23,13 @@ export default function MyPie({
   height,
   valueFormat,
 }: MyPieProps) {
-  if (!subjects?.some(subj => subj?.studySessions?.length))
+  if (!subjects?.some((subj) => subj?.studySessions?.length))
     return (
       <EmptyState
         icon="data"
         message="No focus timers or subjects found"
       />
     );
-
 
   const { theme } = useTheme();
 

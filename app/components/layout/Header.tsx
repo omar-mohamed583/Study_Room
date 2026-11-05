@@ -16,7 +16,7 @@ import {
   UserRoundPen,
 } from "lucide-react";
 import { cn } from "~/lib/utils";
-import ShinyText from "../ui/ShinyText";
+import ShinyText from "../ui/header/ShinyText";
 import useTheme from "~/context/themeContext";
 import { useAuth } from "~/components/providers/authProvider";
 import DialogComp from "../ui/Dialog";
@@ -29,7 +29,7 @@ import {
   MobileNavToggle,
   MobileNavMenu,
   NAVBAR_SCROLL_THRESHOLD,
-} from "~/components/ui/resizable-navbar";
+} from "~/components/ui/header/resizable-navbar";
 import lightLogo from "~/assets/light-logo.svg";
 
 const navItems = [

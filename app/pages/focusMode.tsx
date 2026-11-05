@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef } from "react";
-import FocusTimer from "~/components/ui/FocusTimer";
+import FocusTimer from "~/components/ui/focus timer/FocusTimer";
 import useTheme from "~/context/themeContext";
 import video from "../assets/nature.mp4";
 import image from "../assets/nature.webp";
@@ -7,17 +7,16 @@ import { createPortal } from "react-dom";
 import type { LinksFunction, MetaFunction } from "react-router";
 import lightLogo from "~/assets/light-logo.svg";
 import darkLogo from "~/assets/dark-logo.svg";
-import Button from "~/components/ui/Button";
-import DesktopNotice from "~/components/ui/DesktopNotice";
+import Button from "~/components/ui/global/Button";
+import DesktopNotice from "~/components/ui/global/DesktopNotice";
 
 export const links: LinksFunction = () => [
   {
     rel: "icon",
     type: "image/svg+xml",
-    href:
-      window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? darkLogo
-        : lightLogo,
+    href: window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? darkLogo
+      : lightLogo,
   },
 ];
 

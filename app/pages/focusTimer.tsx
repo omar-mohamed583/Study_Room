@@ -17,7 +17,7 @@ import {
   type LinksFunction,
   type MetaFunction,
 } from "react-router";
-import Button from "~/components/ui/Button";
+import Button from "~/components/ui/global/Button";
 import Footer from "~/components/layout/Footer";
 
 const FocusTimer = lazy(() => import("~/components/ui/FocusTimer"));
@@ -26,10 +26,9 @@ export const links: LinksFunction = () => [
   {
     rel: "icon",
     as: "image",
-    href:
-      window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? darkLogo
-        : lightLogo,
+    href: window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? darkLogo
+      : lightLogo,
   },
 ];
 
@@ -100,8 +99,7 @@ export default function FocusTimerPage() {
                 <FocusTimer size="sm" />
               </Suspense>
               <p className="text-xs text-(--text-secondary)">
-                To change the timers setting go to: setting &gt;
-                study
+                To change the timers setting go to: setting &gt; study
               </p>
             </div>
           </SectionCard>

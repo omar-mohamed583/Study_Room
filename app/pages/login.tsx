@@ -5,9 +5,11 @@ import {
   type MetaFunction,
 } from "react-router";
 import { useAuth } from "~/components/providers/authProvider";
-import GradientWaves from "~/components/ui/GradientWaves";
-import InputComponent, { useInputStates } from "~/components/ui/inputField";
-import LoadingComponent from "~/components/ui/LoadingComponent";
+import GradientWaves from "~/components/ui/global/GradientWaves";
+import InputComponent, {
+  useInputStates,
+} from "~/components/ui/login/inputField";
+import LoadingComponent from "~/components/ui/global/LoadingComponent";
 import lightLogo from "~/assets/light-logo.svg";
 import darkLogo from "~/assets/dark-logo.svg";
 
@@ -15,10 +17,9 @@ export const links: LinksFunction = () => [
   {
     rel: "icon",
     as: "image",
-    href:
-      window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? darkLogo
-        : lightLogo,
+    href: window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? darkLogo
+      : lightLogo,
   },
 ];
 
@@ -288,12 +289,7 @@ export default function Login() {
         </div>
       </form>
 
-      <LoadingComponent
-        loadingState={
-            loading ||
-            isLoading
-        }
-      />
+      <LoadingComponent loadingState={loading || isLoading} />
     </main>
   );
 }

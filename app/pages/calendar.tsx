@@ -8,7 +8,7 @@ import { ensureSession } from "~/auth/session";
 import type { Task } from "~/types/taskType";
 import { DialMenu } from "~/components/ovio/dial-menu/dial-menu";
 import Calendar, { type EventType } from "~/components/ui/Calendar";
-import LoadingComponent from "~/components/ui/LoadingComponent";
+import LoadingComponent from "~/components/ui/global/LoadingComponent";
 import NotificationModal from "~/components/ui/NotificationModal";
 import useStudyData from "~/context/studyDataContext";
 import useTheme from "~/context/themeContext";
@@ -20,10 +20,9 @@ export const links: LinksFunction = () => [
   {
     rel: "icon",
     as: "image",
-    href:
-      window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? darkLogo
-        : lightLogo,
+    href: window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? darkLogo
+      : lightLogo,
   },
 ];
 
@@ -53,7 +52,9 @@ export default function CalendarPage() {
 
   const events: EventType[] = [
     ...(tasks ?? [])
-      .filter((task): task is Task & { dueDate: string } => Boolean(task.dueDate))
+      .filter((task): task is Task & { dueDate: string } =>
+        Boolean(task.dueDate),
+      )
       .map((task) => {
         const end = new Date(task.dueDate);
         const durationMs = Math.max(1, task.estimatedDuration || 60) * 60_000;
@@ -303,7 +304,11 @@ export default function CalendarPage() {
               strokeLinejoin="round"
               className="lucide lucide-sun preview-icon"
             >
-              <circle cx="12" cy="12" r="4" />
+              <circle
+                cx="12"
+                cy="12"
+                r="4"
+              />
               <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
             </svg>
           ),

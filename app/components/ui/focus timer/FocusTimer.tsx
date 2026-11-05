@@ -1,8 +1,7 @@
 import useTheme from "~/context/themeContext";
-import Badge from "./Badge";
 import JellyRadio from "./JellyRadio";
 import { useEffect, useId } from "react";
-import Button from "./Button";
+import Button from "../global/Button";
 
 export const links: LinksFunction = () => [
   {
@@ -15,8 +14,8 @@ import type { TimerMode } from "~/types/customContextType";
 import type { LinksFunction } from "react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "~/api/api";
-import NotificationModal from "./NotificationModal";
-import SearchBar from "./SearchBar";
+import NotificationModal from "../global/NotificationModal";
+import SearchBar from "../header/SearchBar";
 
 const TIMER_MODES: Record<
   TimerMode,

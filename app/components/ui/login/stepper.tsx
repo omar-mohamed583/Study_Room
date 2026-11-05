@@ -4,7 +4,7 @@ import {
   type ReactNode,
   type SetStateAction,
 } from "react";
-import Button from "./Button";
+import Button from "./global/Button";
 
 type Step = {
   id: string;
@@ -73,9 +73,9 @@ export default function Stepper({
             className="bg-zinc-500 hover:brightness-75 transition-[filter] duration-300 flex items-center content-center gap-2"
             type="button"
             onClick={() => {
-              setDisabled(true)
+              setDisabled(true);
               goToNextStep("otp resend");
-              setTimeout(() => setDisabled(false), 60000)
+              setTimeout(() => setDisabled(false), 60000);
             }}
           >
             Resend

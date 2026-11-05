@@ -1,9 +1,9 @@
 import { useId } from "react";
-import type { Task } from "../../types/taskType";
-import type { Exam } from "../../types/examType";
-import { buildDeadlines, pluralize } from "../utils/deadlines";
+import type { Task } from "../../../types/taskType";
+import type { Exam } from "../../../types/examType";
+import { buildDeadlines, pluralize } from "../../utils/deadlines";
 import DeadlineItem from "./DeadlineItem";
-import Button from "./Button";
+import Button from "../global/Button";
 
 interface UpcomingDeadlinesProps {
   tasks?: Task[];

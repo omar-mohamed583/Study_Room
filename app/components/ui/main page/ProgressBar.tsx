@@ -1,6 +1,6 @@
 import { useId } from "react";
-import Button from "./Button";
-import EmptyState from "./EmptyState";
+import Button from "./global/Button";
+import EmptyState from "./global/EmptyState";
 import type { Subject } from "~/types/subjectTypes";
 import type { Task } from "~/types/taskType";
 
@@ -63,7 +63,8 @@ export function ProgressBar({
     <div>
       <div className="mb-1.5 flex items-baseline justify-around gap-4 text-sm">
         <span className="shrink-0 tabular-nums text-(--text-secondary)">
-          {total}{total === 1 ? " task" : total > 1 ? " tasks" : ""}
+          {total}
+          {total === 1 ? " task" : total > 1 ? " tasks" : ""}
         </span>
         <span
           id={labelId}
