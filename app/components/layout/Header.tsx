@@ -19,7 +19,7 @@ import { cn } from "~/lib/utils";
 import ShinyText from "../ui/header/ShinyText";
 import useTheme from "~/context/themeContext";
 import { useAuth } from "~/components/providers/authProvider";
-import DialogComp from "../ui/Dialog";
+import DialogComp from "../ui/global/Dialog";
 import {
   Navbar,
   NavBody,

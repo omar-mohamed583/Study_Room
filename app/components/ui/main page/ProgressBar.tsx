@@ -1,6 +1,6 @@
 import { useId } from "react";
-import Button from "./global/Button";
-import EmptyState from "./global/EmptyState";
+import Button from "../global/Button";
+import EmptyState from "../global/EmptyState";
 import type { Subject } from "~/types/subjectTypes";
 import type { Task } from "~/types/taskType";
 

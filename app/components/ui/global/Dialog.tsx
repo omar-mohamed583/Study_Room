@@ -1,9 +1,9 @@
 import { Dialog } from "@base-ui/react/dialog";
 import { twMerge } from "cn";
 import type { ReactNode } from "react";
-import AccountContent from "../layout/AccountDialog";
-import SettingsContent from "../layout/SettingDialog";
-import { useAuth } from "../providers/authProvider";
+import AccountContent from "../../layout/AccountDialog";
+import SettingsContent from "../../layout/SettingDialog";
+import { useAuth } from "../../providers/authProvider";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "~/api/api";
 import type { UserType } from "~/types/userType";

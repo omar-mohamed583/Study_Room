@@ -11,7 +11,7 @@ import {
   formatTime,
   getDueStatus,
   pluralize,
-} from "../utils/deadlines";
+} from "../../utils/deadlines";
 
 const URGENCY_STYLES: Record<Urgency, { tile: string; label: string }> = {
   overdue: {

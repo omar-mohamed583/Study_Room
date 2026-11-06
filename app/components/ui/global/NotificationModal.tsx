@@ -1,6 +1,6 @@
 import Reactdom from "react-dom";
 import SwipeToast from "./SwipeToast";
-import { getIcon } from "../providers/themeContextprovider";
+import { getIcon } from "../../providers/themeContextprovider";
 import useTheme from "~/context/themeContext";
 
 export default function NotificationModal() {

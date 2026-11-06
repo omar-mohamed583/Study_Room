@@ -1,4 +1,4 @@
-import type { CalendarType } from "~/components/ui/Calendar";
+import type { CalendarType } from "~/components/ui/calendar/Calendar";
 import type { Subject } from "./subjectTypes";
 import type { StudySession } from "./studySessionType";
 

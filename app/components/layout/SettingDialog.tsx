@@ -5,7 +5,7 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from "react";
-import DialogPanel, { Icon } from "../ui/DialogPanel";
+import DialogPanel, { Icon } from "../ui/global/DialogPanel";
 import SettingsContentSkeleton from "../skeleton/SettingDialogSkeleton";
 import useTheme from "~/context/themeContext";
 

@@ -1,7 +1,7 @@
 import { useEffect, useId, useState } from "react";
 import AccountContentSkeleton from "../skeleton/AccountDialogSkeleton";
 import Button from "../ui/global/Button";
-import DialogPanel, { Icon } from "../ui/DialogPanel";
+import DialogPanel, { Icon } from "../ui/global/DialogPanel";
 import type { UserType } from "~/types/userType";
 
 const FIELD_CLASS =

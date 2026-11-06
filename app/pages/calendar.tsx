@@ -7,9 +7,9 @@ import {
 import { ensureSession } from "~/auth/session";
 import type { Task } from "~/types/taskType";
 import { DialMenu } from "~/components/ovio/dial-menu/dial-menu";
-import Calendar, { type EventType } from "~/components/ui/Calendar";
+import Calendar, { type EventType } from "~/components/ui/calendar/Calendar";
 import LoadingComponent from "~/components/ui/global/LoadingComponent";
-import NotificationModal from "~/components/ui/NotificationModal";
+import NotificationModal from "~/components/ui/global/NotificationModal";
 import useStudyData from "~/context/studyDataContext";
 import useTheme from "~/context/themeContext";
 import { useMemo, useTransition } from "react";

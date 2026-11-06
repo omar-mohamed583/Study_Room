@@ -6,7 +6,7 @@ import type { Exam } from "~/types/examType";
 import type { Subject } from "~/types/subjectTypes";
 import type { Task } from "~/types/taskType";
 import type { StudySession } from "~/types/studySessions";
-import type { UnFormattedCalendarType } from "../ui/Calendar";
+import type { UnFormattedCalendarType } from "../ui/calendar/Calendar";
 
 export default function StudyDataProvider({
   children,

@@ -20,7 +20,7 @@ import {
 import Button from "~/components/ui/global/Button";
 import Footer from "~/components/layout/Footer";
 
-const FocusTimer = lazy(() => import("~/components/ui/FocusTimer"));
+const FocusTimer = lazy(() => import("~/components/ui/focus timer/FocusTimer"));
 
 export const links: LinksFunction = () => [
   {

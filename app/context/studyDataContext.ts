@@ -4,7 +4,7 @@ import type { Exam } from "~/types/examType";
 import type { Subject } from "~/types/subjectTypes";
 import type { Task } from "~/types/taskType";
 import type { StudySession } from "~/types/studySessions";
-import type { UnFormattedCalendarType } from "~/components/ui/Calendar";
+import type { UnFormattedCalendarType } from "~/components/ui/calendar/Calendar";
 
 export type DataQuery<T> = Pick<
   UseQueryResult<T, Error>,

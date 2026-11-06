@@ -11,7 +11,7 @@ import {
 import { Link } from "react-router";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import DialogComp from "../ui/Dialog";
+import DialogComp from "../ui/global/Dialog";
 
 export const GS_Duration = 0.8;
 export const GS_DELAY = 0.1;

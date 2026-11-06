@@ -26,8 +26,8 @@ import {
   useState,
   type SubmitEvent,
 } from "react";
-import LoadingComponent from "./LoadingComponent";
-import DesktopNotice from "./DesktopNotice";
+import LoadingComponent from "../global/LoadingComponent";
+import DesktopNotice from "../global/DesktopNotice";
 import CalendarEventDetailsDialog, {
   type CalendarEventFormValues,
 } from "./CalendarEventDetailsDialog";

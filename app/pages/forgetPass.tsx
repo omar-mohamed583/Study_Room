@@ -11,7 +11,7 @@ import InputComponent, {
   useInputStates,
 } from "~/components/ui/login/inputField";
 import LoadingComponent from "~/components/ui/global/LoadingComponent";
-import Stepper from "~/components/ui/stepper";
+import Stepper from "~/components/ui/login/stepper";
 import lightLogo from "~/assets/light-logo.svg";
 import darkLogo from "~/assets/dark-logo.svg";
 import Header from "~/components/layout/Header";

@@ -4,7 +4,7 @@ import {
   type ReactNode,
   type SetStateAction,
 } from "react";
-import Button from "./global/Button";
+import Button from "../global/Button";
 
 type Step = {
   id: string;
