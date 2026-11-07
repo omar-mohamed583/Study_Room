@@ -1,11 +1,19 @@
 // Tasks.tsx (the component body)
 import { useMemo, useRef } from "react";
-import HeatMap from "~/components/ui/global/HeatMap";
+import AreaChartComp from "~/components/ui/global/AreaChart";
 import LoadingComponent from "~/components/ui/global/LoadingComponent";
 import StatsChart from "~/components/ui/global/StatsChart";
 import CreateTaskForm from "~/components/ui/TasksDashboard/CreateTaskForm";
 import LaserFlow from "~/components/ui/TasksDashboard/LaserFlow";
-import { buildCreatedTasksSeries, buildDailyStats, lastDays, toDayKey, buildHeatmapColumns,  type DayPoint, type DayStat } from "~/components/utils/dayStats";
+import {
+  buildCreatedTasksSeries,
+  buildDailyStats,
+  lastDays,
+  toDayKey,
+  buildHeatmapColumns,
+  type DayPoint,
+  type DayStat,
+} from "~/components/utils/dayStats";
 import useStudyData from "~/context/studyDataContext";
 
 const DAYS = 50;
@@ -23,29 +31,29 @@ export default function Tasks() {
   );
 
   const heatMapData = useMemo(
-  () => buildHeatmapColumns(dailyStats),
-  [dailyStats],
-);
+    () => buildHeatmapColumns(dailyStats),
+    [dailyStats],
+  );
 
-const statsChartData = useMemo(() => {
-  const days = lastDays(DAYS);
-  const toSeries = (pick: (stat?: DayStat) => number): DayPoint[] =>
-    days.map((day) => ({ day, value: pick(dailyStats.get(day)) }));
+  const statsChartData = useMemo(() => {
+    const days = lastDays(DAYS);
+    const toSeries = (pick: (stat?: DayStat) => number): DayPoint[] =>
+      days.map((day) => ({ day, value: pick(dailyStats.get(day)) }));
 
-  return [
-    { title: "tasks", chartData: buildCreatedTasksSeries(tasks ?? [], DAYS) },
-    {
-      title: "completed",
-      chartData: toSeries((s) => s?.completed.length ?? 0),
-    },
-    {
-      title: "hours",
-      chartData: toSeries(
-        (s) => Math.round(((s?.focusSeconds ?? 0) / 3600) * 10) / 10,
-      ),
-    },
-  ];
-}, [dailyStats, tasks]);
+    return [
+      { title: "tasks", chartData: buildCreatedTasksSeries(tasks ?? [], DAYS) },
+      {
+        title: "completed",
+        chartData: toSeries((s) => s?.completed.length ?? 0),
+      },
+      {
+        title: "hours",
+        chartData: toSeries(
+          (s) => Math.round(((s?.focusSeconds ?? 0) / 3600) * 10) / 10,
+        ),
+      },
+    ];
+  }, [dailyStats, tasks]);
 
   if (tasksIsLoading || sessionsIsLoading || !tasks || !sessions)
     return (
@@ -93,10 +101,10 @@ const statsChartData = useMemo(() => {
           <section className="border row-span-2 rounded-2xl border-zinc-400/60 in-[.dark]:border-zinc-400/15 flex flex-col p-3 gap-2">
             <CreateTaskForm />
           </section>
-          <section className="border col-span-3 grid place-content-center rounded-2xl border-zinc-400/60 in-[.dark]:border-zinc-400/15">
-            <HeatMap data={heatMapData} />
+          <section className="border col-span-3 grid place-content-center rounded-2xl border-zinc-400/60 in-[.dark]:border-zinc-400/15"></section>
+          <section className="border col-span-3 h-30 rounded-2xl border-zinc-400/60 in-[.dark]:border-zinc-400/15">
+            <AreaChartComp />
           </section>
-          <section className="border col-span-3 h-30 rounded-2xl border-zinc-400/60 in-[.dark]:border-zinc-400/15"></section>
         </section>
       </div>
     </>

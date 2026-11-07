@@ -1,9 +1,26 @@
-import { scaleLinear } from "@visx/scale";
+import { scaleLinear } from "d3-scale";
 import type { LineConfig } from "./chart-context";
 import { type ChartPhase, Y_DOMAIN_TWEEN_SKIP_THRESHOLD } from "./chart-phase";
 import { groupLinesByYAxisId, normalizeYAxisId } from "./y-axis-scales";
 
 export type YDomain = [number, number];
+
+/**
+ * Per-axis y-domain override: a fixed `[min, max]`, or a function that
+ * receives the auto domain (before `nice()`) and returns the one to use —
+ * e.g. `([, max]) => [0, max * 3]` to push volume bars into the bottom third.
+ */
+export type YDomainOverride = YDomain | ((auto: YDomain) => YDomain);
+
+export function applyYDomainOverride(
+  auto: YDomain,
+  override: YDomainOverride | undefined
+): YDomain {
+  if (!override) {
+    return auto;
+  }
+  return typeof override === "function" ? override(auto) : override;
+}
 
 export interface NumericExtents {
   minValue: number;
@@ -64,6 +81,19 @@ export function resolveTimeSeriesYDomain(
 }
 
 /**
+ * Floating y-domain (no zero anchor): padded min..max. For price-like series
+ * such as candlesticks, where a zero baseline would flatten every candle.
+ */
+export function resolveFloatingYDomain(
+  data: Record<string, unknown>[],
+  dataKeys: string[]
+): YDomain {
+  const { minValue, maxValue } = collectNumericExtents(data, dataKeys);
+  const padding = (maxValue - minValue) * 0.05 || 1;
+  return [minValue - padding, maxValue + padding];
+}
+
+/**
  * Value extents for bar series. Stacked bars use the running totals (always
  * including the zero baseline) so the domain reaches every segment end;
  * grouped bars use the individual values.
@@ -110,9 +140,9 @@ export function resolveBarValueDomain({
   return [Math.min(0, minValue - padding), Math.max(0, maxValue + padding)];
 }
 
-/** Apply visx `nice()` to raw domain endpoints for stable grid ticks. */
+/** Apply d3 `nice()` to raw domain endpoints for stable grid ticks. */
 export function niceYDomain(domain: YDomain): YDomain {
-  const scale = scaleLinear({ domain, range: [0, 1], nice: true });
+  const scale = scaleLinear().domain(domain).nice().range([0, 1]);
   const niceDomain = scale.domain();
   return [niceDomain[0] ?? domain[0], niceDomain[1] ?? domain[1]];
 }
@@ -185,7 +215,8 @@ export function computeYDomainsByAxis({
   extraKeysByAxis,
 }: {
   lines: LineConfig[];
-  resolveDomain: (dataKeys: string[]) => YDomain;
+  /** Raw domain for one axis; `axisId` is normalised (`"left"` by default). */
+  resolveDomain: (dataKeys: string[], axisId: string) => YDomain;
   /**
    * Additional value keys per axis that extend the domain without being
    * series (e.g. `<Band>` upper/lower keys). Axes with only extra keys still
@@ -211,7 +242,7 @@ export function computeYDomainsByAxis({
 
   const domains: Record<string, YDomain> = {};
   for (const [axisId, dataKeys] of keysByAxis) {
-    domains[axisId] = niceYDomain(resolveDomain(dataKeys));
+    domains[axisId] = niceYDomain(resolveDomain(dataKeys, axisId));
   }
 
   if (!domains.left) {

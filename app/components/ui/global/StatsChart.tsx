@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import { AreaSparkline, useSparklineHover } from "../charts/sparkline";
 import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 
@@ -30,7 +29,6 @@ export default function StatsChart({
   chartData,
 }: {
   title: string;
-  children: ReactNode;
   chartData: Row[];
 }) {
   const hover = useSparklineHover<Row>();
