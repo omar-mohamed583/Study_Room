@@ -80,8 +80,8 @@ export default function StatsChart({
                   : "text-(--text-secondary)"
             }`}
           >
-            {change ? Math.abs(change).toFixed(1) : 0}%
-            {change ? (
+            {Math.abs(change).toFixed(1)}%
+            {change !== 0 ? (
               <Arrow
                 strokeWidth={1.75}
                 height={15}

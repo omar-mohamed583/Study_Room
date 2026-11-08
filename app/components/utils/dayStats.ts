@@ -1,46 +1,6 @@
 import type { Task } from "~/types/taskType";
 
-export type HeatmapBinData = { bin: number; count: number; date: Date };
-export type HeatmapColumnData = { bin: number; bins: HeatmapBinData[] };
-
-export function buildHeatmapColumns(
-  dailyStats: Map<string, DayStat>,
-  weeks = 52,
-  weekStartDay = 0, // 0 = Sunday ... 6 = Saturday; must match the HeatMap's weekStartDay
-): HeatmapColumnData[] {
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-  // first day of the week that contains today, then go back (weeks - 1) weeks
-  const offsetInWeek = (today.getDay() - weekStartDay + 7) % 7;
-  const firstDay = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate() - offsetInWeek - (weeks - 1) * 7,
-  );
-
-  const columns: HeatmapColumnData[] = [];
-
-  for (let c = 0; c < weeks; c++) {
-    const bins: HeatmapBinData[] = [];
-
-    for (let r = 0; r < 7; r++) {
-      const date = new Date(
-        firstDay.getFullYear(),
-        firstDay.getMonth(),
-        firstDay.getDate() + c * 7 + r,
-      );
-      if (date > today) break; // no cells for future days
-
-      const seconds = dailyStats.get(toDayKey(date))?.focusSeconds ?? 0;
-      bins.push({ bin: r, date, count: Math.round(seconds / 60) }); // focus minutes
-    }
-
-    columns.push({ bin: c, bins });
-  }
-
-  return columns;
-}
+const days = 30;
 
 export type DayStat = {
   completed: Task[];
@@ -56,7 +16,7 @@ type SessionLike = {
 
 export type DayPoint = { day: string; value: number };
 
-export function lastDays(days: number) {
+export function lastDays() {
   const now = new Date();
   return Array.from({ length: days }, (_, i) =>
     toDayKey(
@@ -69,7 +29,7 @@ export function lastDays(days: number) {
   );
 }
 
-export function buildCreatedTasksSeries(tasks: Task[], days = 50): DayPoint[] {
+export function buildCreatedTasksSeries(tasks: Task[]): DayPoint[] {
   const counts = new Map<string, number>();
 
   for (const task of tasks) {
@@ -77,7 +37,7 @@ export function buildCreatedTasksSeries(tasks: Task[], days = 50): DayPoint[] {
     counts.set(key, (counts.get(key) ?? 0) + 1);
   }
 
-  return lastDays(days).map((day) => ({ day, value: counts.get(day) ?? 0 }));
+  return lastDays().map((day) => ({ day, value: counts.get(day) ?? 0 }));
 }
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -116,4 +76,24 @@ export function buildDailyStats(tasks: Task[], sessions: SessionLike[]) {
   }
 
   return days;
+}
+
+export const fromDayKey = (key: string) => {
+  const [y, m, d] = key.split("-").map(Number);
+  return new Date(y, m - 1, d);
+};
+
+export type AreaPoint = { date: Date; created: number; completed: number };
+
+export function buildAreaChartData(
+  tasksArr: DayPoint[],
+  completionArr: DayPoint[],
+): AreaPoint[] {
+  const completedByDay = new Map(completionArr.map((p) => [p.day, p.value]));
+
+  return tasksArr.map(({ day, value }) => ({
+    date: fromDayKey(day),
+    created: value,
+    completed: completedByDay.get(day) ?? 0,
+  }));
 }

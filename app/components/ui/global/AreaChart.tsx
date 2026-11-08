@@ -3,21 +3,24 @@ import { Grid } from "../charts/grid";
 import { XAxis } from "../charts/x-axis";
 import { ChartTooltip } from "../charts/tooltip/chart-tooltip";
 
-const data = [
-  { date: new Date("2025-01-01"), revenue: 12000, costs: 8500 },
-  { date: new Date("2025-01-02"), revenue: 13500, costs: 9200 },
-];
-
-export default function AreaChartComp() {
+export default function AreaChartComp({
+  chartData,
+}: {
+  chartData: { date: Date; created: number, completed: number }[];
+}) {
   return (
-    <AreaChart data={data}>
+    <AreaChart
+      data={chartData}
+      className="h-full w-full"
+      style={{ aspectRatio: "auto" }}
+    >
       <Grid horizontal />
       <Area
-        dataKey="revenue"
+        dataKey="created"
         fill="var(--chart-line-primary)"
       />
       <Area
-        dataKey="costs"
+        dataKey="completed"
         fill="var(--chart-line-secondary)"
       />
       <XAxis />

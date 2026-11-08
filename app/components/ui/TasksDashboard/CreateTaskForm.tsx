@@ -1,6 +1,15 @@
 import { useId, useRef, useState, type ReactNode } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, CircleAlert, Loader2 } from "lucide-react";
+import { ChevronDown } from "@untitledui/icons";
+import type { Key } from "react-aria-components";
+import { Button } from "~/components/base/buttons/button";
+import { Dropdown } from "~/components/base/dropdown/dropdown";
+import { DatePicker } from "~/components/ui/date-picker/date-picker";
+import {
+  calendarDateTimeToDateTimeInput,
+  dateTimeInputToCalendarDateTime,
+} from "~/components/utils/dateTime";
 import { apiFetch } from "~/api/api";
 import useStudyData from "~/context/studyDataContext";
 import {
@@ -15,6 +24,7 @@ import {
   type TaskFormErrors,
   type TaskFormValues,
 } from "~/lib/taskForm";
+import { twMerge } from "tailwind-merge";
 
 // Must match the query key useGetEvents uses for /tasks, otherwise the new
 // task won't show up until a manual refresh.
@@ -151,7 +161,7 @@ export default function CreateTaskForm() {
   }
 
   const now = new Date();
-  const minDue = toLocalInputValue(now, !values.calendarAllDay);
+  const minDue = toLocalInputValue(now, true);
   const titleLen = values.title.trim().length;
   const descLen = values.description.trim().length;
 
@@ -166,7 +176,7 @@ export default function CreateTaskForm() {
         New task
       </h2>
 
-      <div className="scrollbar-hide grid min-h-0 flex-1 content-start gap-3 overflow-y-auto pr-1">
+      <div className="scrollbar-hide grid min-h-0 flex-1 content-start gap-4 overflow-y-auto pr-1">
         <Field
           htmlFor={id("title")}
           label="Title"
@@ -226,16 +236,29 @@ export default function CreateTaskForm() {
           error={errors.dueDate}
           errorId={errorId("dueDate")}
         >
-          <input
-            id={id("dueDate")}
-            name="dueDate"
-            type={values.calendarAllDay ? "date" : "datetime-local"}
-            min={minDue}
-            value={values.dueDate}
-            onChange={(e) => update({ dueDate: e.target.value })}
-            onBlur={() => validateField("dueDate")}
-            className={controlClass(!!errors.dueDate)}
-            {...aria("dueDate")}
+          <DatePicker
+            aria-label="Due date and time"
+            className={twMerge(controlClass(!!errors.dueDate) + " border-0 p-0")}
+            value={
+              values.dueDate
+                ? dateTimeInputToCalendarDateTime(values.dueDate)
+                : null
+            }
+            minValue={dateTimeInputToCalendarDateTime(minDue)}
+            isTimeDisabled={values.calendarAllDay}
+            aria-invalid={!!errors.dueDate || undefined}
+            aria-describedby={errors.dueDate ? errorId("dueDate") : undefined}
+            onChange={(date) => {
+              if (!date) update({ dueDate: "" });
+              else {
+                const dateTime = calendarDateTimeToDateTimeInput(date);
+                update({
+                  dueDate: values.calendarAllDay
+                    ? dateTime.slice(0, 10)
+                    : dateTime,
+                });
+              }
+            }}
           />
         </Field>
 
@@ -314,25 +337,20 @@ export default function CreateTaskForm() {
               : undefined
           }
         >
-          <select
-            id={id("subjectId")}
-            name="subjectId"
+          <SubjectDropdown
+            labelId={id("subjectId")}
             value={values.subjectId}
             disabled={!subjects?.length}
-            onChange={(e) => update({ subjectId: e.target.value })}
-            className={`${controlClass(!!errors.subjectId)} disabled:cursor-not-allowed disabled:opacity-60`}
-            {...aria("subjectId")}
-          >
-            <option value="">No subject</option>
-            {subjects?.map((s) => (
-              <option
-                key={s.documentId}
-                value={s.documentId}
-              >
-                {s.name}
-              </option>
-            ))}
-          </select>
+            invalid={!!errors.subjectId}
+            onChange={(subjectId) => update({ subjectId })}
+            options={[
+              { value: "", label: "No subject" },
+              ...(subjects ?? []).map((s) => ({
+                value: s.documentId,
+                label: s.name,
+              })),
+            ]}
+          />
         </Field>
       </div>
 
@@ -392,12 +410,14 @@ function Field({
   label,
   optional,
   aside,
+  className,
   hint,
   error,
   errorId,
   children,
 }: {
   htmlFor: string;
+  className?: string;
   label: string;
   optional?: boolean;
   aside?: ReactNode;
@@ -447,5 +467,72 @@ function Counter({ value, max }: { value: number; max: number }) {
     >
       {value}/{max}
     </span>
+  );
+}
+
+function SubjectDropdown({
+  labelId,
+  value,
+  disabled,
+  invalid,
+  options,
+  onChange,
+}: {
+  labelId: string;
+  value: string;
+  disabled: boolean;
+  invalid: boolean;
+  options: { value: string; label: string }[];
+  onChange: (value: string) => void;
+}) {
+  const selected = options.find((option) => option.value === value);
+  const selectedKeys = selected
+    ? new Set<Key>([selected.value || "no-subject"])
+    : new Set<Key>();
+
+  return (
+    <Dropdown.Root>
+      <Button
+        id={labelId}
+        name="subjectId"
+        aria-label="Subject"
+        aria-invalid={invalid || undefined}
+        size="md"
+        color="secondary"
+        iconTrailing={ChevronDown}
+        isDisabled={disabled}
+        className={`w-full justify-between rounded-lg px-2.5 text-left text-sm font-normal ${controlClass(invalid)}`}
+      >
+        <span className="truncate">{selected?.label ?? "No subject"}</span>
+      </Button>
+      <Dropdown.Popover
+        className="max-h-64 w-64"
+        style={{ zIndex: 20_000_002 }}
+      >
+        <Dropdown.Menu
+          aria-labelledby={labelId}
+          selectionMode="single"
+          selectedKeys={selectedKeys}
+          onSelectionChange={(selection) => {
+            if (selection === "all") return;
+            const [key] = selection;
+            const option = options.find(
+              (item) => (item.value || "no-subject") === String(key),
+            );
+            if (option) onChange(option.value);
+          }}
+        >
+          {options.map((option) => (
+            <Dropdown.Item
+              key={option.value || "no-subject"}
+              id={option.value || "no-subject"}
+              textValue={option.label}
+            >
+              {option.label}
+            </Dropdown.Item>
+          ))}
+        </Dropdown.Menu>
+      </Dropdown.Popover>
+    </Dropdown.Root>
   );
 }
