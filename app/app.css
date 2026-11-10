@@ -40,6 +40,10 @@ body {
   background-image: var(--body-bg);
 }
 
+section {
+  content-visibility: auto;
+}
+
 .df-calendar-wrapper * {
   font-variant: tabular-nums;
 }

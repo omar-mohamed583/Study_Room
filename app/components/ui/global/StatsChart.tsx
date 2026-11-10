@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { AreaSparkline, useSparklineHover } from "../charts/sparkline";
 import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 
@@ -32,9 +33,14 @@ export default function StatsChart({
   chartData: Row[];
 }) {
   const hover = useSparklineHover<Row>();
-  const shown = hover.datum ?? chartData.at(-1)!;
+  const total = useMemo(
+    () => chartData.reduce((acc: number, row: Row) => acc + row.value, 0),
+    [chartData],
+  );
+  const shownVal = hover.datum ?? total;
+  const shown = shownVal instanceof Object ? shownVal.value : shownVal;
 
-  const change = percentChange(chartData[0]?.value, shown?.value);
+  const change = percentChange(chartData[0]?.value, shown);
   const isUp = isNaN(change) ? null : change >= 0;
   const Arrow = isUp ? ArrowUpRight : ArrowDownRight;
 
@@ -50,7 +56,7 @@ export default function StatsChart({
       <main className="grid gap-4 *:flex *:justify-between *:items-center">
         <div>
           <span className="text-[40px] leading-[normal]">
-            {shown?.value || 0}
+            {(shown < 1 && shown > 0 ? shown.toFixed(1) : shown) || 0}
           </span>
           <AreaSparkline
             className="w-1/2"

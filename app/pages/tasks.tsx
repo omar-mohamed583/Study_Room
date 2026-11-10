@@ -1,10 +1,12 @@
 // Tasks.tsx (the component body)
 import { useMemo, useRef } from "react";
+import { redirect } from "react-router";
+import { ensureSession } from "~/auth/session";
 import AreaChartComp from "~/components/ui/global/AreaChart";
-import LoadingComponent from "~/components/ui/global/LoadingComponent";
 import StatsChart from "~/components/ui/global/StatsChart";
 import CreateTaskForm from "~/components/ui/TasksDashboard/CreateTaskForm";
 import LaserFlow from "~/components/ui/TasksDashboard/LaserFlow";
+import TasksBoard from "~/components/ui/TasksDashboard/TasksBoard";
 import {
   buildAreaChartData,
   buildCreatedTasksSeries,
@@ -17,8 +19,8 @@ import useStudyData from "~/context/studyDataContext";
 
 export default function Tasks() {
   const {
-    tasks: { isLoading: tasksIsLoading, data: tasks },
-    sessions: { isLoading: sessionsIsLoading, data: sessions },
+    tasks: { data: tasks },
+    sessions: { data: sessions },
   } = useStudyData();
   const cardRef = useRef<HTMLDivElement | null>(null);
 
@@ -51,11 +53,6 @@ export default function Tasks() {
     () => buildAreaChartData(series.created, series.completed),
     [series],
   );
-
-  if (tasksIsLoading || sessionsIsLoading || !tasks || !sessions)
-    return (
-      <LoadingComponent loadingState={tasksIsLoading || sessionsIsLoading} />
-    );
 
   return (
     <>
@@ -101,9 +98,19 @@ export default function Tasks() {
           <section className="border col-span-3 min-h-80 min-w-0 rounded-2xl border-zinc-400/60 in-[.dark]:border-zinc-400/15">
             <AreaChartComp chartData={areaChartData} />
           </section>
-          <section className="border col-span-3 h-30 rounded-2xl border-zinc-400/60 in-[.dark]:border-zinc-400/15"></section>
+          <section className="border col-span-4 rounded-2xl border-zinc-400/60 in-[.dark]:border-zinc-400/15">
+          <TasksBoard />
+          </section>
         </section>
       </div>
     </>
   );
+}
+
+
+export const clientMiddleware = [authMiddleware];
+
+async function authMiddleware() {
+  const accessToken = await ensureSession();
+  if (!accessToken) throw redirect("/login");
 }

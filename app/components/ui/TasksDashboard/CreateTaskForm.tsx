@@ -55,7 +55,7 @@ const controlClass = (invalid: boolean) =>
   [
     "w-full rounded-[8px] border bg-transparent px-2.5 py-2 text-sm leading-[normal]",
     "outline-none transition-colors duration-200 in-[.dark]:scheme-dark",
-    "placeholder:text-(--text-secondary) focus-visible:border-violet-500",
+    "placeholder:text-(--text-secondary) focus-visible:border-violet-600",
     invalid ? "border-rose-500" : borderClass,
   ].join(" ");
 
@@ -268,7 +268,7 @@ export default function CreateTaskForm() {
             name="calendarAllDay"
             checked={values.calendarAllDay}
             onChange={(e) => toggleAllDay(e.target.checked)}
-            className="size-4 cursor-pointer accent-violet-500"
+            className="size-4 cursor-pointer accent-violet-600"
           />
           All-day task
         </label>
@@ -290,7 +290,7 @@ export default function CreateTaskForm() {
                   className="peer sr-only"
                 />
                 <span
-                  className={`grid cursor-pointer place-content-center rounded-[8px] border py-2 text-sm leading-[normal] capitalize transition-colors duration-200 hover:bg-muted peer-checked:border-transparent peer-checked:bg-violet-500 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-violet-500 ${borderClass}`}
+                  className={`grid cursor-pointer place-content-center rounded-[8px] border py-2 text-sm leading-[normal] capitalize transition-colors duration-200 hover:bg-muted peer-checked:border-transparent peer-checked:bg-violet-600 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-violet-600 ${borderClass}`}
                 >
                   {p}
                 </span>
@@ -386,7 +386,7 @@ export default function CreateTaskForm() {
           <button
             type="submit"
             disabled={mutation.isPending}
-            className="bg-white py-1.75 text-black font-medium hover:bg-zinc-200"
+            className="bg-white py-2 text-black font-medium hover:bg-zinc-200"
           >
             {mutation.isPending ? (
               <span className="flex items-center gap-1.5">
