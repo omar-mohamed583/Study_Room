@@ -250,7 +250,7 @@ export default function ForgetPassword() {
           return false;
         }
 
-        setResetToken(verifiedOtp.resetToken);
+        setResetToken(verifiedOtp.resetToken ?? "");
         return true;
       }
 

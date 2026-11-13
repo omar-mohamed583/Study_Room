@@ -1,4 +1,9 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { parseDate as parseCalendarDate } from "@internationalized/date";
+import { ChevronDown } from "@untitledui/icons";
+import type { Key } from "react-aria-components";
+import { Button } from "~/components/base/buttons/button";
+import { Dropdown } from "~/components/base/dropdown/dropdown";
 import useStudyData from "~/context/studyDataContext";
 import type { Task } from "~/types/taskType";
 
@@ -68,7 +73,12 @@ export default function TasksBoard() {
         onReset={resetFilters}
       />
 
-      {total > 0 && <TaskFilters filters={filters} onChange={updateFilters} />}
+      {total > 0 && (
+        <TaskFilters
+          filters={filters}
+          onChange={updateFilters}
+        />
+      )}
 
       <BoardBody
         tasks={visibleTasks}
@@ -104,7 +114,7 @@ function BoardHeader({
 
       {total > 0 && (
         <span className="rounded-full bg-muted aspect-square w-5 leading-[normal] grid place-content-center text-xs tabular-nums text-muted-foreground">
-          {shown === total ? total : `${shown} of ${total}`}
+          {total}
         </span>
       )}
 
@@ -130,7 +140,7 @@ function BoardHeader({
 /* -------------------------------------------------------------------------- */
 
 const CONTROL =
-  "h-9 w-full rounded-lg border bg-background px-3 text-sm text-foreground outline-none transition-colors focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/40 in-[.dark]:scheme-dark";
+  "w-full rounded-lg border border-zinc-400/60 bg-transparent px-2.5 py-2 text-sm leading-[normal] outline-none transition-colors duration-200 placeholder:text-(--text-secondary) focus-visible:border-violet-600 in-[.dark]:border-zinc-400/15";
 
 const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
   { value: "all", label: "All tasks" },
@@ -168,145 +178,135 @@ function TaskFilters({
   filters: Filters;
   onChange: (patch: Partial<Filters>) => void;
 }) {
+  const [dueDateDraft, setDueDateDraft] = useState(filters.dueDate);
+  const [createdDateDraft, setCreatedDateDraft] = useState(filters.createdDate);
+
+  useEffect(() => {
+    setDueDateDraft(filters.dueDate);
+  }, [filters.dueDate]);
+
+  useEffect(() => {
+    setCreatedDateDraft(filters.createdDate);
+  }, [filters.createdDate]);
+
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-      <Field label="Name" className="sm:col-span-2">
+      <Field
+        label="Name"
+        className="sm:col-span-2"
+      >
         <input
           type="search"
           value={filters.search}
-          onChange={(e) =>
-            document.startViewTransition
-              ? document.startViewTransition(() =>
-                  onChange({ search: e.target.value })
-                )
-              : onChange({ search: e.target.value })
-          }
+          onChange={(e) => onChange({ search: e.target.value })}
           placeholder="Search tasks"
           className={CONTROL}
         />
       </Field>
 
       <Field label="Status">
-        <select
+        <FilterSelect
+          label="Status"
           value={filters.status}
-          onChange={(e) =>
-            document.startViewTransition
-              ? document.startViewTransition(() =>
-                  onChange({ status: e.target.value as StatusFilter })
-                )
-              : onChange({ status: e.target.value as StatusFilter })
-          }
-          className={CONTROL}
-        >
-          {STATUS_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
+          options={STATUS_OPTIONS}
+          onChange={(value) => onChange({ status: value as StatusFilter })}
+        />
       </Field>
 
       <Field label="Priority">
-        <select
+        <FilterSelect
+          label="Priority"
           value={filters.priority}
-          onChange={(e) =>
-            document.startViewTransition
-              ? document.startViewTransition(() =>
-                  onChange({ priority: e.target.value as PriorityFilter })
-                )
-              : onChange({ priority: e.target.value as PriorityFilter })
-          }
-          className={CONTROL}
-        >
-          {PRIORITY_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
+          options={PRIORITY_OPTIONS}
+          onChange={(value) => onChange({ priority: value as PriorityFilter })}
+        />
       </Field>
 
       {/* Picking a preset clears the specific date, and the other way round,
           so the two never contradict each other. */}
       <Field label="Due">
-        <select
+        <FilterSelect
+          label="Due"
           value={filters.duePreset}
-          onChange={(e) =>
-            document.startViewTransition
-              ? document.startViewTransition(() =>
-                  onChange({
-                    duePreset: e.target.value as DuePreset,
-                    dueDate: "",
-                  })
-                )
-              : onChange({ duePreset: e.target.value as DuePreset, dueDate: "" })
+          options={DUE_OPTIONS}
+          onChange={(value) =>
+            onChange({ duePreset: value as DuePreset, dueDate: "" })
           }
-          className={CONTROL}
-        >
-          {DUE_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
+        />
       </Field>
 
       <Field label="Due on">
-        <input
-          type="date"
-          value={filters.dueDate}
-          onChange={(e) =>
-            document.startViewTransition
-              ? document.startViewTransition(() =>
-                  onChange({ dueDate: e.target.value, duePreset: "any" })
-                )
-              : onChange({ dueDate: e.target.value, duePreset: "any" })
-          }
-          className={CONTROL}
-        />
+        <></>
       </Field>
 
       <Field label="Created">
-        <select
+        <FilterSelect
+          label="Created"
           value={filters.createdPreset}
-          onChange={(e) =>
-            document.startViewTransition
-              ? document.startViewTransition(() =>
-                  onChange({
-                    createdPreset: e.target.value as CreatedPreset,
-                    createdDate: "",
-                  })
-                )
-              : onChange({
-                  createdPreset: e.target.value as CreatedPreset,
-                  createdDate: "",
-                })
+          options={CREATED_OPTIONS}
+          onChange={(value) =>
+            onChange({ createdPreset: value as CreatedPreset, createdDate: "" })
           }
-          className={CONTROL}
-        >
-          {CREATED_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-      </Field>
-
-      <Field label="Created on">
-        <input
-          type="date"
-          value={filters.createdDate}
-          onChange={(e) =>
-            document.startViewTransition
-              ? document.startViewTransition(() =>
-                  onChange({ createdDate: e.target.value, createdPreset: "any" })
-                )
-              : onChange({ createdDate: e.target.value, createdPreset: "any" })
-          }
-          className={CONTROL}
         />
       </Field>
+
+      <Field label="Created on"><></></Field>
     </div>
+  );
+}
+
+function FilterSelect<T extends string>({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: T;
+  options: { value: T; label: string }[];
+  onChange: (value: T) => void;
+}) {
+  const selected = options.find((option) => option.value === value);
+  const selectedKeys = new Set<Key>([value]);
+
+  return (
+    <Dropdown.Root>
+      <Button
+        aria-label={label}
+        size="md"
+        color="secondary"
+        iconTrailing={ChevronDown}
+        className={`justify-between text-left font-normal ${CONTROL}`}
+      >
+        <span className="truncate">{selected?.label}</span>
+      </Button>
+      <Dropdown.Popover className="max-h-64 w-64">
+        <Dropdown.Menu
+          aria-label={label}
+          selectionMode="single"
+          selectedKeys={selectedKeys}
+          onSelectionChange={(selection) => {
+            if (selection === "all") return;
+            const [key] = selection;
+            const option = options.find((item) => item.value === String(key));
+            if (!option) return;
+            document.startViewTransition
+              ? document.startViewTransition(() => onChange(option.value))
+              : onChange(option.value);
+          }}
+        >
+          {options.map((option) => (
+            <Dropdown.Item
+              key={option.value}
+              id={option.value}
+              textValue={option.label}
+            >
+              {option.label}
+            </Dropdown.Item>
+          ))}
+        </Dropdown.Menu>
+      </Dropdown.Popover>
+    </Dropdown.Root>
   );
 }
 
@@ -453,36 +453,63 @@ function BoardBody({
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-sm">
           <thead className="bg-muted in-[.dark]:bg-muted/50">
-            <tr className="*:text-center">
-              <th scope="col" className={`${TH} min-w-48`}>
+            <tr>
+              <th
+                scope="col"
+                className={`${TH} min-w-48`}
+              >
                 Title
               </th>
-              <th scope="col" className={`${TH} min-w-56`}>
+              <th
+                scope="col"
+                className={`${TH} min-w-56`}
+              >
                 Description
               </th>
-              <th scope="col" className={TH}>
+              <th
+                scope="col"
+                className={TH}
+              >
                 Subject
               </th>
-              <th scope="col" className={TH}>
+              <th
+                scope="col"
+                className={TH}
+              >
                 Priority
               </th>
-              <th scope="col" className={TH}>
+              <th
+                scope="col"
+                className={TH}
+              >
                 Due
               </th>
-              <th scope="col" className={TH}>
+              <th
+                scope="col"
+                className={TH}
+              >
                 Status
               </th>
-              <th scope="col" className={TH}>
+              <th
+                scope="col"
+                className={TH}
+              >
                 Time spent
               </th>
-              <th scope="col" className={TH}>
+              <th
+                scope="col"
+                className={TH}
+              >
                 Created
               </th>
             </tr>
           </thead>
           <tbody className="[&>tr:last-child>td]:border-b-0">
             {tasks.map((task) => (
-              <TaskRow key={task.documentId} task={task} />
+              <TaskRow
+                key={task.documentId}
+                task={task}
+              />
             ))}
           </tbody>
         </table>
@@ -497,7 +524,7 @@ function TaskRow({ task }: { task: Task }) {
   const showTime = !task.calendarAllDay;
 
   return (
-    <tr className="transition-colors hover:bg-muted/40 *:text-center">
+    <tr className="transition-colors hover:bg-muted/40">
       <td
         className={`${TD} font-medium ${
           task.completed ? "text-muted-foreground line-through" : ""
@@ -517,7 +544,10 @@ function TaskRow({ task }: { task: Task }) {
       </td>
 
       <td className={TD}>
-        <PriorityBadge priority={task.priority} animate={!task.completed} />
+        <PriorityBadge
+          priority={task.priority}
+          animate={!task.completed}
+        />
       </td>
 
       <td
@@ -530,7 +560,10 @@ function TaskRow({ task }: { task: Task }) {
       </td>
 
       <td className={TD}>
-        <StatusCell task={task} status={status} />
+        <StatusCell
+          task={task}
+          status={status}
+        />
       </td>
 
       <td className={TD}>
@@ -610,7 +643,10 @@ function PriorityBadge({
 
   return (
     <span className={`${BADGE_BASE} ${style.badge}`}>
-      <span className="relative flex size-2" aria-hidden>
+      <span
+        className="relative flex size-2"
+        aria-hidden
+      >
         {animate && (
           <span
             className={`absolute inline-flex size-full animate-ping rounded-full opacity-60 motion-reduce:animate-none ${style.dot}`}
@@ -702,7 +738,10 @@ function BoardSkeleton() {
       aria-label="Loading tasks"
     >
       {Array.from({ length: 5 }, (_, i) => (
-        <div key={i} className="h-12 animate-pulse bg-muted/60" />
+        <div
+          key={i}
+          className="h-12 animate-pulse bg-muted/60"
+        />
       ))}
     </div>
   );
@@ -781,7 +820,8 @@ function formatDate(
     label = date.toLocaleDateString(LOCALE, {
       month: "short",
       day: "numeric",
-      year: date.getFullYear() === new Date().getFullYear() ? undefined : "numeric",
+      year:
+        date.getFullYear() === new Date().getFullYear() ? undefined : "numeric",
     });
   }
 

@@ -1,11 +1,9 @@
-// Tasks.tsx (the component body)
 import { useMemo, useRef } from "react";
 import { redirect } from "react-router";
 import { ensureSession } from "~/auth/session";
 import AreaChartComp from "~/components/ui/global/AreaChart";
 import StatsChart from "~/components/ui/global/StatsChart";
 import CreateTaskForm from "~/components/ui/TasksDashboard/CreateTaskForm";
-import LaserFlow from "~/components/ui/TasksDashboard/LaserFlow";
 import TasksBoard from "~/components/ui/TasksDashboard/TasksBoard";
 import {
   buildAreaChartData,
@@ -22,7 +20,6 @@ export default function Tasks() {
     tasks: { data: tasks },
     sessions: { data: sessions },
   } = useStudyData();
-  const cardRef = useRef<HTMLDivElement | null>(null);
 
   const dailyStats = useMemo(
     () => buildDailyStats(tasks ?? [], sessions ?? []),
@@ -55,58 +52,28 @@ export default function Tasks() {
   );
 
   return (
-    <>
-      <div
-        style={{ position: "relative", height: "100dvh", overflow: "hidden" }}
-      >
-        <LaserFlow
-          surfaceRef={cardRef}
-          beamPosition={0.3}
-          color="#f97316"
-          intensity={1.5}
-          flare={1}
-          spread={1.5}
-          spill={1.1}
-          fog={0.1}
-          dust={1.4}
-          revealRadius={260}
-          revealOpacity={0}
-          beamWidth={2}
-          streaks={1.4}
-          dots={1.3}
-          pulse={1.2}
-          speed={1.95}
-          seed={10}
-          mouseInteraction
-          intro
-        />
-
-        <section
-          ref={cardRef}
-          className="mx-auto grid w-full backdrop-blur-lg max-w-[min(95dvw,89rem)] p-4 absolute top-30 bottom-0 left-1/2 -translate-x-1/2 rounded-t-[30px] border border-zinc-400/5 grid-cols-4 md:grid-rows-[11rem_20rem_1fr] gap-3 overflow-y-auto scrollbar-thin"
-        >
-          {statsChartData.map((sec) => (
-            <StatsChart
-              chartData={sec.chartData}
-              key={sec.title}
-              title={sec.title}
-            />
-          ))}
-          <section className="border row-span-2 rounded-2xl border-zinc-400/60 in-[.dark]:border-zinc-400/15 flex flex-col p-3 gap-2">
-            <CreateTaskForm />
-          </section>
-          <section className="border col-span-3 min-h-80 min-w-0 rounded-2xl border-zinc-400/60 in-[.dark]:border-zinc-400/15">
-            <AreaChartComp chartData={areaChartData} />
-          </section>
-          <section className="border col-span-4 rounded-2xl border-zinc-400/60 in-[.dark]:border-zinc-400/15">
-          <TasksBoard />
-          </section>
-        </section>
-      </div>
-    </>
+    <section className="mx-auto max-w- p-4 rounded-t-[30px] border border-zinc-400/5 grid-cols-1 min-[1250px]:grid-cols-4 min-[1250px]:grid-rows-[11rem_20rem_1fr] gap-3 overflow-y-auto scrollbar-thin grid">
+      <section className="flex flex-wrap gap-3 *:flex-1 *:min-w-56 min-[1250px]:col-span-3">
+        {statsChartData.map((sec) => (
+          <StatsChart
+            chartData={sec.chartData}
+            key={sec.title}
+            title={sec.title}
+          />
+        ))}
+      </section>
+      <section className="border @container min-[1250px]:row-span-2 rounded-2xl border-zinc-400/60 in-[.dark]:border-zinc-400/15 flex flex-col p-3 gap-2">
+        <CreateTaskForm />
+      </section>
+      <section className="border min-[1250px]:col-span-3 min-h-80 min-w-0 rounded-2xl border-zinc-400/60 in-[.dark]:border-zinc-400/15">
+        <AreaChartComp chartData={areaChartData} />
+      </section>
+      <section className="border min-[1250px]:col-span-4 rounded-2xl border-zinc-400/60 in-[.dark]:border-zinc-400/15">
+        <TasksBoard />
+      </section>
+    </section>
   );
 }
-
 
 export const clientMiddleware = [authMiddleware];
 

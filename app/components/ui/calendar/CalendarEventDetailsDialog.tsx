@@ -6,12 +6,12 @@ import type { Key } from "react-aria-components";
 import type { Subject } from "~/types/subjectTypes";
 import { Button } from "~/components/base/buttons/button";
 import { Dropdown } from "~/components/base/dropdown/dropdown";
-import { DatePicker } from "../date-picker/date-picker";
+import { DatePicker } from "../global/DatePickerDay/date-picker/date-picker";
 import {
   addMinutesToDateTimeInput,
-  calendarDateTimeToDateTimeInput,
   dateTimeInputAtMidnight,
-  dateTimeInputToCalendarDateTime,
+  dateTimeInputToCalendarDate,
+  dateTimeInputToTime,
   dateTimeInputToDate,
 } from "~/components/utils/dateTime";
 
@@ -324,38 +324,48 @@ export default function CalendarEventDetailsDialog({
                 </label>
                 <label className="block text-sm font-semibold">
                   Start date and time
-                  <div className="mt-2 flex min-w-0 gap-2">
+                  <div className="mt-2 grid min-w-0 grid-cols-2 gap-2">
                     <DatePicker
                       className="min-w-0 flex-1"
-                      widePlacement="right"
-                      value={dateTimeInputToCalendarDateTime(
+                      value={dateTimeInputToCalendarDate(
                         values.startDateTime,
                       )}
-                      isTimeDisabled={values.allDay}
                       isDisabled={isSaving}
                       onChange={(date) => {
                         if (date) {
                           updateStartDateTime(
-                            calendarDateTimeToDateTimeInput(date),
+                            `${date.toString()}T${dateTimeInputToTime(values.startDateTime)}`,
                           );
                         }
                       }}
+                    />
+                    <input
+                      aria-label="Start time"
+                      type="time"
+                      value={dateTimeInputToTime(values.startDateTime)}
+                      disabled={isSaving || values.allDay}
+                      onChange={(event) => {
+                        if (event.target.value) {
+                          updateStartDateTime(
+                            `${values.startDateTime.slice(0, 10)}T${event.target.value}`,
+                          );
+                        }
+                      }}
+                      className="w-full rounded-lg border border-secondary bg-primary px-2.5 py-2 text-sm"
                     />
                   </div>
                 </label>
                 <label className="block text-sm font-semibold">
                   End date and time
-                  <div className="mt-2 flex min-w-0 gap-2 items-center">
+                  <div className="mt-2 grid min-w-0 grid-cols-2 items-center gap-2">
                     <DatePicker
                       className="min-w-0 flex-1"
-                      widePlacement="left"
-                      value={dateTimeInputToCalendarDateTime(
+                      value={dateTimeInputToCalendarDate(
                         values.endDateTime,
                       )}
-                      minValue={dateTimeInputToCalendarDateTime(
+                      minValue={dateTimeInputToCalendarDate(
                         values.startDateTime,
                       )}
-                      isTimeDisabled={values.allDay}
                       isDisabled={isSaving || values.entityType === "exam"}
                       isInvalid={endPrecedesStart}
                       aria-describedby={
@@ -363,8 +373,7 @@ export default function CalendarEventDetailsDialog({
                       }
                       onChange={(date) => {
                         if (!date) return;
-                        const endDateTime =
-                          calendarDateTimeToDateTimeInput(date);
+                        const endDateTime = `${date.toString()}T${dateTimeInputToTime(values.endDateTime)}`;
                         onChange({
                           ...values,
                           endDateTime,
@@ -373,6 +382,26 @@ export default function CalendarEventDetailsDialog({
                             : {}),
                         });
                       }}
+                    />
+                    <input
+                      aria-label="End time"
+                      type="time"
+                      value={dateTimeInputToTime(values.endDateTime)}
+                      disabled={
+                        isSaving || values.entityType === "exam" || values.allDay
+                      }
+                      onChange={(event) => {
+                        if (!event.target.value) return;
+                        const endDateTime = `${values.endDateTime.slice(0, 10)}T${event.target.value}`;
+                        onChange({
+                          ...values,
+                          endDateTime,
+                          ...(values.allDay && values.entityType === "task"
+                            ? { startDateTime: endDateTime }
+                            : {}),
+                        });
+                      }}
+                      className="w-full rounded-lg border border-secondary bg-primary px-2.5 py-2 text-sm"
                     />
                   </div>
                   {endPrecedesStart && (

@@ -6,7 +6,6 @@ import SettingsContent from "../../layout/SettingDialog";
 import { useAuth } from "../../providers/authProvider";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "~/api/api";
-import type { UserType } from "~/types/userType";
 
 export default function DialogComp({
   dialogType,
@@ -21,7 +20,7 @@ export default function DialogComp({
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }) {
-  const { user, logout }: { user: UserType, logout: () => void } = useAuth();
+  const { user, logout } = useAuth();
 
   const client = useQueryClient();
 
@@ -78,14 +77,18 @@ export default function DialogComp({
                     return mutate(values);
                   }}
                   isLoading={isPending}
-                  preferences={{
-                    notifyExams: user?.notifyExams,
-                    notifyTasks: user?.notifyTasks,
-                    sessionMinutes: +user?.sessionMinutes,
-                    shortBreakMinutes: user?.shortBreakMinutes,
-                    longBreakMinutes: user?.longBreakMinutes,
-                    weeklyGoalHours: +user?.weeklyGoalHours,
-                  }}
+                  preferences={
+                    user
+                      ? {
+                          notifyExams: user.notifyExams,
+                          notifyTasks: user.notifyTasks,
+                          sessionMinutes: +user.sessionMinutes,
+                          shortBreakMinutes: user.shortBreakMinutes,
+                          longBreakMinutes: user.longBreakMinutes,
+                          weeklyGoalHours: +user.weeklyGoalHours,
+                        }
+                      : undefined
+                  }
                 />
               )}
             </div>

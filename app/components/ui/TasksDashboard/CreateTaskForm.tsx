@@ -1,14 +1,20 @@
-import { useId, useRef, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, CircleAlert, Loader2 } from "lucide-react";
 import { ChevronDown } from "@untitledui/icons";
-import type { Key } from "react-aria-components";
+import type { DateValue, Key } from "react-aria-components";
 import { Button } from "~/components/base/buttons/button";
 import { Dropdown } from "~/components/base/dropdown/dropdown";
-import { DatePicker } from "~/components/ui/date-picker/date-picker";
 import {
-  calendarDateTimeToDateTimeInput,
-  dateTimeInputToCalendarDateTime,
+  dateTimeInputToCalendarDate,
+  dateTimeInputToTime,
 } from "~/components/utils/dateTime";
 import { apiFetch } from "~/api/api";
 import useStudyData from "~/context/studyDataContext";
@@ -67,13 +73,17 @@ export default function CreateTaskForm() {
     subjects: { data: subjects },
   } = useStudyData();
 
-  const [values, setValues] = useState<TaskFormValues>(EMPTY_TASK_FORM);
+  const [values, setValues] = useState<TaskFormValues>(() => EMPTY_TASK_FORM);
+  const valuesRef = useRef<TaskFormValues | null>(values);
+  valuesRef.current = values;
   const [errors, setErrors] = useState<TaskFormErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
   const id = (key: string) => `${uid}-${key}`;
+
   const errorId = (key: string) => `${uid}-${key}-error`;
+
   const aria = (key: keyof TaskFormValues) => ({
     "aria-invalid": errors[key] ? (true as const) : undefined,
     "aria-describedby": errors[key] ? errorId(key) : undefined,
@@ -93,6 +103,7 @@ export default function CreateTaskForm() {
     mutationFn: createTask,
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: TASKS_QUERY_KEY });
+      valuesRef.current = EMPTY_TASK_FORM;
       setValues(EMPTY_TASK_FORM);
       setErrors({});
       setFormError(null);
@@ -107,9 +118,9 @@ export default function CreateTaskForm() {
     },
   });
 
-  /** Update values; errors already on screen re-check live so they clear as soon as they're fixed. */
   function update(patch: Partial<TaskFormValues>) {
     const next = { ...values, ...patch };
+    valuesRef.current = next;
     setValues(next);
     setSaved(false);
     setFormError(null);
@@ -123,7 +134,6 @@ export default function CreateTaskForm() {
     });
   }
 
-  /** Validate a single field when the user leaves it. */
   function validateField(key: keyof TaskFormValues) {
     const message = validateTask(values)[key];
     setErrors((prev) => {
@@ -161,9 +171,65 @@ export default function CreateTaskForm() {
   }
 
   const now = new Date();
-  const minDue = toLocalInputValue(now, true);
-  const titleLen = values.title.trim().length;
-  const descLen = values.description.trim().length;
+  const minuteKey = Math.floor(now.getTime() / 60_000);
+  const minDue = useMemo(
+    () => dateTimeInputToCalendarDate(toLocalInputValue(now, true)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [minuteKey],
+  );
+
+  const dueValue = useMemo(
+    () => (values.dueDate ? dateTimeInputToCalendarDate(values.dueDate) : null),
+    [values.dueDate],
+  );
+
+  const handleDueDateChange = useCallback((date: DateValue | null) => {
+    const previous = valuesRef.current ?? EMPTY_TASK_FORM;
+    const datePart = date?.toString() ?? "";
+    const nextValues: TaskFormValues = {
+      ...previous,
+      dueDate: !datePart
+        ? ""
+        : previous.calendarAllDay
+          ? datePart.slice(0, 10)
+          : `${datePart.slice(0, 10)}T${dateTimeInputToTime(previous.dueDate)}`,
+    };
+    valuesRef.current = nextValues;
+    setValues(nextValues);
+    setSaved(false);
+    setFormError(null);
+    setErrors((shownErrors) => {
+      if (!Object.keys(shownErrors).length) return shownErrors;
+      const fresh = validateTask(nextValues);
+      const kept: TaskFormErrors = {};
+      for (const key of Object.keys(shownErrors) as (keyof TaskFormErrors)[]) {
+        if (fresh[key]) kept[key] = fresh[key];
+      }
+      return kept;
+    });
+  }, []);
+
+  const datePickerClassName = useMemo(
+    () => twMerge(controlClass(!!errors.dueDate) + " border-0 p-0"),
+    [errors.dueDate],
+  );
+  const dueTime = values.dueDate
+    ? dateTimeInputToTime(values.dueDate)
+    : "09:00";
+
+  function handleDueTimeChange(time: string) {
+    if (!time || values.calendarAllDay) return;
+    const datePart = values.dueDate.slice(0, 10);
+    if (!datePart) return;
+    update({ dueDate: `${datePart}T${time}` });
+  }
+
+  const titleLen = useMemo(() => values.title.trim().length, [values.title]);
+
+  const descLen = useMemo(
+    () => values.description.trim().length,
+    [values.description],
+  );
 
   return (
     <form
@@ -229,38 +295,41 @@ export default function CreateTaskForm() {
           />
         </Field>
 
-        <Field
-          htmlFor={id("dueDate")}
-          label="Due"
-          optional
-          error={errors.dueDate}
-          errorId={errorId("dueDate")}
-        >
-          <DatePicker
-            aria-label="Due date and time"
-            className={twMerge(controlClass(!!errors.dueDate) + " border-0 p-0")}
-            value={
-              values.dueDate
-                ? dateTimeInputToCalendarDateTime(values.dueDate)
-                : null
-            }
-            minValue={dateTimeInputToCalendarDateTime(minDue)}
-            isTimeDisabled={values.calendarAllDay}
-            aria-invalid={!!errors.dueDate || undefined}
-            aria-describedby={errors.dueDate ? errorId("dueDate") : undefined}
-            onChange={(date) => {
-              if (!date) update({ dueDate: "" });
-              else {
-                const dateTime = calendarDateTimeToDateTimeInput(date);
-                update({
-                  dueDate: values.calendarAllDay
-                    ? dateTime.slice(0, 10)
-                    : dateTime,
-                });
-              }
-            }}
-          />
-        </Field>
+        <div className="grid gap-1.5">
+          <span className="text-sm leading-[normal]">Due</span>
+          <div className="grid grid-cols-2 gap-2">
+            <Field
+              htmlFor={id("dueDate")}
+              label="Date"
+              errorId={errorId("dueDate")}
+            >
+              <></>
+            </Field>
+            <Field
+              htmlFor={id("dueTime")}
+              label="Time"
+              errorId={errorId("dueTime")}
+            >
+              <input
+                id={id("dueTime")}
+                name="dueTime"
+                type="time"
+                value={dueTime}
+                disabled={values.calendarAllDay}
+                onChange={(event) => handleDueTimeChange(event.target.value)}
+                className={controlClass(false)}
+                aria-label="Due time"
+                aria-invalid={errors.dueDate ? true : undefined}
+                aria-describedby={
+                  errors.dueDate ? errorId("dueDate") : undefined
+                }
+              />
+            </Field>
+          </div>
+          {errors.dueDate && (
+            <FieldError id={errorId("dueDate")}>{errors.dueDate}</FieldError>
+          )}
+        </div>
 
         <label className="flex cursor-pointer items-center gap-2 text-sm leading-[normal]">
           <input
@@ -405,7 +474,7 @@ export default function CreateTaskForm() {
 
 /* ------------------------------------------------------------------ */
 
-function Field({
+export function Field({
   htmlFor,
   label,
   optional,
@@ -449,7 +518,13 @@ function Field({
   );
 }
 
-function FieldError({ id, children }: { id: string; children: ReactNode }) {
+export function FieldError({
+  id,
+  children,
+}: {
+  id: string;
+  children: ReactNode;
+}) {
   return (
     <p
       id={id}
@@ -460,7 +535,7 @@ function FieldError({ id, children }: { id: string; children: ReactNode }) {
   );
 }
 
-function Counter({ value, max }: { value: number; max: number }) {
+export function Counter({ value, max }: { value: number; max: number }) {
   return (
     <span
       className={`text-xs tabular-nums ${value > max ? "text-rose-500" : "text-(--text-secondary)"}`}
@@ -470,7 +545,7 @@ function Counter({ value, max }: { value: number; max: number }) {
   );
 }
 
-function SubjectDropdown({
+export function SubjectDropdown({
   labelId,
   value,
   disabled,

@@ -264,7 +264,7 @@ export function useChartInteraction({
   const handleTouchStart = useCallback(
     (event: React.TouchEvent<SVGGElement>) => {
       if (event.touches.length === 1) {
-        event.preventDefault();
+        event?.preventDefault();
         const chartX = getChartX(event, 0);
         if (chartX === null) {
           return;
@@ -275,7 +275,7 @@ export function useChartInteraction({
           scheduleTooltip(tooltip);
         }
       } else if (event.touches.length === 2) {
-        event.preventDefault();
+        event?.preventDefault();
         resetTooltipDedupe();
         clearTooltip();
         const x0 = getChartX(event, 0);
@@ -308,7 +308,7 @@ export function useChartInteraction({
   const handleTouchMove = useCallback(
     (event: React.TouchEvent<SVGGElement>) => {
       if (event.touches.length === 1) {
-        event.preventDefault();
+        event?.preventDefault();
         const chartX = getChartX(event, 0);
         if (chartX === null) {
           return;

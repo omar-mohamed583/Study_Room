@@ -42,6 +42,7 @@ body {
 
 section {
   content-visibility: auto;
+  contain: paint;
 }
 
 .df-calendar-wrapper * {
@@ -426,4 +427,13 @@ body.dark {
     }
   }
 
+}
+
+[aria-label="Date picker"], [data-trigger="Date picker"] {
+  will-change: auto;
+  scale: .8;
+}
+
+[data-react-aria-pressable="true"]:not([data-icon-only="true"]) {
+  width: 100%;
 }

@@ -14,9 +14,9 @@ export const styles = sortCx({
             // Disabled styles
             "disabled:cursor-not-allowed disabled:opacity-50 in-data-input-wrapper:disabled:opacity-100",
             // Same as `icon` but for SSR icons that cannot be passed to the client as functions.
-            "*:data-icon:pointer-events-none *:data-icon:size-5 *:data-icon:shrink-0 *:data-icon:transition-inherit-all",
+            "*:data-icon:pointer-events-none *:data-icon:size-5 *:data-icon:shrink-0",
         ].join(" "),
-        icon: "pointer-events-none size-5 shrink-0 transition-inherit-all",
+        icon: "pointer-events-none size-5 shrink-0",
     },
     sizes: {
         xs: {
@@ -222,7 +222,7 @@ export const Button: {
             )}
 
             {children && (
-                <span data-text className={cx("transition-inherit-all", !noTextPadding && "px-0.5")}>
+                <span data-text className={cx(!noTextPadding && "px-0.5")}>
                     {children}
                 </span>
             )}
