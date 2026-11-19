@@ -32,8 +32,9 @@ export type Toast = {
   actionBtnText?: string;
   icon?: "fail" | "success" | "alert";
   onAction?: () => any | (() => null);
-  fuseColor?: string;
 };
+export type ToastAction = NonNullable<Toast["icon"]>;
+export type ToastInput = Omit<Toast, "id" | "icon">;
 
 export default interface CustomContextType {
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
@@ -44,6 +45,7 @@ export default interface CustomContextType {
   setTimerStates: Dispatch<SetStateAction<TimerStates>>;
   toasts: Toast[];
   setToasts: Dispatch<SetStateAction<Toast[]>>;
+  setToast: (toast: ToastInput, action: ToastAction) => void;
   showToast: boolean;
   setShowToast: Dispatch<SetStateAction<boolean>>;
   selectEventValue: {

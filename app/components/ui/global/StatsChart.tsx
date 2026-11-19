@@ -47,7 +47,7 @@ export default function StatsChart({
   const { value } = getDayRatio(chartData);
 
   return (
-    <section className="[background:linear-gradient(to_top,oklch(82.8%_0.189_84.429/0.28),rgb(159_159_169/0.2))] in-[.dark]:[background:linear-gradient(to_top,oklch(82.8%_0.189_84.429/0.04),rgb(159_159_169/0.01))] hover:saturate-150 p-4 border border-zinc-400/60 in-[.dark]:border-zinc-400/15 backdrop-blur-md rounded-2xl transition-colors duration-200 hover:border-amber-500/90 grid gap-2">
+    <section className="grid gap-2 rounded-2xl border border-zinc-500/50 in-[.dark]:border-zinc-400/30 bg-muted/10 p-4 text-card-foreground backdrop-blur-md transition-colors duration-300 hover:border-transparent in-[.dark]:hover:bg-muted/20">
       <header>
         <h3 className="uppercase tracking-[-0.01em] font-heading text-[14px] leading-[normal] text-(--text-secondary)">
           {title}
@@ -60,7 +60,7 @@ export default function StatsChart({
           </span>
           <AreaSparkline
             className="w-1/2"
-            color="#f97316"
+            color="var(--accent-100)"
             crosshair="gradient"
             data={
               chartData.length
@@ -78,11 +78,11 @@ export default function StatsChart({
 
         <div>
           <span
-            className={`rounded-full py-1 px-2 bg-muted in-[.dark]:bg-muted/60 text-sm leading-[normal] flex gap-0.5 items-center in-[.dark]:hover:bg-muted transition-colors duration-200 font-heading ${
+            className={`flex items-center gap-0.5 rounded-full bg-zinc-400/20 in-[.dark]:bg-muted px-2 py-1 text-sm leading-[normal] transition-colors duration-200 hover:bg-accent font-heading ${
               isUp
-                ? "text-emerald-400 in-[.dark]:text-green-500"
+                ? "text-emerald-700 in-[.dark]:text-emerald-400"
                 : isUp !== null
-                  ? "text-rose-400 in-[.dark]:text-red-500"
+                  ? "text-rose-700 in-[.dark]:text-rose-400"
                   : "text-(--text-secondary)"
             }`}
           >

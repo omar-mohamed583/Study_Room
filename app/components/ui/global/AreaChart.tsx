@@ -11,7 +11,7 @@ export default function AreaChartComp({
   return (
     <AreaChart
       data={chartData}
-      className="h-full w-full"
+      className="tasks-area-chart h-full w-full"
       style={{ aspectRatio: "auto" }}
     >
       <Grid horizontal />

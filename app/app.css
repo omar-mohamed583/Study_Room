@@ -13,7 +13,7 @@
 
 html {
   scroll-behavior: smooth;
-  font-family: "Outfit", sans-serif;
+  font-family: "Inter", sans-serif;
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
@@ -22,7 +22,7 @@ html {
 }
 
 input, button, textarea {
-  font-family: inherit;
+  font-family: inherit!important;
 }
 
 input:autofill, input:-webkit-autofill, input:-internal-autofill-selected {
@@ -42,7 +42,7 @@ body {
 
 section {
   content-visibility: auto;
-  contain: paint;
+  contain-intrinsic-size: auto 500px;
 }
 
 .df-calendar-wrapper * {
@@ -427,6 +427,16 @@ body.dark {
     }
   }
 
+}
+
+.tasks-area-chart {
+  --chart-line-primary: oklch(0.64 0.17 45);
+  --chart-line-secondary: oklch(0.56 0.14 255);
+}
+
+.dark .tasks-area-chart {
+  --chart-line-primary: var(--chart-1);
+  --chart-line-secondary: var(--chart-2);
 }
 
 [aria-label="Date picker"], [data-trigger="Date picker"] {

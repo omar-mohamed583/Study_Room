@@ -37,7 +37,7 @@ export default function NotificationModal() {
           onAction={toast.onAction || (() => null)}
           background={theme === "dark" ? "#27272acc" : "hsl(240 4% 90% / 0.5)"}
           color={theme === "dark" ? "#f5f5f5" : "#000"}
-          fuseColor={toast?.fuseColor?.trim() ?? "#f5a524"}
+          fuseColor={{ success: "#84CC16", alert: "#f5a524", fail: "#EF4444" }[toast.icon ?? "alert"]}
           width={356}
           radius={12}
           slideMs={400}

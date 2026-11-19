@@ -1,4 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import {
+  startTransition,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { parseDate as parseCalendarDate } from "@internationalized/date";
 import { ChevronDown } from "@untitledui/icons";
 import type { Key } from "react-aria-components";
@@ -6,6 +12,8 @@ import { Button } from "~/components/base/buttons/button";
 import { Dropdown } from "~/components/base/dropdown/dropdown";
 import useStudyData from "~/context/studyDataContext";
 import type { Task } from "~/types/taskType";
+import debounce from "~/utils/debounce";
+import { DatePickerField } from "../global/date picker/DatePicker";
 
 /* -------------------------------------------------------------------------- */
 /*  Types                                                                     */
@@ -60,8 +68,10 @@ export default function TasksBoard() {
     (key) => filters[key] !== DEFAULT_FILTERS[key],
   );
 
-  const updateFilters = (patch: Partial<Filters>) =>
-    setFilters((prev) => ({ ...prev, ...patch }));
+  const updateFilters = useCallback(
+    (patch: Partial<Filters>) => setFilters((prev) => ({ ...prev, ...patch })),
+    [],
+  );
   const resetFilters = () => setFilters(DEFAULT_FILTERS);
 
   return (
@@ -113,7 +123,7 @@ function BoardHeader({
       </h3>
 
       {total > 0 && (
-        <span className="rounded-full bg-muted aspect-square w-5 leading-[normal] grid place-content-center text-xs tabular-nums text-muted-foreground">
+        <span className="rounded-full bg-zinc-400/80 in-[.dark]:bg-zinc-400/40 aspect-square w-5 leading-[normal] grid place-content-center text-xs tabular-nums text-(--secondary-text)">
           {total}
         </span>
       )}
@@ -126,7 +136,7 @@ function BoardHeader({
               ? () => document.startViewTransition(() => onReset())
               : onReset
           }
-          className="ml-auto h-8 rounded-lg border px-3 text-sm transition-colors hover:bg-muted"
+          className="ml-auto h-8 rounded-lg border border-[hsl(from_var(--text-primary)_h_s_l_/.2)] bg-background px-3 text-sm text-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
         >
           Clear filters
         </button>
@@ -140,7 +150,7 @@ function BoardHeader({
 /* -------------------------------------------------------------------------- */
 
 const CONTROL =
-  "w-full rounded-lg border border-zinc-400/60 bg-transparent px-2.5 py-2 text-sm leading-[normal] outline-none transition-colors duration-200 placeholder:text-(--text-secondary) focus-visible:border-violet-600 in-[.dark]:border-zinc-400/15";
+  "w-full rounded-lg border border-[hsl(from_var(--text-primary)_h_s_l_/.2)] bg-background px-2.5 py-2 text-sm leading-[normal] text-foreground outline-none transition-colors duration-200 placeholder:text-muted-foreground hover:border-ring/60 focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30";
 
 const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
   { value: "all", label: "All tasks" },
@@ -181,6 +191,17 @@ function TaskFilters({
   const [dueDateDraft, setDueDateDraft] = useState(filters.dueDate);
   const [createdDateDraft, setCreatedDateDraft] = useState(filters.createdDate);
 
+  const [searchDraft, setSearchDraft] = useState(filters.search);
+
+  const debouncedSearch = useMemo(
+    () => debounce((value: string) => onChange({ search: value }), 400),
+    [onChange],
+  );
+
+  useEffect(() => {
+    setSearchDraft(filters.search);
+  }, [filters.search]);
+
   useEffect(() => {
     setDueDateDraft(filters.dueDate);
   }, [filters.dueDate]);
@@ -197,8 +218,11 @@ function TaskFilters({
       >
         <input
           type="search"
-          value={filters.search}
-          onChange={(e) => onChange({ search: e.target.value })}
+          value={searchDraft}
+          onChange={(e) => {
+            setSearchDraft(e.target.value);
+            debouncedSearch(e.target.value);
+          }}
           placeholder="Search tasks"
           className={CONTROL}
         />
@@ -236,7 +260,13 @@ function TaskFilters({
       </Field>
 
       <Field label="Due on">
-        <></>
+        <DatePickerField
+          onChange={(val) =>
+            startTransition(() => onChange({ dueDate: val.slice(0, 10) }))
+          }
+          value={new Date(filters.dueDate)}
+          showTimePicker={false}
+        />
       </Field>
 
       <Field label="Created">
@@ -250,7 +280,15 @@ function TaskFilters({
         />
       </Field>
 
-      <Field label="Created on"><></></Field>
+      <Field label="Created on">
+        <DatePickerField
+          onChange={(val) =>
+            startTransition(() => onChange({ createdDate: val }))
+          }
+          value={filters.createdDate}
+          showTimePicker={false}
+        />
+      </Field>
     </div>
   );
 }
@@ -290,9 +328,7 @@ function FilterSelect<T extends string>({
             const [key] = selection;
             const option = options.find((item) => item.value === String(key));
             if (!option) return;
-            document.startViewTransition
-              ? document.startViewTransition(() => onChange(option.value))
-              : onChange(option.value);
+            onChange(option.value);
           }}
         >
           {options.map((option) => (
@@ -394,8 +430,8 @@ function matchesCreatedPreset(
 // border-radius is ignored on a table that uses border-collapse, so the
 // rounded outline lives on a wrapper and the table only draws the inner lines.
 const TH =
-  "px-4 py-2.5 text-left text-xs font-medium whitespace-nowrap text-muted-foreground border-b border-r last:border-r-0";
-const TD = "px-4 py-3 align-middle border-b border-r last:border-r-0";
+  "px-4 py-2.5 text-left text-xs font-medium whitespace-nowrap text-muted-foreground border-b border-r border-[hsl(from_var(--text-primary)_h_s_l_/.12)] last:border-r-0";
+const TD = "px-4 py-3 align-middle border-b border-r border-[hsl(from_var(--text-primary)_h_s_l_/.12)] last:border-r-0";
 
 function BoardBody({
   tasks,
@@ -439,7 +475,7 @@ function BoardBody({
           <button
             type="button"
             onClick={onReset}
-            className="h-8 rounded-lg border px-3 text-sm transition-colors hover:bg-muted"
+            className="h-8 rounded-lg border border-[hsl(from_var(--text-primary)_h_s_l_/.2)] bg-background px-3 text-sm text-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
           >
             Clear filters
           </button>
@@ -449,10 +485,10 @@ function BoardBody({
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border mt-3">
+    <div className="overflow-hidden rounded-xl border border-zinc-400/30 in-[.dark]:border-zinc-400/15 mt-3">
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-sm">
-          <thead className="bg-muted in-[.dark]:bg-muted/50">
+          <thead className="bg-zinc-400/30 in-[.dark]:bg-zinc-400/15">
             <tr>
               <th
                 scope="col"
@@ -524,7 +560,7 @@ function TaskRow({ task }: { task: Task }) {
   const showTime = !task.calendarAllDay;
 
   return (
-    <tr className="transition-colors hover:bg-muted/40">
+    <tr className="transition-colors hover:bg-accent/60">
       <td
         className={`${TD} font-medium ${
           task.completed ? "text-muted-foreground line-through" : ""
@@ -552,7 +588,7 @@ function TaskRow({ task }: { task: Task }) {
 
       <td
         className={`${TD} whitespace-nowrap ${
-          status === "overdue" ? "text-rose-600 in-[.dark]:text-rose-300" : ""
+          status === "overdue" ? "text-rose-600/80" : ""
         }`}
         title={due ? formatFull(due, showTime) : undefined}
       >
@@ -594,23 +630,23 @@ const PRIORITY_STYLES: Record<
   high: {
     label: "High",
     badge:
-      "border-rose-200 bg-rose-50 text-rose-700 in-[.dark]:border-rose-500/30 in-[.dark]:bg-rose-500/10 in-[.dark]:text-rose-300",
-    dot: "bg-rose-500",
-    glow: "shadow-[0_0_8px_2px_rgba(244,63,94,0.55)]",
+      "border-rose-200/80 bg-rose-50/90 text-rose-800 leading-[normal] in-[.dark]:border-rose-500/30 in-[.dark]:bg-rose-500/10 in-[.dark]:text-rose-300",
+    dot: "bg-rose-500/70",
+    glow: "shadow-[0_0_8px_2px_rgba(244,63,94,0.4)]",
   },
   medium: {
     label: "Medium",
     badge:
-      "border-amber-200 bg-amber-50 text-amber-700 in-[.dark]:border-amber-500/30 in-[.dark]:bg-amber-500/10 in-[.dark]:text-amber-300",
-    dot: "bg-amber-500",
-    glow: "shadow-[0_0_8px_2px_rgba(245,158,11,0.55)]",
+      "border-amber-200/80 bg-amber-50/90 text-amber-800 leading-[normal] in-[.dark]:border-amber-500/30 in-[.dark]:bg-amber-500/10 in-[.dark]:text-amber-300",
+    dot: "bg-amber-500/70",
+    glow: "shadow-[0_0_8px_2px_rgba(245,158,11,0.4)]",
   },
   low: {
     label: "Low",
     badge:
-      "border-sky-200 bg-sky-50 text-sky-700 in-[.dark]:border-sky-500/30 in-[.dark]:bg-sky-500/10 in-[.dark]:text-sky-300",
-    dot: "bg-sky-500",
-    glow: "shadow-[0_0_8px_2px_rgba(14,165,233,0.55)]",
+      "border-sky-200/80 bg-sky-50/90 text-sky-800 leading-[normal] in-[.dark]:border-sky-500/30 in-[.dark]:bg-sky-500/10 in-[.dark]:text-sky-300",
+    dot: "bg-sky-500/70",
+    glow: "shadow-[0_0_8px_2px_rgba(14,165,233,0.4)]",
   },
 };
 
@@ -618,23 +654,23 @@ const STATUS_STYLES: Record<TaskStatus, { label: string; badge: string }> = {
   completed: {
     label: "Completed",
     badge:
-      "border-emerald-200 bg-emerald-50 text-emerald-700 in-[.dark]:border-emerald-500/30 in-[.dark]:bg-emerald-500/10 in-[.dark]:text-emerald-300",
+      "border-emerald-200 bg-emerald-50/90 text-emerald-800 in-[.dark]:border-emerald-500/30 in-[.dark]:bg-emerald-500/10 in-[.dark]:text-emerald-300 leading-normal",
   },
   overdue: {
     label: "Overdue",
     badge:
-      "border-rose-200 bg-rose-50 text-rose-700 in-[.dark]:border-rose-500/30 in-[.dark]:bg-rose-500/10 in-[.dark]:text-rose-300",
+      "border-rose-200 bg-rose-50/90 text-rose-800 in-[.dark]:border-rose-500/30 in-[.dark]:bg-rose-500/10 in-[.dark]:text-rose-300 leading-[normal]",
   },
   pending: {
     label: "Pending",
-    badge: "bg-muted text-muted-foreground",
+    badge: "bg-zinc-400/60 leading-[normal]",
   },
 };
 
 /** Priority pill with a glowing dot. The ping only runs while the task is open. */
 function PriorityBadge({
   priority,
-  animate,
+  animate = false,
 }: {
   priority: Priority;
   animate: boolean;
@@ -643,19 +679,6 @@ function PriorityBadge({
 
   return (
     <span className={`${BADGE_BASE} ${style.badge}`}>
-      <span
-        className="relative flex size-2"
-        aria-hidden
-      >
-        {animate && (
-          <span
-            className={`absolute inline-flex size-full animate-ping rounded-full opacity-60 motion-reduce:animate-none ${style.dot}`}
-          />
-        )}
-        <span
-          className={`relative inline-flex size-2 rounded-full ${style.dot} ${style.glow}`}
-        />
-      </span>
       {style.label}
     </span>
   );

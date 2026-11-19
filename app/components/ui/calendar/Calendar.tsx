@@ -350,7 +350,7 @@ export default function Calendar({
   exams: Exam[];
 }) {
   const client = useQueryClient();
-  const { setToasts } = useTheme();
+  const { setToast } = useTheme();
   const defaultCalendarCreationStarted = useRef(false);
   const eventIdentities = useRef(new Map<string, EventIdentity>());
   const temporaryEventIds = useRef(new Set<string>());
@@ -406,17 +406,12 @@ export default function Calendar({
       }
     },
     onError: (error) => {
-      setToasts((previous) => [
-        ...previous,
-        {
-          id: crypto.randomUUID(),
+      setToast({
           title: "Calendar creation failed",
           description: error.message,
           actionBtnText: "Dismiss",
-          icon: "fail",
           onAction: () => {},
-        },
-      ]);
+        }, "fail");
     },
   });
 
@@ -471,17 +466,12 @@ export default function Calendar({
         mutation.action === "create"
           ? mutation.values.entityType
           : mutation.identity.entityType;
-      setToasts((previous) => [
-        ...previous,
-        {
-          id: crypto.randomUUID(),
+      setToast({
           title: `${getEntityLabel(entityType)} ${action} failed`,
           description: error.message,
           actionBtnText: "Dismiss",
-          icon: "fail",
           onAction: () => {},
-        },
-      ]);
+        }, "fail");
     },
   });
 
@@ -494,17 +484,12 @@ export default function Calendar({
     description: string,
     icon: "fail" | "success" | "alert" = "fail",
   ) {
-    setToasts((previous) => [
-      ...previous,
-      {
-        id: crypto.randomUUID(),
+    setToast({
         title,
         description,
         actionBtnText: "Dismiss",
-        icon,
         onAction: () => {},
-      },
-    ]);
+      }, icon);
   }
 
   function showMissingEventToast() {

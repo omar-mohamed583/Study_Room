@@ -9,13 +9,9 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, CircleAlert, Loader2 } from "lucide-react";
 import { ChevronDown } from "@untitledui/icons";
-import type { DateValue, Key } from "react-aria-components";
+import type { Key } from "react-aria-components";
 import { Button } from "~/components/base/buttons/button";
 import { Dropdown } from "~/components/base/dropdown/dropdown";
-import {
-  dateTimeInputToCalendarDate,
-  dateTimeInputToTime,
-} from "~/components/utils/dateTime";
 import { apiFetch } from "~/api/api";
 import useStudyData from "~/context/studyDataContext";
 import {
@@ -23,14 +19,13 @@ import {
   PRIORITIES,
   TASK_LIMITS,
   parseServerErrors,
-  toLocalInputValue,
   toTaskPayload,
   validateTask,
   type NewTaskPayload,
   type TaskFormErrors,
   type TaskFormValues,
 } from "~/lib/taskForm";
-import { twMerge } from "tailwind-merge";
+import { DatePickerField } from "../global/date picker/DatePicker";
 
 // Must match the query key useGetEvents uses for /tasks, otherwise the new
 // task won't show up until a manual refresh.
@@ -55,14 +50,13 @@ async function createTask(payload: NewTaskPayload) {
   });
 }
 
-const borderClass = "border-zinc-400/60 in-[.dark]:border-zinc-400/15";
+const borderClass = "border-[hsl(from_var(--text-primary)_h_s_l_/.2)]";
 
 const controlClass = (invalid: boolean) =>
   [
-    "w-full rounded-[8px] border bg-transparent px-2.5 py-2 text-sm leading-[normal]",
-    "outline-none transition-colors duration-200 in-[.dark]:scheme-dark",
-    "placeholder:text-(--text-secondary) focus-visible:border-violet-600",
-    invalid ? "border-rose-500" : borderClass,
+    "w-full rounded-[8px] border bg-background px-2.5 py-2 text-sm leading-[normal] text-foreground",
+    "outline-none transition-colors duration-200 placeholder:text-muted-foreground hover:border-ring/60 focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30",
+    invalid ? "border-destructive" : borderClass,
   ].join(" ");
 
 export default function CreateTaskForm() {
@@ -145,7 +139,6 @@ export default function CreateTaskForm() {
   }
 
   function toggleAllDay(checked: boolean) {
-    // date and datetime-local inputs use different value formats
     const dueDate = checked
       ? values.dueDate.slice(0, 10)
       : values.dueDate
@@ -170,29 +163,22 @@ export default function CreateTaskForm() {
     mutation.mutate(toTaskPayload(values));
   }
 
-  const now = new Date();
-  const minuteKey = Math.floor(now.getTime() / 60_000);
-  const minDue = useMemo(
-    () => dateTimeInputToCalendarDate(toLocalInputValue(now, true)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [minuteKey],
-  );
-
   const dueValue = useMemo(
-    () => (values.dueDate ? dateTimeInputToCalendarDate(values.dueDate) : null),
+    () => (values.dueDate ? new Date(values.dueDate) : null),
     [values.dueDate],
   );
 
-  const handleDueDateChange = useCallback((date: DateValue | null) => {
+  const handleDueDateChange = useCallback((date: string) => {
     const previous = valuesRef.current ?? EMPTY_TASK_FORM;
-    const datePart = date?.toString() ?? "";
+    const datePart = date.slice(0, 10);
+    const timePart = date.slice(11, 16);
     const nextValues: TaskFormValues = {
       ...previous,
       dueDate: !datePart
         ? ""
         : previous.calendarAllDay
           ? datePart.slice(0, 10)
-          : `${datePart.slice(0, 10)}T${dateTimeInputToTime(previous.dueDate)}`,
+          : `${datePart}T${timePart}`,
     };
     valuesRef.current = nextValues;
     setValues(nextValues);
@@ -209,21 +195,6 @@ export default function CreateTaskForm() {
     });
   }, []);
 
-  const datePickerClassName = useMemo(
-    () => twMerge(controlClass(!!errors.dueDate) + " border-0 p-0"),
-    [errors.dueDate],
-  );
-  const dueTime = values.dueDate
-    ? dateTimeInputToTime(values.dueDate)
-    : "09:00";
-
-  function handleDueTimeChange(time: string) {
-    if (!time || values.calendarAllDay) return;
-    const datePart = values.dueDate.slice(0, 10);
-    if (!datePart) return;
-    update({ dueDate: `${datePart}T${time}` });
-  }
-
   const titleLen = useMemo(() => values.title.trim().length, [values.title]);
 
   const descLen = useMemo(
@@ -238,11 +209,11 @@ export default function CreateTaskForm() {
       onSubmit={onSubmit}
       className="flex min-h-0 flex-1 flex-col gap-3"
     >
-      <h2 className="font-heading text-[14px] leading-[normal] tracking-[-0.01em] text-(--text-secondary)">
+      <h2 className="font-heading text-[14px] leading-[normal] tracking-[-0.01em]">
         New task
       </h2>
 
-      <div className="scrollbar-hide grid min-h-0 flex-1 content-start gap-4 overflow-y-auto pr-1">
+      <div className="scrollbar-hide grid min-h-0 flex-1 content-start gap-4 overflow-y-auto p-1">
         <Field
           htmlFor={id("title")}
           label="Title"
@@ -296,33 +267,17 @@ export default function CreateTaskForm() {
         </Field>
 
         <div className="grid gap-1.5">
-          <span className="text-sm leading-[normal]">Due</span>
           <div className="grid grid-cols-2 gap-2">
             <Field
               htmlFor={id("dueDate")}
               label="Date"
               errorId={errorId("dueDate")}
+              className="[anchor-name:--due]"
             >
-              <></>
-            </Field>
-            <Field
-              htmlFor={id("dueTime")}
-              label="Time"
-              errorId={errorId("dueTime")}
-            >
-              <input
-                id={id("dueTime")}
-                name="dueTime"
-                type="time"
-                value={dueTime}
-                disabled={values.calendarAllDay}
-                onChange={(event) => handleDueTimeChange(event.target.value)}
-                className={controlClass(false)}
-                aria-label="Due time"
-                aria-invalid={errors.dueDate ? true : undefined}
-                aria-describedby={
-                  errors.dueDate ? errorId("dueDate") : undefined
-                }
+              <DatePickerField
+                showTimePicker
+                onChange={handleDueDateChange}
+                value={dueValue}
               />
             </Field>
           </div>
@@ -337,7 +292,7 @@ export default function CreateTaskForm() {
             name="calendarAllDay"
             checked={values.calendarAllDay}
             onChange={(e) => toggleAllDay(e.target.checked)}
-            className="size-4 cursor-pointer accent-violet-600"
+            className="size-4 cursor-pointer accent-primary"
           />
           All-day task
         </label>
@@ -359,7 +314,7 @@ export default function CreateTaskForm() {
                   className="peer sr-only"
                 />
                 <span
-                  className={`grid cursor-pointer place-content-center rounded-[8px] border py-2 text-sm leading-[normal] capitalize transition-colors duration-200 hover:bg-muted peer-checked:border-transparent peer-checked:bg-violet-600 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-violet-600 ${borderClass}`}
+                  className={`grid cursor-pointer place-content-center rounded-[8px] border py-2 text-sm leading-[normal] capitalize transition-colors duration-200 peer-checked:border-transparent peer-checked:bg-(--text-primary) peer-checked:text-(--contrast-text) peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ring ${borderClass}`}
                 >
                   {p}
                 </span>
@@ -427,7 +382,7 @@ export default function CreateTaskForm() {
         {formError && (
           <p
             role="alert"
-            className="flex items-start gap-1.5 rounded-[8px] border border-rose-500/50 bg-rose-500/10 p-2 text-sm leading-[normal] text-rose-500"
+            className="flex items-start gap-1.5 rounded-[8px] border border-destructive/40 bg-destructive/10 p-2 text-sm leading-[normal] text-destructive"
           >
             <CircleAlert
               className="mt-px size-4 shrink-0"
@@ -455,7 +410,7 @@ export default function CreateTaskForm() {
           <button
             type="submit"
             disabled={mutation.isPending}
-            className="bg-white py-2 text-black font-medium hover:bg-zinc-200"
+            className="bg-(--text-primary) py-2 font-medium text-(--contrast-text) hover:bg-(--text-primary)/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
             {mutation.isPending ? (
               <span className="flex items-center gap-1.5">
@@ -500,7 +455,7 @@ export function Field({
       <div className="flex items-baseline justify-between gap-2">
         <label
           htmlFor={htmlFor}
-          className="text-sm leading-[normal]"
+          className="text-sm leading-[normal] text-(--text-secondary)"
         >
           {label}
         </label>
@@ -528,7 +483,7 @@ export function FieldError({
   return (
     <p
       id={id}
-      className="text-xs font-medium indent-1 leading-[normal] text-rose-500"
+      className="text-xs font-medium indent-1 leading-[normal] text-destructive"
     >
       {children}
     </p>
@@ -538,7 +493,7 @@ export function FieldError({
 export function Counter({ value, max }: { value: number; max: number }) {
   return (
     <span
-      className={`text-xs tabular-nums ${value > max ? "text-rose-500" : "text-(--text-secondary)"}`}
+      className={`text-xs tabular-nums ${value > max ? "text-destructive" : "text-(--text-secondary)"}`}
     >
       {value}/{max}
     </span>

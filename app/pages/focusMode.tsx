@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef } from "react";
-import FocusTimer from "~/components/ui/focus timer/FocusTimer";
+import FocusTimer from "~/components/ui/focus-timer/FocusTimer";
 import useTheme from "~/context/themeContext";
 import video from "../assets/nature.mp4";
 import image from "../assets/nature.webp";

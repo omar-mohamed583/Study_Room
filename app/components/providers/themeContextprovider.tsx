@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useState, type ReactNode } from "react";
 import { ThemeContext } from "~/context/themeContext";
 import { useLocalStorage } from "~/hooks/useLocalStorage";
 import type CustomContextType from "~/types/customContextType";
-import type { TimerStates, Toast } from "~/types/customContextType";
+import type { TimerStates, Toast, ToastInput, ToastAction } from "~/types/customContextType";
 
 type Theme = "light" | "dark";
 
@@ -124,6 +124,9 @@ export default function ThemeContextProvider({
   const [showToast, setShowToast] = useState<boolean>(false);
 
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const setToast = (toast: ToastInput, action: ToastAction) => {
+    setToasts((previous) => [...previous, { ...toast, id: crypto.randomUUID(), icon: action }]);
+  };
 
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -152,6 +155,7 @@ export default function ThemeContextProvider({
         setTimerStates,
         toasts,
         setToasts,
+        setToast,
         showToast,
         setShowToast,
         selectEventValue,

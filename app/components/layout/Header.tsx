@@ -230,7 +230,7 @@ export default function Header() {
         </NavBody>
 
         <MobileNav>
-          <MobileNavHeader>
+          <MobileNavHeader className="overscroll-none">
             <button
               type="button"
               onClick={() => navigate("/")}
@@ -274,7 +274,7 @@ export default function Header() {
 
             <MobileNavToggle
               isOpen={isMobileMenuOpen}
-              onClick={() => setIsMobileMenuOpen((open) => !open)}
+              onClick={() => startTransition(() => setIsMobileMenuOpen((open) => !open))}
             />
           </MobileNavHeader>
 

@@ -1,10 +1,11 @@
-import { useMemo, useRef } from "react";
+import { useMemo } from "react";
 import { redirect } from "react-router";
 import { ensureSession } from "~/auth/session";
+import Header from "~/components/layout/Header";
 import AreaChartComp from "~/components/ui/global/AreaChart";
 import StatsChart from "~/components/ui/global/StatsChart";
-import CreateTaskForm from "~/components/ui/TasksDashboard/CreateTaskForm";
-import TasksBoard from "~/components/ui/TasksDashboard/TasksBoard";
+import CreateTaskForm from "~/components/ui/tasks-dashboard/CreateTaskForm";
+import TasksBoard from "~/components/ui/tasks-dashboard/TasksBoard";
 import {
   buildAreaChartData,
   buildCreatedTasksSeries,
@@ -52,7 +53,10 @@ export default function Tasks() {
   );
 
   return (
-    <section className="mx-auto max-w- p-4 rounded-t-[30px] border border-zinc-400/5 grid-cols-1 min-[1250px]:grid-cols-4 min-[1250px]:grid-rows-[11rem_20rem_1fr] gap-3 overflow-y-auto scrollbar-thin grid">
+    <>
+    <Header />
+
+    <main className="mt-20 mx-auto max-w- p-4 rounded-t-[30px grid-cols-1 min-[1250px]:grid-cols-4 min-[1250px]:grid-rows-[11rem_20rem_1fr] gap-3 overflow-y-auto scrollbar-thin grid ">
       <section className="flex flex-wrap gap-3 *:flex-1 *:min-w-56 min-[1250px]:col-span-3">
         {statsChartData.map((sec) => (
           <StatsChart
@@ -62,16 +66,17 @@ export default function Tasks() {
           />
         ))}
       </section>
-      <section className="border @container min-[1250px]:row-span-2 rounded-2xl border-zinc-400/60 in-[.dark]:border-zinc-400/15 flex flex-col p-3 gap-2">
+      <section className="border border-[hsl(from_var(--text-primary)_h_s_l_/.16)] min-[1250px]:row-span-2 rounded-2xl [content-visibility:revert!important] flex flex-col p-3 gap-2">
         <CreateTaskForm />
       </section>
-      <section className="border min-[1250px]:col-span-3 min-h-80 min-w-0 rounded-2xl border-zinc-400/60 in-[.dark]:border-zinc-400/15">
+      <section className="border border-[hsl(from_var(--text-primary)_h_s_l_/.16)] min-[1250px]:col-span-3 min-h-80 min-w-0 rounded-2xl">
         <AreaChartComp chartData={areaChartData} />
       </section>
-      <section className="border min-[1250px]:col-span-4 rounded-2xl border-zinc-400/60 in-[.dark]:border-zinc-400/15">
+      <section className="border border-[hsl(from_var(--text-primary)_h_s_l_/.16)] min-[1250px]:col-span-4 rounded-2xl">
         <TasksBoard />
       </section>
-    </section>
+    </main>
+    </>
   );
 }
 

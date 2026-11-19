@@ -6,7 +6,7 @@ import type { Key } from "react-aria-components";
 import type { Subject } from "~/types/subjectTypes";
 import { Button } from "~/components/base/buttons/button";
 import { Dropdown } from "~/components/base/dropdown/dropdown";
-import { DatePicker } from "../global/DatePickerDay/date-picker/date-picker";
+import DatePicker from "../global/date-picker/DatePicker";
 import {
   addMinutesToDateTimeInput,
   dateTimeInputAtMidnight,

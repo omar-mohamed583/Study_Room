@@ -1,6 +1,6 @@
 import useTheme from "~/context/themeContext";
 import JellyRadio from "./JellyRadio";
-import { useEffect, useId } from "react";
+import { useDeferredValue, useEffect, useId } from "react";
 import Button from "../global/Button";
 
 export const links: LinksFunction = () => [
@@ -57,7 +57,7 @@ export default function FocusTimer({
 
   const { selectEventValue } = useTheme();
 
-  const { timerStates, setTimerStates, setToasts, setShowToast } = useTheme();
+  const { timerStates, setTimerStates, setToast, setShowToast } = useTheme();
 
   let minutes = Math.trunc(
     (timerStates[TIMER_MODES[timerStates.timerMode]] -
@@ -71,6 +71,13 @@ export default function FocusTimer({
       60,
     0,
   );
+
+  const displayMinutes =
+    minutes.toString().length > 2
+      ? minutes.toString().slice(0, 2)
+      : minutes.toString().padStart(2, "0");
+  const timerText = `${displayMinutes}:${seconds.toString().padStart(2, "0")}`;
+  const deferredTimerText = useDeferredValue(timerText);
 
   useEffect(() => {
     if (
@@ -222,10 +229,7 @@ export default function FocusTimer({
           className={`timer aspect-square w-[clamp(130px,100%,250px)] rounded-[50%] bg-(--contrast-text) tracking-tight text-xl leading-[normal] grid place-content-center gap-3 mx-auto ${anchor && "[anchor-name:--timer]"}`}
         >
           <div className="text-4xl md:text-[40px] font-bold leading-[normal] text-center *:tabular-nums min-w-max">
-            {minutes.toString().length > 2
-              ? minutes.toString().slice(0, 2)
-              : minutes.toString().padStart(2, "0")}
-            :{seconds < 10 ? `0${seconds}` : seconds}
+            {deferredTimerText}
           </div>
           <SearchBar />
 
@@ -266,20 +270,10 @@ export default function FocusTimer({
                   },
                 }));
 
-                setToasts((prev) => [
-                  ...prev,
-                  {
-                    id: crypto.randomUUID(),
+                setToast({
                     title: `Timer ${timerStates.timerState !== "running" ? "started" : "paused"}`,
                     description: `The ${timerStates.timerMode} timer was ${timerStates.timerState !== "running" ? "started" : "paused"}.`,
-                    icon:
-                      timerStates.timerState !== "running"
-                        ? "success"
-                        : "alert",
-                    fuseColor:
-                      timerStates.timerState !== "running" ? "#84CC16" : "",
-                  },
-                ]);
+                  }, timerStates.timerState !== "running" ? "success" : "alert");
 
                 setShowToast(true);
               }}
@@ -332,15 +326,10 @@ export default function FocusTimer({
               className={`${timerStates.timerState === "idle" ? "opacity-30 pointer-events-none" : "opacity-100 pointer-events-auto"} bg-gray-500 hover:bg-zinc-600 rounded-full`}
               disabled={timerStates.timerState === "idle"}
               onClick={() => {
-                setToasts((prev) => [
-                  ...prev,
-                  {
-                    id: crypto.randomUUID(),
+                setToast({
                     title: "Timer Reset",
                     description: `The ${timerStates.timerMode} timer was reset.`,
-                    fuseColor: "#EF4444",
-                  },
-                ]);
+                  }, "alert");
 
                 setShowToast(true);
 

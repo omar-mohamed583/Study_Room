@@ -1,3 +1,5 @@
+import { getIcon } from "~/components/providers/themeContextprovider";
+import useTheme from "~/context/themeContext";
 import type { Task } from "~/types/taskType";
 
 export const TASK_LIMITS = {
@@ -189,12 +191,27 @@ export function parseServerErrors(err: unknown): {
   form: string | null;
   fields: TaskFormErrors;
 } {
-  const fields: TaskFormErrors = {};
+  const { setToast } = useTheme();
 
-  // fetch() rejects with a TypeError when the network is down
+  const fields: TaskFormErrors = {};
+  let msg = "";
+
+  const updateToast = () =>
+    setToast(
+      {
+        description: msg,
+        title: "Error",
+        actionBtnText: "dismiss",
+      },
+      "fail",
+    );
+
   if (err instanceof TypeError) {
+    msg = "Can't reach the server. Check your connection and try again.";
+    updateToast();
+
     return {
-      form: "Can't reach the server. Check your connection and try again.",
+      form: msg,
       fields,
     };
   }
@@ -220,39 +237,58 @@ export function parseServerErrors(err: unknown): {
     }
   }
 
-  // Strapi: "1 relation(s) of type api::subject.subject ... do not exist"
   if (/relation/i.test(message) && !fields.subjectId) {
-    fields.subjectId =
-      "This subject no longer exists. Pick another or choose none.";
+    msg = "This subject no longer exists. Pick another or choose none.";
+    updateToast();
+
+    fields.subjectId = msg;
   }
 
   if (Object.keys(fields).length) {
+    msg = "Some fields need attention. Fix them and try again.";
+    updateToast();
+
     return {
-      form: "Some fields need attention. Fix them and try again.",
+      form: msg,
       fields,
     };
   }
 
   if (status === 401 || status === 403) {
+    msg =
+      "Your session expired or you don't have permission. Sign in again, then retry.";
+    updateToast();
+
     return {
-      form: "Your session expired or you don't have permission. Sign in again, then retry.",
+      form: msg,
       fields,
     };
   }
   if (status === 429) {
-    return { form: "Too many requests. Wait a moment and try again.", fields };
+    msg = "Too many requests. Wait a moment and try again.";
+    updateToast();
+
+    return { form: msg, fields };
   }
   if (status && status >= 500) {
+    msg =
+      "The server hit an error. Your input is still here, so try again in a moment.";
+    updateToast();
+
     return {
-      form: "The server hit an error. Your input is still here, so try again in a moment.",
+      form: msg,
       fields,
     };
   }
+
+  msg =
+    status === 400 && message
+      ? sentence(message)
+      : "Couldn't create the task. Try again.";
+  updateToast();
+
   return {
-    form:
-      status === 400 && message
-        ? sentence(message)
-        : "Couldn't create the task. Try again.",
+    form: msg,
     fields,
   };
 }
