@@ -1,4 +1,5 @@
 import {
+  startTransition,
   useCallback,
   useId,
   useMemo,
@@ -546,10 +547,12 @@ export function SubjectDropdown({
           onSelectionChange={(selection) => {
             if (selection === "all") return;
             const [key] = selection;
-            const option = options.find(
-              (item) => (item.value || "no-subject") === String(key),
-            );
-            if (option) onChange(option.value);
+            startTransition(() => {
+              const option = options.find(
+                (item) => (item.value || "no-subject") === String(key),
+              );
+              if (option) onChange(option.value);
+            });
           }}
         >
           {options.map((option) => (
