@@ -118,6 +118,7 @@ export default function SearchBar() {
     <>
       <div
         ref={togglerRef}
+        data-select-trigger
         style={{ anchorName } as CSSProperties}
         className={`font-['Outfit'] w-30 transition-colors ${open ? "bg-zinc-600/30" : "bg-transparent"} hover:bg-zinc-600/30 tracking-[0.020em] border duration-200 border-zinc-400/40 p-1.75 px-2.5 rounded-lg flex items-center *:cursor-default *:text-[13px] *:leading-[normal] gap-1`}
         onClick={() => setOpen((prev) => !prev)}
@@ -154,7 +155,7 @@ export default function SearchBar() {
                 positionArea: "bottom",
               } as CSSProperties
             }
-            className={`fixed z-1000 w-54 my-1.5 font-['DM_Sans'] bg-zinc-300 in-[.dark]:bg-zinc-800 rounded-lg origin-top ${open ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-85 pointer-events-none"} transition-[opacity,scale,pointer-events] duration-200 overflow-hidden`}
+            className={`fixed z-1000 w-54 my-1.5 font-['DM_Sans'] rounded-lg border border-border bg-popover text-popover-foreground origin-top ${open ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-85 pointer-events-none"} transition-[opacity,scale,pointer-events] duration-200 overflow-hidden`}
           >
             <header className="grid gap-2 border-b pb-2 border-b-zinc-500/80 p-2.75">
               <div className="flex gap-1.5">

@@ -2,12 +2,14 @@ import { AreaChart, Area } from "../charts/area-chart";
 import { Grid } from "../charts/grid";
 import { XAxis } from "../charts/x-axis";
 import { ChartTooltip } from "../charts/tooltip/chart-tooltip";
+import useTheme from "~/context/themeContext";
 
 export default function AreaChartComp({
   chartData,
 }: {
   chartData: { date: Date; created: number, completed: number }[];
 }) {
+  const {theme} = useTheme();
   return (
     <AreaChart
       data={chartData}
@@ -17,11 +19,17 @@ export default function AreaChartComp({
       <Grid horizontal />
       <Area
         dataKey="created"
-        fill="var(--chart-line-primary)"
+        fill={
+          theme === "dark"
+            ? "var(--chart-line-primary)"
+            : "var(--chart-2)"
+        }
       />
       <Area
         dataKey="completed"
-        fill="var(--chart-line-secondary)"
+        fill={
+          theme === "dark" ? "var(--chart-line-secondary)" : "var(--chart-4)"
+        }
       />
       <XAxis />
       <ChartTooltip />

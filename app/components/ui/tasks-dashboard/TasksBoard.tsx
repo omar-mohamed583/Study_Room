@@ -14,6 +14,7 @@ import useStudyData from "~/context/studyDataContext";
 import type { Task } from "~/types/taskType";
 import debounce from "~/utils/debounce";
 import { DatePickerField } from "../global/date picker/DatePicker";
+import useTheme from "~/context/themeContext";
 
 /* -------------------------------------------------------------------------- */
 /*  Types                                                                     */
@@ -123,7 +124,7 @@ function BoardHeader({
       </h3>
 
       {total > 0 && (
-        <span className="rounded-full bg-zinc-400/80 in-[.dark]:bg-zinc-400/40 aspect-square w-5 leading-[normal] grid place-content-center text-xs tabular-nums text-(--secondary-text)">
+        <span className="rounded-full bg-zinc-400/80 in-[body.dark]:bg-zinc-400/40 aspect-square w-5 leading-[normal] grid place-content-center text-xs tabular-nums text-(--secondary-text)">
           {total}
         </span>
       )}
@@ -136,7 +137,7 @@ function BoardHeader({
               ? () => document.startViewTransition(() => onReset())
               : onReset
           }
-          className="ml-auto h-8 rounded-lg border border-[hsl(from_var(--text-primary)_h_s_l_/.2)] bg-background px-3 text-sm text-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+          className="ml-auto h-8 rounded-lg border border-[hsl(from_var(--text-primary)_h_s_l_/.2)] bg-background px-3 text-sm text-foreground transition-colors hover:bg-zinc-400/80 in-[.dark]:hover:bg-zinc-400/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
         >
           Clear filters
         </button>
@@ -150,7 +151,7 @@ function BoardHeader({
 /* -------------------------------------------------------------------------- */
 
 const CONTROL =
-  "w-full rounded-lg border border-[hsl(from_var(--text-primary)_h_s_l_/.2)] bg-background px-2.5 py-2 text-sm leading-[normal] text-foreground outline-none transition-colors duration-200 placeholder:text-muted-foreground hover:border-ring/60 focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30";
+  "w-full rounded-lg border border-[hsl(from_var(--text-primary)_h_s_l_/.2)] in-[body.light]:bg-white/70 in-[body.dark]:bg-black/30 px-2.5 py-2 text-sm leading-[normal] text-foreground outline-none transition-colors duration-200 placeholder:text-(--text-secondary) focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30";
 
 const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
   { value: "all", label: "All tasks" },
@@ -356,7 +357,9 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <label className={`grid gap-1 text-xs text-muted-foreground ${className}`}>
+    <label
+      className={`grid gap-1 text-xs text-(--text-secondary) ${className}`}
+    >
       {label}
       {children}
     </label>
@@ -430,8 +433,9 @@ function matchesCreatedPreset(
 // border-radius is ignored on a table that uses border-collapse, so the
 // rounded outline lives on a wrapper and the table only draws the inner lines.
 const TH =
-  "px-4 py-2.5 text-left text-xs font-medium whitespace-nowrap text-muted-foreground border-b border-r border-[hsl(from_var(--text-primary)_h_s_l_/.12)] last:border-r-0";
-const TD = "px-4 py-3 align-middle border-b border-r border-[hsl(from_var(--text-primary)_h_s_l_/.12)] last:border-r-0";
+  "px-4 py-3 text-left text-xs font-medium whitespace-nowrap text-(--text-secondary) border-b border-r border-[hsl(from_var(--text-primary)_h_s_l_/.12)] last:border-r-0 leading-[normal]";
+const TD =
+  "px-4 py-3 align-middle border-b border-r leading-[normal] border-[hsl(from_var(--text-primary)_h_s_l_/.12)] last:border-r-0";
 
 function BoardBody({
   tasks,
@@ -475,7 +479,7 @@ function BoardBody({
           <button
             type="button"
             onClick={onReset}
-            className="h-8 rounded-lg border border-[hsl(from_var(--text-primary)_h_s_l_/.2)] bg-background px-3 text-sm text-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+            className="h-8 rounded-lg border border-[hsl(from_var(--text-primary)_h_s_l_/.2)] bg-background px-3 text-sm text-foreground transition-colors hover:bg-zinc-400/80 in-[.dark]:hover:bg-zinc-400/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 leading-[normal]"
           >
             Clear filters
           </button>
@@ -485,10 +489,10 @@ function BoardBody({
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-zinc-400/30 in-[.dark]:border-zinc-400/15 mt-3">
+    <div className="overflow-hidden rounded-xl border border-zinc-400/30 in-[body.dark]:border-zinc-400/15 mt-3">
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-sm">
-          <thead className="bg-zinc-400/30 in-[.dark]:bg-zinc-400/15">
+          <thead className="bg-zinc-400/30 in-[body.dark]:bg-zinc-400/15">
             <tr>
               <th
                 scope="col"
@@ -558,9 +562,10 @@ function TaskRow({ task }: { task: Task }) {
   const status = getStatus(task);
   const due = parseDate(task.dueDate);
   const showTime = !task.calendarAllDay;
+  const { theme } = useTheme();
 
   return (
-    <tr className="transition-colors hover:bg-accent/60">
+    <tr className="transition-colors in-[body.dark]:hover:bg-zinc-400/15">
       <td
         className={`${TD} font-medium ${
           task.completed ? "text-muted-foreground line-through" : ""
@@ -569,8 +574,8 @@ function TaskRow({ task }: { task: Task }) {
         <span className="line-clamp-2">{task.title}</span>
       </td>
 
-      <td className={`${TD} text-muted-foreground`}>
-        <span className="line-clamp-2 max-w-xs">
+      <td className={`${TD} text-(--text-secondary)`}>
+        <span className="line-clamp-2 max-w-35">
           {task.description?.trim() || "—"}
         </span>
       </td>
@@ -588,7 +593,11 @@ function TaskRow({ task }: { task: Task }) {
 
       <td
         className={`${TD} whitespace-nowrap ${
-          status === "overdue" ? "text-rose-600/80" : ""
+          status === "overdue"
+            ? theme === "dark"
+              ? "text-rose-400"
+              : "text-rose-700"
+            : ""
         }`}
         title={due ? formatFull(due, showTime) : undefined}
       >
@@ -621,7 +630,7 @@ function TaskRow({ task }: { task: Task }) {
 /* -------------------------------------------------------------------------- */
 
 const BADGE_BASE =
-  "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium whitespace-nowrap";
+  "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.75 text-xs font-medium whitespace-nowrap";
 
 const PRIORITY_STYLES: Record<
   Priority,
@@ -630,21 +639,21 @@ const PRIORITY_STYLES: Record<
   high: {
     label: "High",
     badge:
-      "border-rose-200/80 bg-rose-50/90 text-rose-800 leading-[normal] in-[.dark]:border-rose-500/30 in-[.dark]:bg-rose-500/10 in-[.dark]:text-rose-300",
+      "border-rose-400/80 bg-rose-200/40 text-rose-600 leading-[normal] in-[body.dark]:border-rose-500/30 in-[body.dark]:bg-rose-500/10 in-[body.dark]:text-rose-300",
     dot: "bg-rose-500/70",
     glow: "shadow-[0_0_8px_2px_rgba(244,63,94,0.4)]",
   },
   medium: {
     label: "Medium",
     badge:
-      "border-amber-200/80 bg-amber-50/90 text-amber-800 leading-[normal] in-[.dark]:border-amber-500/30 in-[.dark]:bg-amber-500/10 in-[.dark]:text-amber-300",
+      "border-amber-400/80 bg-amber-200/40 text-amber-600 leading-[normal] in-[body.dark]:border-amber-500/30 in-[body.dark]:bg-amber-500/10 in-[body.dark]:text-amber-300",
     dot: "bg-amber-500/70",
     glow: "shadow-[0_0_8px_2px_rgba(245,158,11,0.4)]",
   },
   low: {
     label: "Low",
     badge:
-      "border-sky-200/80 bg-sky-50/90 text-sky-800 leading-[normal] in-[.dark]:border-sky-500/30 in-[.dark]:bg-sky-500/10 in-[.dark]:text-sky-300",
+      "border-sky-400/80 bg-sky-200/40 text-sky-600 leading-[normal] in-[body.dark]:border-sky-500/30 in-[body.dark]:bg-sky-500/10 in-[body.dark]:text-sky-300",
     dot: "bg-sky-500/70",
     glow: "shadow-[0_0_8px_2px_rgba(14,165,233,0.4)]",
   },
@@ -654,16 +663,16 @@ const STATUS_STYLES: Record<TaskStatus, { label: string; badge: string }> = {
   completed: {
     label: "Completed",
     badge:
-      "border-emerald-200 bg-emerald-50/90 text-emerald-800 in-[.dark]:border-emerald-500/30 in-[.dark]:bg-emerald-500/10 in-[.dark]:text-emerald-300 leading-normal",
+      "border-emerald-400/80 bg-emerald-200/40 text-emerald-600 in-[body.dark]:border-emerald-500/30 in-[body.dark]:bg-emerald-500/10 in-[body.dark]:text-emerald-300 leading-normal",
   },
   overdue: {
     label: "Overdue",
     badge:
-      "border-rose-200 bg-rose-50/90 text-rose-800 in-[.dark]:border-rose-500/30 in-[.dark]:bg-rose-500/10 in-[.dark]:text-rose-300 leading-[normal]",
+      "border-rose-400/80 bg-rose-200/40 text-rose-600 in-[body.dark]:border-rose-500/30 in-[body.dark]:bg-rose-500/10 in-[body.dark]:text-rose-300 leading-[normal]",
   },
   pending: {
     label: "Pending",
-    badge: "bg-zinc-400/60 leading-[normal]",
+    badge: "bg-zinc-400/50 border-zinc-500/80 leading-[normal]",
   },
 };
 
@@ -677,11 +686,7 @@ function PriorityBadge({
 }) {
   const style = PRIORITY_STYLES[priority] ?? PRIORITY_STYLES.low;
 
-  return (
-    <span className={`${BADGE_BASE} ${style.badge}`}>
-      {style.label}
-    </span>
-  );
+  return <span className={`${BADGE_BASE} ${style.badge}`}>{style.label}</span>;
 }
 
 function StatusCell({ task, status }: { task: Task; status: TaskStatus }) {

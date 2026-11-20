@@ -27,6 +27,9 @@ import {
   type TaskFormValues,
 } from "~/lib/taskForm";
 import { DatePickerField } from "../global/date picker/DatePicker";
+import useTheme from "~/context/themeContext";
+import type { Theme } from "~/types/customContextType";
+import NotificationModal from "../global/NotificationModal";
 
 // Must match the query key useGetEvents uses for /tasks, otherwise the new
 // task won't show up until a manual refresh.
@@ -55,8 +58,8 @@ const borderClass = "border-[hsl(from_var(--text-primary)_h_s_l_/.2)]";
 
 const controlClass = (invalid: boolean) =>
   [
-    "w-full rounded-[8px] border bg-background px-2.5 py-2 text-sm leading-[normal] text-foreground",
-    "outline-none transition-colors duration-200 placeholder:text-muted-foreground hover:border-ring/60 focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30",
+    "w-full rounded-[8px] border in-[body.light]:bg-white in-[body.dark]:bg-black/30 px-2.5 py-2 text-sm leading-[normal]",
+    "outline-none transition-colors duration-200 placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30",
     invalid ? "border-destructive" : borderClass,
   ].join(" ");
 
@@ -68,12 +71,13 @@ export default function CreateTaskForm() {
     subjects: { data: subjects },
   } = useStudyData();
 
+  const { theme, setToasts } = useTheme();
+
   const [values, setValues] = useState<TaskFormValues>(() => EMPTY_TASK_FORM);
   const valuesRef = useRef<TaskFormValues | null>(values);
   valuesRef.current = values;
   const [errors, setErrors] = useState<TaskFormErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
-  const [saved, setSaved] = useState(false);
 
   const id = (key: string) => `${uid}-${key}`;
 
@@ -98,11 +102,19 @@ export default function CreateTaskForm() {
     mutationFn: createTask,
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: TASKS_QUERY_KEY });
+      setToasts((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          description: `task ${values.title} was successfully created.`,
+          title: "Task Created",
+          icon: "success",
+        },
+      ]);
       valuesRef.current = EMPTY_TASK_FORM;
       setValues(EMPTY_TASK_FORM);
       setErrors({});
       setFormError(null);
-      setSaved(true);
       focusField("title");
     },
     onError: (err) => {
@@ -117,7 +129,6 @@ export default function CreateTaskForm() {
     const next = { ...values, ...patch };
     valuesRef.current = next;
     setValues(next);
-    setSaved(false);
     setFormError(null);
     setErrors((prev) => {
       const shown = Object.keys(prev) as (keyof TaskFormValues)[];
@@ -154,7 +165,6 @@ export default function CreateTaskForm() {
 
     const found = validateTask(values);
     setErrors(found);
-    setSaved(false);
     if (Object.keys(found).length) {
       setFormError(null);
       focusFirstError(found);
@@ -183,7 +193,6 @@ export default function CreateTaskForm() {
     };
     valuesRef.current = nextValues;
     setValues(nextValues);
-    setSaved(false);
     setFormError(null);
     setErrors((shownErrors) => {
       if (!Object.keys(shownErrors).length) return shownErrors;
@@ -204,227 +213,235 @@ export default function CreateTaskForm() {
   );
 
   return (
-    <form
-      ref={formRef}
-      noValidate
-      onSubmit={onSubmit}
-      className="flex min-h-0 flex-1 flex-col gap-3"
-    >
-      <h2 className="font-heading text-[14px] leading-[normal] tracking-[-0.01em]">
-        New task
-      </h2>
+    <>
+      <form
+        ref={formRef}
+        noValidate
+        onSubmit={onSubmit}
+        className="flex min-h-0 flex-1 flex-col gap-3 backdrop-blur-[6px]"
+      >
+        <h2 className="font-heading text-[14px] leading-[normal] tracking-[-0.01em]">
+          New task
+        </h2>
 
-      <div className="scrollbar-hide grid min-h-0 flex-1 content-start gap-4 overflow-y-auto p-1">
-        <Field
-          htmlFor={id("title")}
-          label="Title"
-          error={errors.title}
-          errorId={errorId("title")}
-          aside={
-            <Counter
-              value={titleLen}
-              max={TASK_LIMITS.titleMax}
-            />
-          }
-        >
-          <input
-            id={id("title")}
-            name="title"
-            type="text"
-            autoComplete="off"
-            placeholder="e.g. Finish chapter 4 exercises"
-            value={values.title}
-            onChange={(e) => update({ title: e.target.value })}
-            onBlur={() => validateField("title")}
-            className={controlClass(!!errors.title)}
-            {...aria("title")}
-          />
-        </Field>
-
-        <Field
-          htmlFor={id("description")}
-          label="Description"
-          optional
-          error={errors.description}
-          errorId={errorId("description")}
-          aside={
-            <Counter
-              value={descLen}
-              max={TASK_LIMITS.descriptionMax}
-            />
-          }
-        >
-          <textarea
-            id={id("description")}
-            name="description"
-            rows={3}
-            placeholder="Add details, links or what “done” looks like"
-            value={values.description}
-            onChange={(e) => update({ description: e.target.value })}
-            onBlur={() => validateField("description")}
-            className={`${controlClass(!!errors.description)} resize-none`}
-            {...aria("description")}
-          />
-        </Field>
-
-        <div className="grid gap-1.5">
-          <div className="grid grid-cols-2 gap-2">
-            <Field
-              htmlFor={id("dueDate")}
-              label="Date"
-              errorId={errorId("dueDate")}
-              className="[anchor-name:--due]"
-            >
-              <DatePickerField
-                showTimePicker
-                onChange={handleDueDateChange}
-                value={dueValue}
+        <div className="scrollbar-hide grid min-h-0 flex-1 content-start gap-4 overflow-y-auto p-1">
+          <Field
+            theme={theme}
+            htmlFor={id("title")}
+            label="Title"
+            error={errors.title}
+            errorId={errorId("title")}
+            aside={
+              <Counter
+                theme={theme}
+                value={titleLen}
+                max={TASK_LIMITS.titleMax}
               />
-            </Field>
-          </div>
-          {errors.dueDate && (
-            <FieldError id={errorId("dueDate")}>{errors.dueDate}</FieldError>
-          )}
-        </div>
+            }
+          >
+            <input
+              id={id("title")}
+              name="title"
+              type="text"
+              autoComplete="off"
+              placeholder="e.g. Finish chapter 4 exercises"
+              value={values.title}
+              onChange={(e) => update({ title: e.target.value })}
+              onBlur={() => validateField("title")}
+              className={controlClass(!!errors.title)}
+              {...aria("title")}
+            />
+          </Field>
 
-        <label className="flex cursor-pointer items-center gap-2 text-sm leading-[normal]">
-          <input
-            type="checkbox"
-            name="calendarAllDay"
-            checked={values.calendarAllDay}
-            onChange={(e) => toggleAllDay(e.target.checked)}
-            className="size-4 cursor-pointer accent-primary"
-          />
-          All-day task
-        </label>
+          <Field
+            theme={theme}
+            htmlFor={id("description")}
+            label="Description"
+            optional
+            error={errors.description}
+            errorId={errorId("description")}
+            aside={
+              <Counter
+                theme={theme}
+                value={descLen}
+                max={TASK_LIMITS.descriptionMax}
+              />
+            }
+          >
+            <textarea
+              id={id("description")}
+              name="description"
+              rows={3}
+              placeholder="Add details, links or what “done” looks like"
+              value={values.description}
+              onChange={(e) => update({ description: e.target.value })}
+              onBlur={() => validateField("description")}
+              className={`${controlClass(!!errors.description)} resize-none`}
+              {...aria("description")}
+            />
+          </Field>
 
-        <fieldset className="grid gap-1.5">
-          <legend className="mb-1.5 text-sm leading-[normal]">Priority</legend>
-          <div className="grid grid-cols-3 gap-1.5">
-            {PRIORITIES.map((p) => (
-              <label
-                key={p}
-                className="relative"
+          <div className="grid gap-1.5">
+            <div className="grid grid-cols-2 gap-2">
+              <Field
+                theme={theme}
+                htmlFor={id("dueDate")}
+                label="Date"
+                errorId={errorId("dueDate")}
+                className="[anchor-name:--due]"
               >
-                <input
-                  type="radio"
-                  name="priority"
-                  value={p}
-                  checked={values.priority === p}
-                  onChange={() => update({ priority: p })}
-                  className="peer sr-only"
+                <DatePickerField
+                  showTimePicker
+                  onChange={handleDueDateChange}
+                  value={dueValue}
                 />
-                <span
-                  className={`grid cursor-pointer place-content-center rounded-[8px] border py-2 text-sm leading-[normal] capitalize transition-colors duration-200 peer-checked:border-transparent peer-checked:bg-(--text-primary) peer-checked:text-(--contrast-text) peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ring ${borderClass}`}
-                >
-                  {p}
-                </span>
-              </label>
-            ))}
-          </div>
-          {errors.priority && (
-            <FieldError id={errorId("priority")}>{errors.priority}</FieldError>
-          )}
-        </fieldset>
-
-        <Field
-          htmlFor={id("estimatedDuration")}
-          label="Estimated time"
-          error={errors.estimatedDuration}
-          errorId={errorId("estimatedDuration")}
-          aside={
-            <span className="text-xs text-(--text-secondary)">minutes</span>
-          }
-        >
-          <input
-            id={id("estimatedDuration")}
-            name="estimatedDuration"
-            type="text"
-            inputMode="numeric"
-            autoComplete="off"
-            value={values.estimatedDuration}
-            onChange={(e) => update({ estimatedDuration: e.target.value })}
-            onBlur={() => validateField("estimatedDuration")}
-            className={controlClass(!!errors.estimatedDuration)}
-            {...aria("estimatedDuration")}
-          />
-        </Field>
-
-        <Field
-          htmlFor={id("subjectId")}
-          label="Subject"
-          optional
-          error={errors.subjectId}
-          errorId={errorId("subjectId")}
-          hint={
-            !subjects?.length
-              ? "No subjects yet. Create one to link tasks to it."
-              : undefined
-          }
-        >
-          <SubjectDropdown
-            labelId={id("subjectId")}
-            value={values.subjectId}
-            disabled={!subjects?.length}
-            invalid={!!errors.subjectId}
-            onChange={(subjectId) => update({ subjectId })}
-            options={[
-              { value: "", label: "No subject" },
-              ...(subjects ?? []).map((s) => ({
-                value: s.documentId,
-                label: s.name,
-              })),
-            ]}
-          />
-        </Field>
-      </div>
-
-      <footer className="grid gap-2">
-        {formError && (
-          <p
-            role="alert"
-            className="flex items-start gap-1.5 rounded-[8px] border border-destructive/40 bg-destructive/10 p-2 text-sm leading-[normal] text-destructive"
-          >
-            <CircleAlert
-              className="mt-px size-4 shrink-0"
-              strokeWidth={1.75}
-            />
-            {formError}
-          </p>
-        )}
-        {saved && (
-          <p
-            role="status"
-            className="flex items-center gap-1.5 text-sm leading-[normal] text-emerald-500"
-          >
-            <Check
-              className="size-4"
-              strokeWidth={1.75}
-            />
-            Task created.
-          </p>
-        )}
-
-        <div
-          className={`grid rounded-xl pt-2 *:cursor-pointer *:place-content-center *:rounded-[8px] *:text-sm *:leading-[normal] *:transition-colors *:duration-200 *:disabled:cursor-not-allowed *:disabled:opacity-60 ${borderClass}`}
-        >
-          <button
-            type="submit"
-            disabled={mutation.isPending}
-            className="bg-(--text-primary) py-2 font-medium text-(--contrast-text) hover:bg-(--text-primary)/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-          >
-            {mutation.isPending ? (
-              <span className="flex items-center gap-1.5">
-                <Loader2 className="size-4 animate-spin" />
-                Creating…
-              </span>
-            ) : (
-              "Create task"
+              </Field>
+            </div>
+            {errors.dueDate && (
+              <FieldError id={errorId("dueDate")}>{errors.dueDate}</FieldError>
             )}
-          </button>
+          </div>
+
+          <label className="flex select-none cursor-pointer items-center gap-2 text-sm leading-[normal]">
+            <input
+              type="checkbox"
+              name="calendarAllDay"
+              checked={values.calendarAllDay}
+              onChange={(e) => toggleAllDay(e.target.checked)}
+              className="size-4 cursor-pointer accent-primary"
+            />
+            All-day task
+          </label>
+
+          <fieldset className="grid gap-1.5">
+            <legend
+              className={`mb-1.5 text-sm leading-[normal] text-(--text-secondary) ${
+                theme === "dark"
+                  ? "text-shadow-sm text-shadow-black/60 text-gray-300"
+                  : ""
+              }`}
+            >
+              Priority
+            </legend>
+            <div className="grid grid-cols-3 gap-1.5">
+              {PRIORITIES.map((p) => (
+                <label
+                  key={p}
+                  className="relative"
+                >
+                  <input
+                    type="radio"
+                    name="priority"
+                    value={p}
+                    checked={values.priority === p}
+                    onChange={() => update({ priority: p })}
+                    className="peer sr-only"
+                  />
+                  <span
+                    className={`grid cursor-pointer place-content-center rounded-[8px] border py-2 text-sm leading-[normal] capitalize transition-colors duration-200 peer-checked:border-transparent peer-checked:bg-(--text-primary) peer-checked:text-(--contrast-text) peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ring ${borderClass}`}
+                  >
+                    {p}
+                  </span>
+                </label>
+              ))}
+            </div>
+            {errors.priority && (
+              <FieldError id={errorId("priority")}>
+                {errors.priority}
+              </FieldError>
+            )}
+          </fieldset>
+
+          <Field
+            theme={theme}
+            htmlFor={id("estimatedDuration")}
+            label="Estimated time"
+            error={errors.estimatedDuration}
+            errorId={errorId("estimatedDuration")}
+            aside={
+              <span className="text-xs text-(--text-secondary)">minutes</span>
+            }
+          >
+            <input
+              id={id("estimatedDuration")}
+              name="estimatedDuration"
+              type="text"
+              inputMode="numeric"
+              autoComplete="off"
+              value={values.estimatedDuration}
+              onChange={(e) => update({ estimatedDuration: e.target.value })}
+              onBlur={() => validateField("estimatedDuration")}
+              className={controlClass(!!errors.estimatedDuration)}
+              {...aria("estimatedDuration")}
+            />
+          </Field>
+
+          <Field
+            theme={theme}
+            htmlFor={id("subjectId")}
+            label="Subject"
+            optional
+            error={errors.subjectId}
+            errorId={errorId("subjectId")}
+            hint={
+              !subjects?.length
+                ? "No subjects yet. Create one to link tasks to it."
+                : undefined
+            }
+          >
+            <SubjectDropdown
+              labelId={id("subjectId")}
+              value={values.subjectId}
+              disabled={!subjects?.length}
+              invalid={!!errors.subjectId}
+              onChange={(subjectId) => update({ subjectId })}
+              options={[
+                { value: "", label: "No subject" },
+                ...(subjects ?? []).map((s) => ({
+                  value: s.documentId,
+                  label: s.name,
+                })),
+              ]}
+            />
+          </Field>
         </div>
-      </footer>
-    </form>
+
+        <footer className="grid gap-2">
+          {formError && (
+            <p
+              role="alert"
+              className="flex items-start gap-1.5 rounded-[8px] border border-destructive/40 bg-destructive/10 p-2 text-sm leading-[normal] text-destructive"
+            >
+              <CircleAlert
+                className="mt-px size-4 shrink-0"
+                strokeWidth={1.75}
+              />
+              {formError}
+            </p>
+          )}
+
+          <div
+            className={`grid rounded-xl pt-2 *:cursor-pointer *:place-content-center *:rounded-[8px] *:text-sm *:leading-[normal] *:transition-colors *:duration-200 *:disabled:cursor-not-allowed *:disabled:opacity-60 ${borderClass}`}
+          >
+            <button
+              type="submit"
+              disabled={mutation.isPending}
+              className="bg-(--text-primary) py-2 font-medium text-(--contrast-text) hover:bg-(--text-primary)/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            >
+              {mutation.isPending ? (
+                <span className="flex items-center gap-1.5">
+                  <Loader2 className="size-4 animate-spin" />
+                  Creating…
+                </span>
+              ) : (
+                "Create task"
+              )}
+            </button>
+          </div>
+        </footer>
+      </form>
+      <NotificationModal />
+    </>
   );
 }
 
@@ -433,6 +450,7 @@ export default function CreateTaskForm() {
 export function Field({
   htmlFor,
   label,
+  theme,
   optional,
   aside,
   className,
@@ -450,13 +468,18 @@ export function Field({
   error?: string;
   errorId: string;
   children: ReactNode;
+  theme: Theme;
 }) {
   return (
     <div className="grid gap-1.5">
       <div className="flex items-baseline justify-between gap-2">
         <label
           htmlFor={htmlFor}
-          className="text-sm leading-[normal] text-(--text-secondary)"
+          className={`text-sm leading-[normal] text-(--text-secondary) ${
+            theme === "dark"
+              ? "text-shadow-sm text-shadow-black/60 text-gray-300"
+              : ""
+          }`}
         >
           {label}
         </label>
@@ -491,10 +514,18 @@ export function FieldError({
   );
 }
 
-export function Counter({ value, max }: { value: number; max: number }) {
+export function Counter({
+  value,
+  max,
+  theme,
+}: {
+  value: number;
+  max: number;
+  theme: Theme;
+}) {
   return (
     <span
-      className={`text-xs tabular-nums ${value > max ? "text-destructive" : "text-(--text-secondary)"}`}
+      className={`text-xs tabular-nums ${theme === "dark" ? "tracking-wider text-shadow-sm text-shadow-black/60" : ""} ${value > max ? "text-destructive" : theme === "dark" ? "text-gray-300" : "text-(--text-secondary)"}`}
     >
       {value}/{max}
     </span>

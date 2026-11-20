@@ -16,7 +16,6 @@ import { ChevronLeft, ChevronRight } from "@untitledui/icons";
 import { createPortal } from "react-dom";
 import { twMerge } from "tailwind-merge";
 
-
 type DatePickerProps = {
   value: DateValue;
   onChange: (value: string) => void;
@@ -781,9 +780,7 @@ export function DatePickerField({
     parsedValue && showTimePicker
       ? ` ${pad(parsedValue.getHours())}:${pad(parsedValue.getMinutes())}`
       : "";
-  const displayValue = parsedValue
-    ? `${displayDate}${displayTime}`
-    : "";
+  const displayValue = parsedValue ? `${displayDate}${displayTime}` : "";
 
   return (
     <div className={`w-[max(208px,100%)] ${className}`.trim()}>
@@ -794,16 +791,16 @@ export function DatePickerField({
         aria-haspopup="dialog"
         aria-expanded={open}
         onClick={() => setOpen((current) => !current)}
-        className="flex h-9 w-full items-center justify-between gap-3 rounded-lg border border-[hsl(from_var(--text-primary)_h_s_l_/.2)] bg-background px-3 text-left text-sm text-foreground transition-colors hover:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+        className="flex h-9 w-full items-center justify-between gap-3 rounded-lg border border-[hsl(from_var(--text-primary)_h_s_l_/.2)] in-[body.light]:bg-white in-[body.dark]:bg-black/30 px-3 text-left text-sm text-foreground transition-colors hover:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
       >
-        <span className={displayValue ? "" : "text-neutral-400"}>
+        <span className={displayValue ? "" : "text-muted-foreground"}>
           {displayValue || placeholder}
         </span>
         <svg
           aria-hidden="true"
           viewBox="0 0 24 24"
           fill="none"
-          className="size-4 shrink-0 text-neutral-300"
+          className="size-4 shrink-0 text-muted-foreground"
         >
           <rect
             x="3.5"
