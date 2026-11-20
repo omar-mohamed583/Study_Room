@@ -174,7 +174,6 @@ export default function ForgetPassword() {
 
   useEffect(() => {
     document.body.classList.add("dark");
-    document.body.style.paddingBlock = "0px";
   }, []);
 
   function SetErrorStates(type: string) {

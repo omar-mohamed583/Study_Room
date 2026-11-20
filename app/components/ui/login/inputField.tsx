@@ -180,6 +180,7 @@ export default function InputComponent({
         {type === "password" && (
           <button
             type="button"
+            aria-label={(seePassword ? "Hide " : "Show " ) + "Password"}
             className={`cursor-pointer absolute right-1.5 top-1/2 -translate-y-1/2 grid *:[grid-area:stack] *:[grid-template-areas:'stack'] ${seePassword ? "[&>svg:first-child]:opacity-0" : "[&>svg:last-child]:opacity-0"} *:transition-opacity duration-75 *:stroke-gray-400`}
             onClick={() => {
               if (setSeePassword !== null) setSeePassword((prev) => !prev);

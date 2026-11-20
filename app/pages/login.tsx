@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { memo, startTransition, useLayoutEffect, useRef, useState } from "react";
 import {
   useNavigate,
   type LinksFunction,
@@ -32,6 +32,31 @@ export const meta: MetaFunction = () => [
     content: "",
   },
 ];
+
+const MemoWaves = memo(() => (
+  <GradientWaves
+    horizonColor="#0032e6"
+    waveColor="#ff7452"
+    crestColor="#FFFFFF"
+    speed={0.4}
+    amplitude={2.5}
+    waveScale={0.6}
+    waveRatio={0.9}
+    swell={35}
+    turbulence={22}
+    tilt={1.11}
+    zoom={1.1}
+    height={5.5}
+    fogDepth={17}
+    detail="high"
+    brightness={1}
+    opacity={1}
+    mouseInteraction={false}
+    parallaxStrength={0.9}
+    grain
+    grainIntensity={0.05}
+  />
+));
 
 export default function Login() {
   const navigate = useNavigate();
@@ -67,26 +92,27 @@ export default function Login() {
 
   const { register, login, isLoading } = useAuth();
 
-  useEffect(() => {
-    document.body.classList.add("dark");
-    document.body.style.paddingBlock = "0px";
+  useLayoutEffect(() => {
+    document.body.classList.add("dark")
   }, []);
 
   function handleChangeAction() {
-    setLoading(true);
+    startTransition(() => {
+      setLoading(true);
 
-    setTimeout(() => {
-      setAction(action === "login" ? "register" : "login");
+      setTimeout(() => {
+        setAction(action === "login" ? "register" : "login");
 
-      nameContRef?.current?.classList.toggle("hidden", action === "register");
+        nameContRef?.current?.classList.toggle("hidden", action === "register");
 
-      setNameError(false);
-      setEmailError(false);
-      setPasswordError(false);
-      setSubmitError("");
-    }, 500);
+        setNameError(false);
+        setEmailError(false);
+        setPasswordError(false);
+        setSubmitError("");
+      }, 500);
 
-    setTimeout(() => setLoading(false), 1000);
+      setTimeout(() => setLoading(false), 1000);
+    });
   }
 
   async function handleFormSubmission(e: any) {
@@ -175,28 +201,7 @@ export default function Login() {
 
   return (
     <main className="grid place-content-center min-h-screen">
-      <GradientWaves
-        horizonColor="#0032e6"
-        waveColor="#ff7452"
-        crestColor="#FFFFFF"
-        speed={0.4}
-        amplitude={2.5}
-        waveScale={0.6}
-        waveRatio={0.9}
-        swell={35}
-        turbulence={22}
-        tilt={1.11}
-        zoom={1.1}
-        height={5.5}
-        fogDepth={17}
-        detail="high"
-        brightness={1}
-        opacity={1}
-        mouseInteraction={false}
-        parallaxStrength={0.9}
-        grain
-        grainIntensity={0.05}
-      />
+      <MemoWaves />
 
       <p
         className={`absolute [position-anchor:--anc] bottom-[calc(anchor(top)-16px)] left-[anchor(left)] w-[anchor-size(width)] -z-10 pb-7 pt-3 rounded-t-3xl submit-error text-red-400 font-bold text-center bg-red-500/15 backdrop-blur-xl transition-[translate,opacity] duration-200 ${submitError ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"}`}

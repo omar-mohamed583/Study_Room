@@ -2,13 +2,14 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router";
 import { apiFetch } from "~/api/api";
 import useTheme from "~/context/themeContext";
+import type { Task } from "~/types/taskType";
 
 const TASKS_QUERY_KEY = ["/tasks?populate=*", null] as const;
 
-export default function TaskItem({ task }: { task: any }) {
+export default function TaskItem({ task }: { task: Task }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { setSelectEventValue } = useTheme();
+  const { setSelectEventValue, setToasts } = useTheme();
 
   const taskAction = useMutation({
     mutationFn: (action: "complete" | "delete") =>
@@ -50,10 +51,49 @@ export default function TaskItem({ task }: { task: any }) {
     navigate("/focus-timer");
   }
 
-  function deleteTask() {
-    if (window.confirm(`Delete “${task.title}”? This cannot be undone.`)) {
-      taskAction.mutate("delete");
-    }
+  async function deleteTask() {
+    // confirmation dialog
+
+    await taskAction.mutateAsync("delete");
+    if (taskAction.error) setToasts((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        title: "Failed To Delete",
+        description: `failed to delete task "${task.title}".`,
+        actionBtnText: "See Details",
+        onAction: () => taskAction.error.cause,
+        icon: "fail",
+      },
+    ]);
+
+    setToasts((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        title: "Task Deletion",
+        description: `task ${task.title} was successfully deleted.`,
+        icon: "success",
+      },
+    ]);
+  }
+
+  async function completeTask() {
+    await taskAction.mutateAsync("complete");
+
+    setToasts((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        title: "Task Completed",
+        description: `task ${task.title} was marked as completed.`,
+        icon: "success",
+      },
+    ]);
+  }
+
+  function editTask() {
+    
   }
 
   return (
@@ -61,8 +101,8 @@ export default function TaskItem({ task }: { task: any }) {
       <div className="min-w-0">
         {task.subject ? (
           <Link
-            to={`/subject/${task.subject.documentId}`}
-            className="inline-block max-w-full truncate text-xs capitalize tracking-wide text-(--text-secondary) hover:underline"
+            to={`/subject/${encodeURIComponent(task.subject.name)}`}
+            className="block max-w-full truncate text-xs capitalize tracking-wide text-(--text-secondary) leading-[normal] hover:underline"
           >
             {task.subject.name}
           </Link>
@@ -71,7 +111,7 @@ export default function TaskItem({ task }: { task: any }) {
         )}
         <h3 className="mt-1 truncate text-base font-semibold capitalize">
           <Link
-            to="/tasks"
+            to={`/tasks/${encodeURIComponent(task.title)}`}
             className="hover:underline"
           >
             {task.title}
@@ -80,14 +120,22 @@ export default function TaskItem({ task }: { task: any }) {
         <p className="mt-1 text-[11px] text-(--text-secondary)">{dueLabel}</p>
       </div>
 
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1 *:transition-colors *:disabled:cursor-wait *:rounded-lg *:duration-250">
         <button
           type="button"
           aria-label={`Mark ${task.title} complete`}
-          title="Mark complete"
           disabled={taskAction.isPending}
-          onClick={() => taskAction.mutate("complete")}
-          className="grid size-9 place-items-center rounded-lg text-green-700 transition-colors hover:bg-green-500/10 disabled:cursor-wait disabled:opacity-50 dark:text-green-400"
+          onClick={editTask}
+          className="grid size-9 place-items-center hover:bg-zinc-400/25 text-green-600 disabled:opacity-50 dark:text-green-500"
+        >
+
+        </button>
+        <button
+          type="button"
+          aria-label={`Mark ${task.title} complete`}
+          disabled={taskAction.isPending}
+          onClick={completeTask}
+          className="grid size-9 place-items-center hover:bg-zinc-400/25 text-green-600 disabled:opacity-50 dark:text-green-500"
         >
           <svg
             aria-hidden="true"
@@ -110,7 +158,7 @@ export default function TaskItem({ task }: { task: any }) {
           title="Delete task"
           disabled={taskAction.isPending}
           onClick={deleteTask}
-          className="grid size-9 place-items-center rounded-lg text-red-600 transition-colors hover:bg-red-500/10 disabled:cursor-wait disabled:opacity-50 dark:text-red-400"
+          className="grid size-9 place-items-center text-red-600 transition-colors hover:bg-zinc-400/25 disabled:opacity-50 dark:text-red-400"
         >
           <svg
             aria-hidden="true"
@@ -130,7 +178,7 @@ export default function TaskItem({ task }: { task: any }) {
         <button
           type="button"
           onClick={startFocusTimer}
-          className="hidden h-9 items-center gap-2 rounded-lg bg-zinc-300 px-3 text-sm font-medium text-neutral-900 transition-colors hover:bg-(--accent-100) hover:text-white dark:bg-zinc-400/20 dark:text-white sm:flex"
+          className="hidden h-9 items-center gap-2 px-3 text-sm font-medium text-white bg-zinc-400 dark:bg-zinc-400/20 hover:bg-(--accent-100) dark:hover:bg-(--accent-100) sm:flex leading-[normal]"
         >
           <svg
             aria-hidden="true"
@@ -149,14 +197,6 @@ export default function TaskItem({ task }: { task: any }) {
           Start
         </button>
       </div>
-      {taskAction.error && (
-        <p
-          role="alert"
-          className="col-span-full text-xs text-red-600 dark:text-red-400"
-        >
-          {taskAction.error.message}
-        </p>
-      )}
     </article>
   );
 }

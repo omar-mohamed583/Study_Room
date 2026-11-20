@@ -1,6 +1,7 @@
-import { memo, useMemo } from "react";
-import { redirect } from "react-router";
+import { memo, useEffect, useMemo, useRef } from "react";
+import { redirect, useLocation, useNavigate } from "react-router";
 import { ensureSession } from "~/auth/session";
+import Footer from "~/components/layout/Footer";
 import Header from "~/components/layout/Header";
 import SideRays from "~/components/SideRays";
 import AreaChartComp from "~/components/ui/global/AreaChart";
@@ -48,6 +49,23 @@ export default function Tasks() {
   } = useStudyData();
 
   const { theme } = useTheme();
+
+  const task = useRef<string | null>(null);
+
+  const location = useLocation();
+  const parsedLocation = location.pathname.split("/")[2];
+  task.current = decodeURIComponent(parsedLocation);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (parsedLocation?.length) {
+      navigate({
+        pathname: location.pathname,
+        hash: "#board",
+      });
+    }
+  }, [location.pathname]);
 
   const dailyStats = useMemo(
     () => buildDailyStats(tasks ?? [], sessions ?? []),
@@ -104,9 +122,11 @@ export default function Tasks() {
           <AreaChartComp chartData={areaChartData} />
         </section>
         <section className="border border-[hsl(from_var(--text-primary)_h_s_l_/.16)] min-[1250px]:col-span-4 rounded-2xl">
-          <TasksBoard />
+          <TasksBoard locationSearch={task.current ?? ""} />
         </section>
       </main>
+
+      <Footer />
     </>
   );
 }

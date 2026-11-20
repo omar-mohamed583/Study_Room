@@ -1,6 +1,13 @@
 import useTheme from "~/context/themeContext";
 import JellyRadio from "./JellyRadio";
-import { useDeferredValue, useEffect, useId } from "react";
+import {
+  memo,
+  startTransition,
+  useDeferredValue,
+  useEffect,
+  useId,
+  useMemo,
+} from "react";
 import Button from "../global/Button";
 
 export const links: LinksFunction = () => [
@@ -16,6 +23,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "~/api/api";
 import NotificationModal from "../global/NotificationModal";
 import SearchBar from "../header/SearchBar";
+
+const MemoTimer = memo(({ className }: { className: string }) => (
+  <TimerRing className={className} />
+));
 
 const TIMER_MODES: Record<
   TimerMode,
@@ -34,6 +45,7 @@ export default function FocusTimer({
   anchor?: boolean;
 }) {
   const client = useQueryClient();
+
   const { mutate: mutateTimer } = useMutation({
     mutationFn: (focusTimerDetails: {
       startedAt: string;
@@ -77,7 +89,7 @@ export default function FocusTimer({
       ? minutes.toString().slice(0, 2)
       : minutes.toString().padStart(2, "0");
   const timerText = `${displayMinutes}:${seconds.toString().padStart(2, "0")}`;
-  const deferredTimerText = useDeferredValue(timerText);
+  const deferredTimerText = useDeferredValue(timerText, "10:00");
 
   useEffect(() => {
     if (
@@ -177,36 +189,42 @@ export default function FocusTimer({
     timerStates.currentFocusTimer.currentTime,
   ]);
 
+  const jellyRadioDefaultVal = useMemo(
+    () =>
+      timerStates.timerMode === "focus"
+        ? "Focus"
+        : timerStates.timerMode === "short break"
+          ? "Short Break"
+          : "Long Break",
+    [timerStates.timerMode],
+  );
+
   return (
     <>
       <div className="p-3 py-5 isolate rounded-2xl grid justify-center gap-9">
         <div className="flex flex-col gap-2">
           <JellyRadio
             items={["Short Break", "Focus", "Long Break"]}
-            defaultValue={
-              timerStates.timerMode === "focus"
-                ? "Focus"
-                : timerStates.timerMode === "short break"
-                  ? "Short Break"
-                  : "Long Break"
+            defaultValue={jellyRadioDefaultVal}
+            onChange={(value) =>
+              startTransition(() => {
+                setTimerStates((prev: any) => ({
+                  ...prev,
+                  timerMode: value.toLowerCase(),
+                  timerState: "idle",
+                  currentFocusTimer: {
+                    ...prev.currentFocusTimer,
+                    currentTime: 0,
+                    startDate: null,
+                  },
+                }));
+              })
             }
-            onChange={(value) => {
-              setTimerStates((prev: any) => ({
-                ...prev,
-                timerMode: value.toLowerCase(),
-                timerState: "idle",
-                currentFocusTimer: {
-                  ...prev.currentFocusTimer,
-                  currentTime: 0,
-                  startDate: null,
-                },
-              }));
-            }}
             chipColor="#27272a"
             activeColor={
-              timerStates.timerMode.toLowerCase() === "focus"
-                ? "#03a9f4"
-                : timerStates.timerMode.toLowerCase() === "short break"
+              timerStates.timerMode === "focus"
+                ? "#1078a6"
+                : timerStates.timerMode === "short break"
                   ? "#4caf50"
                   : "#f44336"
             }
@@ -219,9 +237,9 @@ export default function FocusTimer({
             barge={5}
             shrink={0.05}
             jelly={1}
-            bounce={0.28}
-            stagger={22}
-            stiffness={580}
+            bounce={0.25}
+            stagger={20}
+            stiffness={550}
           />
         </div>
 
@@ -231,25 +249,12 @@ export default function FocusTimer({
           <div className="text-4xl md:text-[40px] font-bold leading-[normal] text-center *:tabular-nums min-w-max">
             {deferredTimerText}
           </div>
+
           <SearchBar />
 
-          <TimerRing
-            progress={
-              1 -
-              timerStates.currentFocusTimer.currentTime /
-                timerStates[TIMER_MODES[timerStates.timerMode]]
-            }
-            className="bg-div"
-          />
+          <MemoTimer className="bg-div" />
 
-          <TimerRing
-            progress={
-              1 -
-              timerStates.currentFocusTimer.currentTime /
-                timerStates[TIMER_MODES[timerStates.timerMode]]
-            }
-            className="bg-div glow"
-          />
+          <MemoTimer className="bg-div glow" />
 
           <div className="flex flex-row-reverse gap-5 justify-center">
             <Button
@@ -260,22 +265,27 @@ export default function FocusTimer({
                 timerStates.timerState === "paused"
               }
               onClick={() => {
-                setTimerStates((prev) => ({
-                  ...prev,
-                  timerState:
-                    prev.timerState === "running" ? "paused" : "running",
-                  currentFocusTimer: {
-                    ...prev.currentFocusTimer,
-                    startDate: prev.currentFocusTimer.startDate ?? new Date(),
-                  },
-                }));
+                startTransition(() => {
+                  setTimerStates((prev) => ({
+                    ...prev,
+                    timerState:
+                      prev.timerState === "running" ? "paused" : "running",
+                    currentFocusTimer: {
+                      ...prev.currentFocusTimer,
+                      startDate: prev.currentFocusTimer.startDate ?? new Date(),
+                    },
+                  }));
 
-                setToast({
-                    title: `Timer ${timerStates.timerState !== "running" ? "started" : "paused"}`,
-                    description: `The ${timerStates.timerMode} timer was ${timerStates.timerState !== "running" ? "started" : "paused"}.`,
-                  }, timerStates.timerState !== "running" ? "success" : "alert");
+                  setToast(
+                    {
+                      title: `Timer ${timerStates.timerState !== "running" ? "started" : "paused"}`,
+                      description: `The ${timerStates.timerMode} timer was ${timerStates.timerState !== "running" ? "started" : "paused"}.`,
+                    },
+                    timerStates.timerState !== "running" ? "success" : "alert",
+                  );
 
-                setShowToast(true);
+                  setShowToast(true);
+                });
               }}
             >
               <svg
@@ -326,22 +336,27 @@ export default function FocusTimer({
               className={`${timerStates.timerState === "idle" ? "opacity-30 pointer-events-none" : "opacity-100 pointer-events-auto"} bg-gray-500 hover:bg-zinc-600 rounded-full`}
               disabled={timerStates.timerState === "idle"}
               onClick={() => {
-                setToast({
-                    title: "Timer Reset",
-                    description: `The ${timerStates.timerMode} timer was reset.`,
-                  }, "alert");
+                startTransition(() => {
+                  setToast(
+                    {
+                      title: "Timer Reset",
+                      description: `The ${timerStates.timerMode} timer was reset.`,
+                    },
+                    "alert",
+                  );
 
-                setShowToast(true);
+                  setShowToast(true);
 
-                setTimerStates((prev: any) => ({
-                  ...prev,
-                  timerState: "idle",
-                  currentFocusTimer: {
-                    ...prev.currentFocusTimer,
-                    currentTime: 0,
-                    startDate: null,
-                  },
-                }));
+                  setTimerStates((prev: any) => ({
+                    ...prev,
+                    timerState: "idle",
+                    currentFocusTimer: {
+                      ...prev.currentFocusTimer,
+                      currentTime: 0,
+                      startDate: null,
+                    },
+                  }));
+                });
               }}
             >
               <svg
@@ -389,7 +404,6 @@ const RADIUS = 46;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 interface TimerRingProps {
-  progress: number;
   strokeWidth?: number;
   animated?: boolean;
   trackColor?: string;
@@ -397,12 +411,18 @@ interface TimerRingProps {
 }
 
 function TimerRing({
-  progress,
   strokeWidth = 6,
   animated = true,
   trackColor = "rgba(161, 161, 170, 0.35)",
   className = "absolute -inset-10 size-full",
 }: TimerRingProps) {
+  const { timerStates } = useTheme();
+
+  const progress =
+    1 -
+    timerStates.currentFocusTimer.currentTime /
+      timerStates[TIMER_MODES[timerStates.timerMode]];
+
   const gradientId = `ring-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
   const clamped = Math.min(1, Math.max(0, progress));
 

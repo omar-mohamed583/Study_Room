@@ -120,7 +120,7 @@ export default function SearchBar() {
         ref={togglerRef}
         data-select-trigger
         style={{ anchorName } as CSSProperties}
-        className={`font-['Outfit'] w-30 transition-colors ${open ? "bg-zinc-600/30" : "bg-transparent"} hover:bg-zinc-600/30 tracking-[0.020em] border duration-200 border-zinc-400/40 p-1.75 px-2.5 rounded-lg flex items-center *:cursor-default *:text-[13px] *:leading-[normal] gap-1`}
+        className={`font-['Inter'] w-29 transition-colors ${open ? "bg-zinc-600/30" : "bg-transparent"} hover:bg-zinc-600/30 border duration-200 border-zinc-400/40 p-1.75 px-2.5 rounded-lg flex items-center *:cursor-default *:text-[13px] *:leading-[normal] gap-1`}
         onClick={() => setOpen((prev) => !prev)}
       >
         <span className="truncate w-[90%] font-medium select-none">
@@ -155,7 +155,7 @@ export default function SearchBar() {
                 positionArea: "bottom",
               } as CSSProperties
             }
-            className={`fixed z-1000 w-54 my-1.5 font-['DM_Sans'] rounded-lg border border-border bg-popover text-popover-foreground origin-top ${open ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-85 pointer-events-none"} transition-[opacity,scale,pointer-events] duration-200 overflow-hidden`}
+            className={`font-['Inter'] fixed z-1000 w-54 my-1.5  rounded-lg border border-border bg-popover text-popover-foreground origin-top ${open ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-85 pointer-events-none"} transition-[opacity,scale,pointer-events] duration-200 overflow-hidden`}
           >
             <header className="grid gap-2 border-b pb-2 border-b-zinc-500/80 p-2.75">
               <div className="flex gap-1.5">
@@ -210,7 +210,7 @@ export default function SearchBar() {
               )}
             </header>
 
-            <main className="grid gap-3 p-2.75 max-h-35 overflow-y-auto [scrollbar-width:thin]">
+            <main className="**:font-['Inter'] grid gap-3 p-2.75 max-h-35 overflow-y-auto [scrollbar-width:thin]">
               {groups.length === 0 ? (
                 <span className="text-[13px] text-(--text-secondary)">
                   No events found

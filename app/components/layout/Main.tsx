@@ -138,7 +138,7 @@ export default function DefaultMain() {
       ),
       name: "Start new task",
       variation: "bg-(--accent-100) text-white",
-      toLocation: "/tasks/new",
+      toLocation: "/tasks",
     },
     {
       svg: (
@@ -168,7 +168,7 @@ export default function DefaultMain() {
       ),
       name: "Set new exam",
       variation: "bg-(--btns-bg) text-black",
-      toLocation: "/exam/new",
+      toLocation: "/exam",
     },
     {
       svg: (
@@ -190,7 +190,7 @@ export default function DefaultMain() {
       ),
       name: "Create new subject",
       variation: "bg-(--accent-200) text-white",
-      toLocation: "/subject/new",
+      toLocation: "/subject",
     },
     {
       svg: (

@@ -1,8 +1,14 @@
 import { useEffect, useLayoutEffect, useState, type ReactNode } from "react";
+import { useLocation } from "react-router";
 import { ThemeContext } from "~/context/themeContext";
 import { useLocalStorage } from "~/hooks/useLocalStorage";
 import type CustomContextType from "~/types/customContextType";
-import type { TimerStates, Toast, ToastInput, ToastAction } from "~/types/customContextType";
+import type {
+  TimerStates,
+  Toast,
+  ToastInput,
+  ToastAction,
+} from "~/types/customContextType";
 
 type Theme = "light" | "dark";
 
@@ -125,7 +131,10 @@ export default function ThemeContextProvider({
 
   const [toasts, setToasts] = useState<Toast[]>([]);
   const setToast = (toast: ToastInput, action: ToastAction) => {
-    setToasts((previous) => [...previous, { ...toast, id: crypto.randomUUID(), icon: action }]);
+    setToasts((previous) => [
+      ...previous,
+      { ...toast, id: crypto.randomUUID(), icon: action },
+    ]);
   };
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -136,12 +145,22 @@ export default function ThemeContextProvider({
     timerStates.timeForShortBreak,
   ]);
 
+  const location = useLocation();
+
+  const parsedLocation = location.pathname.split("/")[1];
+
   useLayoutEffect(() => {
-    document.body.classList.add(theme);
+    if (parsedLocation.toLowerCase() !== "login")
+      document.body.classList.add(theme);
+    else document.body.classList.add("dark");
   }, []);
 
   useEffect(() => {
-    document.body.classList.replace(theme === "dark" ? "light" : "dark", theme);
+    if (parsedLocation.toLowerCase() !== "login")
+      document.body.classList.replace(
+        theme === "dark" ? "light" : "dark",
+        theme,
+      );
   }, [theme]);
 
   return (

@@ -52,12 +52,19 @@ const DEFAULT_FILTERS: Filters = {
 /*  Component                                                                 */
 /* -------------------------------------------------------------------------- */
 
-export default function TasksBoard() {
+export default function TasksBoard({
+  locationSearch,
+}: {
+  locationSearch: string;
+}) {
   const {
     tasks: { isLoading, isError, data },
   } = useStudyData();
 
-  const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
+  const [filters, setFilters] = useState<Filters>(() => {
+    if (!locationSearch.length) return DEFAULT_FILTERS;
+    return { ...DEFAULT_FILTERS, search: locationSearch };
+  });
 
   const visibleTasks = useMemo(
     () => (data ?? []).filter((task) => matchesFilters(task, filters)),
@@ -76,7 +83,7 @@ export default function TasksBoard() {
   const resetFilters = () => setFilters(DEFAULT_FILTERS);
 
   return (
-    <section className="p-4 grid gap-5">
+    <section className="p-4 grid gap-5" id="board">
       <BoardHeader
         shown={visibleTasks.length}
         total={total}
@@ -575,7 +582,7 @@ function TaskRow({ task }: { task: Task }) {
       </td>
 
       <td className={`${TD} text-(--text-secondary)`}>
-        <span className="line-clamp-2 max-w-35">
+        <span className="max-w-30 truncate">
           {task.description?.trim() || "—"}
         </span>
       </td>
