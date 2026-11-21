@@ -1,9 +1,10 @@
 import useTheme from "~/context/themeContext";
 import EmptyState from "./global/EmptyState";
 import type { Subject } from "~/types/subjectTypes";
-import PieChart from "../charts/pie/pie-chart";
-import PieSlice from "../charts/pie/pie-slice";
+import PieChart from "../charts/radial/pie-chart";
+import PieSlice from "../charts/radial/pie-slice";
 import { getColor } from "../utils/generateColors";
+import { Legend, LegendLabel, LegendMarker, LegendValue } from "../charts/radial/legend";
 
 export type PieData = {
   id: string;
@@ -35,18 +36,31 @@ export default function MyPie({
   }));
 
   return (
-    <PieChart
-      data={formateData}
-      size={280}
-    >
-      {formateData.map((item, index) => (
-        <PieSlice
-          key={item.id}
-          index={index}
-          animate
-          hoverEffect="translate"
-        />
-      ))}
-    </PieChart>
+    <div className="flex flex-wrap gap-4">
+      <PieChart
+        data={formateData}
+        size={280}
+      >
+        {formateData.map((item, index) => (
+          <PieSlice
+            key={item.id}
+            index={index}
+            animate
+            hoverEffect="translate"
+          />
+        ))}
+      </PieChart>
+
+      <Legend
+        items={formateData}
+        title="Hours Spent"
+      >
+        <LegendItemComponent>
+          <LegendMarker />
+          <LegendLabel />
+          <LegendValue />
+        </LegendItemComponent>
+      </Legend>
+    </div>
   );
 }
