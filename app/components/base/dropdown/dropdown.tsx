@@ -218,10 +218,6 @@ const DropdownPopover = (props: DropdownPopoverProps) => {
       className={(state) =>
         cx(
                     "w-62 origin-(--trigger-anchor-point) overflow-auto rounded-lg bg-popover text-popover-foreground shadow-lg ring-1 ring-border will-change-auto",
-          state.isEntering &&
-            "duration-150 ease-out animate-in fade-in placement-right:slide-in-from-left-0.5 placement-top:slide-in-from-bottom-0.5 placement-bottom:slide-in-from-top-0.5",
-          state.isExiting &&
-            "opacity-0 duration-0",
           typeof props.className === "function"
             ? props.className(state)
             : props.className,

@@ -28,6 +28,8 @@ const MemoTimer = memo(({ className }: { className: string }) => (
   <TimerRing className={className} />
 ));
 
+const MemoSearchBar = memo(SearchBar);
+
 const TIMER_MODES: Record<
   TimerMode,
   "timeForFocus" | "timeForShortBreak" | "timeForLongBreak"
@@ -63,7 +65,7 @@ export default function FocusTimer({
 
     onSuccess: () =>
       client.invalidateQueries({
-        queryKey: ["/study-sessions?populate=*"],
+        queryKey: ["study-sessions"],
       }),
   });
 
@@ -202,7 +204,7 @@ export default function FocusTimer({
   return (
     <>
       <div className="p-3 py-5 isolate rounded-2xl grid justify-center gap-9">
-        <div className="flex flex-col gap-2">
+        <div>
           <JellyRadio
             items={["Short Break", "Focus", "Long Break"]}
             defaultValue={jellyRadioDefaultVal}
@@ -210,7 +212,7 @@ export default function FocusTimer({
               startTransition(() => {
                 setTimerStates((prev: any) => ({
                   ...prev,
-                  timerMode: value.toLowerCase(),
+                  timerMode: value?.toLowerCase(),
                   timerState: "idle",
                   currentFocusTimer: {
                     ...prev.currentFocusTimer,
@@ -250,7 +252,7 @@ export default function FocusTimer({
             {deferredTimerText}
           </div>
 
-          <SearchBar />
+          <MemoSearchBar />
 
           <MemoTimer className="bg-div" />
 

@@ -150,13 +150,13 @@ export default function ThemeContextProvider({
   const parsedLocation = location.pathname.split("/")[1];
 
   useLayoutEffect(() => {
-    if (parsedLocation.toLowerCase() !== "login")
+    if (parsedLocation?.toLowerCase() !== "login")
       document.body.classList.add(theme);
     else document.body.classList.add("dark");
   }, []);
 
   useEffect(() => {
-    if (parsedLocation.toLowerCase() !== "login")
+    if (parsedLocation?.toLowerCase() !== "login")
       document.body.classList.replace(
         theme === "dark" ? "light" : "dark",
         theme,

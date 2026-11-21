@@ -516,11 +516,11 @@ export default function Calendar({
     await Promise.all(
       [
         {
-          queryKey: [`/${entityType}s?populate=*`, null],
+          queryKey: [`${entityType}s`, null],
           exact: true,
         },
-        { queryKey: ["/subjects?populate=*"] },
-        { queryKey: ["/study-sessions?populate=*"] },
+        { queryKey: ["subjects"] },
+        { queryKey: ["study-sessions"] },
       ].map((filters) =>
         client.invalidateQueries({ ...filters, refetchType: "all" }),
       ),
@@ -552,7 +552,7 @@ export default function Calendar({
   }
 
   function removeEventFromCalendar(eventId: string, identity: EventIdentity) {
-    eventIdentities.current.delete(eventId);
+    eventIdentities?.current?.delete(eventId);
     client.setQueryData<{ data?: Array<{ documentId?: string }> }>(
       [`/${identity.entityType}s?populate=*`, null],
       (current) =>
@@ -581,10 +581,10 @@ export default function Calendar({
   }
 
   function handleEventCreate(event: DayFlowEvent) {
-    if (seenCreateEventIds.current.has(event.id)) return;
-    seenCreateEventIds.current.add(event.id);
-    temporaryEventIds.current.add(event.id);
-    temporaryEvents.current.set(event.id, event);
+    if (seenCreateEventIds?.current?.has(event.id)) return;
+    seenCreateEventIds?.current?.add(event.id);
+    temporaryEventIds?.current?.add(event.id);
+    temporaryEvents?.current?.set(event.id, event);
     setDetailsDialogError(null);
 
     const initialValues: CalendarEventFormValues = {
@@ -646,7 +646,7 @@ export default function Calendar({
 
   function handleEventClick(event: DayFlowEvent) {
     const identity =
-      getEventIdentity(event) ?? eventIdentities.current.get(event.id);
+      getEventIdentity(event) ?? eventIdentities?.current?.get(event.id);
     if (!identity) {
       showMissingEventToast();
       return;
@@ -664,8 +664,8 @@ export default function Calendar({
   }
 
   async function handleEventUpdate(event: DayFlowEvent) {
-    if (temporaryEventIds.current.has(event.id)) {
-      temporaryEvents.current.set(event.id, event);
+    if (temporaryEventIds?.current?.has(event.id)) {
+      temporaryEvents?.current?.set(event.id, event);
       setDetailsDialog((current) =>
         current?.mode === "create" && current.event.id === event.id
           ? { ...current, event }
@@ -675,7 +675,7 @@ export default function Calendar({
     }
 
     const identity =
-      getEventIdentity(event) ?? eventIdentities.current.get(event.id);
+      getEventIdentity(event) ?? eventIdentities?.current?.get(event.id);
 
     if (!identity) {
       showMissingEventToast();
@@ -688,8 +688,8 @@ export default function Calendar({
         (candidate.meta.entityType === identity.entityType &&
           candidate.meta.documentId === identity.documentId),
     );
-    if (event.conference && !warnedConferenceEvents.current.has(event.id)) {
-      warnedConferenceEvents.current.add(event.id);
+    if (event.conference && !warnedConferenceEvents?.current?.has(event.id)) {
+      warnedConferenceEvents?.current?.add(event.id);
       showToast(
         "Meeting details are not stored",
         "Task and Exam records do not have a conference field, so this Dayflow value will not be Saved.",
@@ -736,33 +736,33 @@ export default function Calendar({
     if (Object.keys(eventData).length === 0) return;
 
     const mutationId = `${identity.entityType}:${identity.documentId}`;
-    if (pendingMutationIds.current.has(mutationId)) {
-      queuedEventUpdates.current.set(event.id, event);
+    if (pendingMutationIds?.current?.has(mutationId)) {
+      queuedEventUpdates?.current?.set(event.id, event);
       return;
     }
-    pendingMutationIds.current.add(mutationId);
+    pendingMutationIds?.current?.add(mutationId);
     try {
       await mutateCalendarEvents.mutateAsync({
         action: "update",
         identity,
         data: eventData,
       });
-      eventIdentities.current.set(event.id, identity);
+      eventIdentities?.current?.set(event.id, identity);
       showMutationSuccess("updated", identity.entityType, event.title);
       await refreshEventData(identity.entityType);
     } catch {
       await refreshEventData(identity.entityType);
     } finally {
-      pendingMutationIds.current.delete(mutationId);
-      const queuedDelete = queuedEventDeletes.current.get(mutationId);
+      pendingMutationIds?.current?.delete(mutationId);
+      const queuedDelete = queuedEventDeletes?.current?.get(mutationId);
       if (queuedDelete) {
-        queuedEventDeletes.current.delete(mutationId);
-        queuedEventUpdates.current.delete(event.id);
+        queuedEventDeletes?.current?.delete(mutationId);
+        queuedEventUpdates?.current?.delete(event.id);
         void handleEventDelete(event.id);
       } else {
-        const queuedUpdate = queuedEventUpdates.current.get(event.id);
+        const queuedUpdate = queuedEventUpdates?.current?.get(event.id);
         if (queuedUpdate) {
-          queuedEventUpdates.current.delete(event.id);
+          queuedEventUpdates?.current?.delete(event.id);
           void handleEventUpdate(queuedUpdate);
         }
       }
@@ -770,8 +770,8 @@ export default function Calendar({
   }
 
   async function handleEventDelete(eventId: string) {
-    if (temporaryEventIds.current.delete(eventId)) {
-      temporaryEvents.current.delete(eventId);
+    if (temporaryEventIds?.current?.delete(eventId)) {
+      temporaryEvents?.current?.delete(eventId);
       setDetailsDialog((current) =>
         current?.mode === "create" && current.event.id === eventId
           ? null
@@ -783,7 +783,7 @@ export default function Calendar({
     const originalEvent = events.find((event) => event.id === eventId);
     const identity =
       (originalEvent && getEventIdentity(originalEvent)) ??
-      eventIdentities.current.get(eventId) ??
+      eventIdentities?.current?.get(eventId) ??
       getEventIdentity({ id: eventId, meta: undefined });
 
     if (!identity) {
@@ -792,12 +792,12 @@ export default function Calendar({
     }
 
     const mutationId = `${identity.entityType}:${identity.documentId}`;
-    if (pendingMutationIds.current.has(mutationId)) {
-      queuedEventUpdates.current.delete(eventId);
-      queuedEventDeletes.current.set(mutationId, identity);
+    if (pendingMutationIds?.current?.has(mutationId)) {
+      queuedEventUpdates?.current?.delete(eventId);
+      queuedEventDeletes?.current?.set(mutationId, identity);
       return;
     }
-    pendingMutationIds.current.add(mutationId);
+    pendingMutationIds?.current?.add(mutationId);
     try {
       await mutateCalendarEvents.mutateAsync({
         action: "delete",
@@ -809,8 +809,8 @@ export default function Calendar({
     } catch {
       await refreshEventData(identity.entityType);
     } finally {
-      pendingMutationIds.current.delete(mutationId);
-      queuedEventUpdates.current.delete(eventId);
+      pendingMutationIds?.current?.delete(mutationId);
+      queuedEventUpdates?.current?.delete(eventId);
     }
   }
 
@@ -826,8 +826,8 @@ export default function Calendar({
 
     const { identity } = detailsDialog;
     const mutationId = `${identity.entityType}:${identity.documentId}`;
-    if (pendingMutationIds.current.has(mutationId)) return;
-    pendingMutationIds.current.add(mutationId);
+    if (pendingMutationIds?.current?.has(mutationId)) return;
+    pendingMutationIds?.current?.add(mutationId);
     setDetailsDialogSaving(true);
     setDetailsDialogError(null);
     try {
@@ -847,7 +847,7 @@ export default function Calendar({
           : "The event could not be deleted.",
       );
     } finally {
-      pendingMutationIds.current.delete(mutationId);
+      pendingMutationIds?.current?.delete(mutationId);
       setDetailsDialogSaving(false);
     }
   }
@@ -858,9 +858,9 @@ export default function Calendar({
 
     if (
       current.mode === "create" &&
-      temporaryEventIds.current.delete(current.event.id)
+      temporaryEventIds?.current?.delete(current.event.id)
     ) {
-      temporaryEvents.current.delete(current.event.id);
+      temporaryEvents?.current?.delete(current.event.id);
       calendarApp.current?.applyEventsChanges(
         { delete: [current.event.id] },
         false,
@@ -900,8 +900,8 @@ export default function Calendar({
       detailsDialog.mode === "create"
         ? detailsDialog.event.id
         : `${detailsDialog.identity?.entityType}:${detailsDialog.identity?.documentId}`;
-    if (pendingMutationIds.current.has(mutationId)) return;
-    pendingMutationIds.current.add(mutationId);
+    if (pendingMutationIds?.current?.has(mutationId)) return;
+    pendingMutationIds?.current?.add(mutationId);
     setDetailsDialogSaving(true);
     setDetailsDialogError(null);
 
@@ -910,7 +910,7 @@ export default function Calendar({
     try {
       const sourceEvent =
         detailsDialog.mode === "create"
-          ? (temporaryEvents.current.get(detailsDialog.event.id) ??
+          ? (temporaryEvents?.current?.get(detailsDialog.event.id) ??
             detailsDialog.event)
           : detailsDialog.event;
       const eventFromForm = makeEventFromForm(sourceEvent, values);
@@ -1016,15 +1016,15 @@ export default function Calendar({
             documentId,
           },
         };
-        eventIdentities.current.set(submittedEvent.id, createdIdentity);
-        eventIdentities.current.set(persistedEvent.id, createdIdentity);
+        eventIdentities?.current?.set(submittedEvent.id, createdIdentity);
+        eventIdentities?.current?.set(persistedEvent.id, createdIdentity);
         calendarApp.current.applyEventsChanges(
           { delete: [submittedEvent.id], add: [persistedEvent] },
           false,
           "remote",
         );
-        temporaryEventIds.current.delete(submittedEvent.id);
-        temporaryEvents.current.delete(submittedEvent.id);
+        temporaryEventIds?.current?.delete(submittedEvent.id);
+        temporaryEvents?.current?.delete(submittedEvent.id);
         setDetailsDialog(null);
         await refreshEventData(createdIdentity.entityType);
       } else if (detailsDialog.identity) {
@@ -1065,7 +1065,7 @@ export default function Calendar({
             identity.entityType,
             submittedEvent.title,
           );
-          eventIdentities.current.set(submittedEvent.id, identity);
+          eventIdentities?.current?.set(submittedEvent.id, identity);
           try {
             calendarApp.current?.applyEventsChanges(
               {
@@ -1098,8 +1098,8 @@ export default function Calendar({
     } catch (error) {
       if (createdIdentity || createResponseReceived) {
         const temporaryEventId = detailsDialog.event.id;
-        if (temporaryEventIds.current.delete(temporaryEventId)) {
-          temporaryEvents.current.delete(temporaryEventId);
+        if (temporaryEventIds?.current?.delete(temporaryEventId)) {
+          temporaryEvents?.current?.delete(temporaryEventId);
           try {
             calendarApp.current?.applyEventsChanges(
               { delete: [temporaryEventId] },
@@ -1110,8 +1110,8 @@ export default function Calendar({
             // The refreshed Strapi query below will reconcile the calendar.
           }
         }
-        temporaryEventIds.current.delete(detailsDialog.event.id);
-        temporaryEvents.current.delete(detailsDialog.event.id);
+        temporaryEventIds?.current?.delete(detailsDialog.event.id);
+        temporaryEvents?.current?.delete(detailsDialog.event.id);
         setDetailsDialog(null);
         await refreshEventData(
           createdIdentity?.entityType ?? values.entityType,
@@ -1133,7 +1133,7 @@ export default function Calendar({
         );
       }
     } finally {
-      pendingMutationIds.current.delete(mutationId);
+      pendingMutationIds?.current?.delete(mutationId);
       setDetailsDialogSaving(false);
     }
   }

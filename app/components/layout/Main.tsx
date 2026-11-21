@@ -1,4 +1,4 @@
-import { Suspense, useRef } from "react";
+import { memo, Suspense, useRef } from "react";
 import {
   Link,
   redirect,
@@ -50,6 +50,13 @@ export const meta: MetaFunction = () => [
     content: "",
   },
 ];
+
+const MemoFocusTimer = memo(() => (
+  <FocusTimer
+    size="sm"
+    anchor
+  />
+));
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -327,7 +334,11 @@ export default function DefaultMain() {
               <h2 className="font-medium text-3xl text-white leading-[normal] text-center">
                 {now < 20 && now > 5 ? "Have A Good Day" : "Welcome Night Owl"}
                 <br></br>
-                <Suspense fallback={"guest"}>
+                <Suspense
+                  fallback={
+                    <span className="tracking-wider capitalize">guest</span>
+                  }
+                >
                   <span className="tracking-wider capitalize">
                     {user?.username}!
                   </span>
@@ -396,11 +407,8 @@ export default function DefaultMain() {
               </svg>
             }
           >
-            <div className="flex flex-wrap *:grow">
-              <FocusTimer
-                size="sm"
-                anchor
-              />
+            <div className="grid grid-cols-1">
+              <MemoFocusTimer />
 
               <p className="text-center pt-8 pb-2 text-[14px]">
                 For more settings and actions visit the{" "}
@@ -590,7 +598,7 @@ function DefaultMainSection({
 
       {seeMore && (
         <Link
-          to={to.toLowerCase()}
+          to={to?.toLowerCase()}
           className="block p-2 bg-(--accent-300) hover:bg-(--accent-300)/80 text-white in-[.dark]:hover:bg-zinc-900 transition-colors duration-200 text-center px-6 in-[.dark]:bg-zinc-800 rounded-full"
         >
           See more...

@@ -61,7 +61,7 @@ function taskToDeadline(task: Task): Deadline | null {
     title: task.title,
     subject: task?.subject?.name,
     date: new Date(task.dueDate),
-    href: `/tasks/${task.id}`,
+    href: `/tasks/${task.title}`,
     priority: task.priority ?? undefined,
     duration: task.estimatedDuration ?? undefined,
   };
@@ -78,7 +78,7 @@ function examToDeadline(exam: Exam, now: Date): Deadline | null {
     title: exam.title,
     subject: exam.subject?.[0]?.name,
     date,
-    href: `/exams/${exam.id}`,
+    href: `/exams/${exam.title}`,
     topicsCount: exam.exam_topics?.length,
   };
 }

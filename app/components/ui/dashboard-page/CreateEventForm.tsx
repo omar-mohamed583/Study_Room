@@ -6,14 +6,14 @@ import {
   useRef,
   useState,
   type ReactNode,
+  type RefObject,
 } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Check, CircleAlert, Loader2 } from "lucide-react";
+import { CircleAlert, Loader2 } from "lucide-react";
 import { ChevronDown } from "@untitledui/icons";
 import type { Key } from "react-aria-components";
 import { Button } from "~/components/base/buttons/button";
 import { Dropdown } from "~/components/base/dropdown/dropdown";
-import { apiFetch } from "~/api/api";
 import useStudyData from "~/context/studyDataContext";
 import {
   EMPTY_TASK_FORM,
@@ -22,7 +22,6 @@ import {
   parseServerErrors,
   toTaskPayload,
   validateTask,
-  type NewTaskPayload,
   type TaskFormErrors,
   type TaskFormValues,
 } from "~/lib/taskForm";
@@ -30,29 +29,7 @@ import { DatePickerField } from "../global/date picker/DatePicker";
 import useTheme from "~/context/themeContext";
 import type { Theme } from "~/types/customContextType";
 import NotificationModal from "../global/NotificationModal";
-
-// Must match the query key useGetEvents uses for /tasks, otherwise the new
-// task won't show up until a manual refresh.
-const TASKS_QUERY_KEY = ["tasks"];
-
-// Same order as the fields appear in the DOM (used to focus the first error).
-const FIELD_ORDER: (keyof TaskFormValues)[] = [
-  "title",
-  "description",
-  "dueDate",
-  "calendarAllDay",
-  "priority",
-  "estimatedDuration",
-  "subjectId",
-];
-
-async function createTask(payload: NewTaskPayload) {
-  return apiFetch("/tasks", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ data: payload }),
-  });
-}
+import { ThinkingOrb } from "thinking-orbs";
 
 const borderClass = "border-[hsl(from_var(--text-primary)_h_s_l_/.2)]";
 
@@ -63,21 +40,34 @@ const controlClass = (invalid: boolean) =>
     invalid ? "border-destructive" : borderClass,
   ].join(" ");
 
-export default function CreateTaskForm() {
+export default function CreateEventForm({
+  values,
+  errors,
+  updateFunc,
+  onSubmit,
+  validateField,
+  handleDueDateChange,
+  dueValue,
+  formError,
+  mutation,
+}: {
+  values: any;
+  errors: any;
+  updateFunc: any;
+  onSubmit: any;
+  validateField: any;
+  handleDueDateChange: any;
+  dueValue: any;
+  formError: any;
+  mutation: any;
+}) {
   const uid = useId();
   const formRef = useRef<HTMLFormElement>(null);
-  const queryClient = useQueryClient();
   const {
     subjects: { data: subjects },
   } = useStudyData();
 
-  const { theme, setToasts } = useTheme();
-
-  const [values, setValues] = useState<TaskFormValues>(() => EMPTY_TASK_FORM);
-  const valuesRef = useRef<TaskFormValues | null>(values);
-  valuesRef.current = values;
-  const [errors, setErrors] = useState<TaskFormErrors>({});
-  const [formError, setFormError] = useState<string | null>(null);
+  const { theme } = useTheme();
 
   const id = (key: string) => `${uid}-${key}`;
 
@@ -88,122 +78,14 @@ export default function CreateTaskForm() {
     "aria-describedby": errors[key] ? errorId(key) : undefined,
   });
 
-  function focusField(name: string) {
-    const el = formRef.current?.elements.namedItem(name);
-    if (el instanceof HTMLElement) el.focus();
-  }
-
-  function focusFirstError(found: TaskFormErrors) {
-    const first = FIELD_ORDER.find((k) => found[k]);
-    if (first) focusField(first);
-  }
-
-  const mutation = useMutation({
-    mutationFn: createTask,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: TASKS_QUERY_KEY });
-      setToasts((prev) => [
-        ...prev,
-        {
-          id: crypto.randomUUID(),
-          description: `task ${values.title} was successfully created.`,
-          title: "Task Created",
-          icon: "success",
-        },
-      ]);
-      valuesRef.current = EMPTY_TASK_FORM;
-      setValues(EMPTY_TASK_FORM);
-      setErrors({});
-      setFormError(null);
-      focusField("title");
-    },
-    onError: (err) => {
-      const { form, fields } = parseServerErrors(err);
-      setErrors(fields);
-      setFormError(form);
-      focusFirstError(fields);
-    },
-  });
-
-  function update(patch: Partial<TaskFormValues>) {
-    const next = { ...values, ...patch };
-    valuesRef.current = next;
-    setValues(next);
-    setFormError(null);
-    setErrors((prev) => {
-      const shown = Object.keys(prev) as (keyof TaskFormValues)[];
-      if (!shown.length) return prev;
-      const fresh = validateTask(next);
-      const kept: TaskFormErrors = {};
-      for (const k of shown) if (fresh[k]) kept[k] = fresh[k];
-      return kept;
-    });
-  }
-
-  function validateField(key: keyof TaskFormValues) {
-    const message = validateTask(values)[key];
-    setErrors((prev) => {
-      const next = { ...prev };
-      if (message) next[key] = message;
-      else delete next[key];
-      return next;
-    });
-  }
-
   function toggleAllDay(checked: boolean) {
     const dueDate = checked
       ? values.dueDate.slice(0, 10)
       : values.dueDate
         ? `${values.dueDate}T09:00`
         : "";
-    update({ calendarAllDay: checked, dueDate });
+    updateFunc({ calendarAllDay: checked, dueDate });
   }
-
-  function onSubmit(e: any) {
-    e.preventDefault();
-    if (mutation.isPending) return;
-
-    const found = validateTask(values);
-    setErrors(found);
-    if (Object.keys(found).length) {
-      setFormError(null);
-      focusFirstError(found);
-      return;
-    }
-    setFormError(null);
-    mutation.mutate(toTaskPayload(values));
-  }
-
-  const dueValue = useMemo(
-    () => (values.dueDate ? new Date(values.dueDate) : null),
-    [values.dueDate],
-  );
-
-  const handleDueDateChange = useCallback((date: string) => {
-    const previous = valuesRef.current ?? EMPTY_TASK_FORM;
-    const datePart = date.slice(0, 10);
-    const timePart = date.slice(11, 16);
-    const nextValues: TaskFormValues = {
-      ...previous,
-      dueDate: !datePart
-        ? ""
-        : previous.calendarAllDay
-          ? datePart.slice(0, 10)
-          : `${datePart}T${timePart}`,
-    };
-    valuesRef.current = nextValues;
-    setValues(nextValues);
-    setFormError(null);
-    setErrors((shownErrors) => {
-      if (!Object.keys(shownErrors).length) return shownErrors;
-      const fresh = validateTask(nextValues);
-      const kept: TaskFormErrors = {};
-      for (const key of Object.keys(shownErrors) as (keyof TaskFormErrors)[]) {
-        if (fresh[key]) kept[key] = fresh[key];
-      }
-      return kept;
-    });
-  }, []);
 
   const titleLen = useMemo(() => values.title.trim().length, [values.title]);
 
@@ -246,7 +128,7 @@ export default function CreateTaskForm() {
               autoComplete="off"
               placeholder="e.g. Finish chapter 4 exercises"
               value={values.title}
-              onChange={(e) => update({ title: e.target.value })}
+              onChange={(e) => updateFunc({ title: e.target.value })}
               onBlur={() => validateField("title")}
               className={controlClass(!!errors.title)}
               {...aria("title")}
@@ -274,7 +156,7 @@ export default function CreateTaskForm() {
               rows={3}
               placeholder="Add details, links or what “done” looks like"
               value={values.description}
-              onChange={(e) => update({ description: e.target.value })}
+              onChange={(e) => updateFunc({ description: e.target.value })}
               onBlur={() => validateField("description")}
               className={`${controlClass(!!errors.description)} resize-none`}
               {...aria("description")}
@@ -334,7 +216,7 @@ export default function CreateTaskForm() {
                     name="priority"
                     value={p}
                     checked={values.priority === p}
-                    onChange={() => update({ priority: p })}
+                    onChange={() => updateFunc({ priority: p })}
                     className="peer sr-only"
                   />
                   <span
@@ -369,7 +251,9 @@ export default function CreateTaskForm() {
               inputMode="numeric"
               autoComplete="off"
               value={values.estimatedDuration}
-              onChange={(e) => update({ estimatedDuration: e.target.value })}
+              onChange={(e) =>
+                updateFunc({ estimatedDuration: e.target.value })
+              }
               onBlur={() => validateField("estimatedDuration")}
               className={controlClass(!!errors.estimatedDuration)}
               {...aria("estimatedDuration")}
@@ -394,7 +278,7 @@ export default function CreateTaskForm() {
               value={values.subjectId}
               disabled={!subjects?.length}
               invalid={!!errors.subjectId}
-              onChange={(subjectId) => update({ subjectId })}
+              onChange={(subjectId) => updateFunc({ subjectId })}
               options={[
                 { value: "", label: "No subject" },
                 ...(subjects ?? []).map((s) => ({
@@ -426,12 +310,14 @@ export default function CreateTaskForm() {
             <button
               type="submit"
               disabled={mutation.isPending}
-              className="bg-(--text-primary) py-2 font-medium text-(--contrast-text) hover:bg-(--text-primary)/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              className="bg-(--text-primary) py-2 font-medium text-(--contrast-text) hover:bg-(--text-primary)/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background text-center"
             >
               {mutation.isPending ? (
-                <span className="flex items-center gap-1.5">
-                  <Loader2 className="size-4 animate-spin" />
-                  Creating…
+                <span className="scale-150 mx-auto">
+                  <ThinkingOrb
+                    state="composing"
+                    size={20}
+                  />
                 </span>
               ) : (
                 "Create task"

@@ -64,7 +64,7 @@ export default function DialogComp({
               <XIcon />
             </Dialog.Close>
             <div className="pointer-events-auto h-full w-full max-w-280 bg-white dark:bg-neutral-950 p-4 text-neutral-950 dark:text-white border border-neutral-950 dark:border-zinc-400/35 shadow-[0.25rem_0.25rem_0] shadow-black/12 dark:shadow-none transition-[scale] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-data-starting-style/popup:scale-105">
-              {dialogType.toLowerCase() === "account" ? (
+              {dialogType?.toLowerCase() === "account" ? (
                 <AccountContent
                   user={user}
                   onSave={({ username }) => mutate({ username })}

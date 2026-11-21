@@ -63,7 +63,7 @@ export default function TasksBoard({
 
   const [filters, setFilters] = useState<Filters>(() => {
     if (!locationSearch.length) return DEFAULT_FILTERS;
-    return { ...DEFAULT_FILTERS, search: locationSearch };
+    return { ...DEFAULT_FILTERS, search: decodeURIComponent(locationSearch) };
   });
 
   const visibleTasks = useMemo(
@@ -374,8 +374,8 @@ function Field({
 }
 
 function matchesFilters(task: Task, f: Filters): boolean {
-  const query = f.search.trim().toLowerCase();
-  if (query && !(task.title ?? "").toLowerCase().includes(query)) return false;
+  const query = f?.search?.trim()?.toLowerCase();
+  if (query && !(task.title ?? "")?.toLowerCase()?.includes(query)) return false;
 
   if (f.status === "completed" && !task.completed) return false;
   if (f.status === "open" && task.completed) return false;

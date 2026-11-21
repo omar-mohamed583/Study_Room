@@ -79,7 +79,7 @@ export default function SearchBar() {
   }, []);
 
   const groups = useMemo(() => {
-    const q = deferredInpValue.trim().toLowerCase();
+    const q = deferredInpValue?.trim()?.toLowerCase();
 
     const all: Record<EventType, SearchItem[]> = {
       task: (tasks.data ?? []).map(
@@ -102,8 +102,8 @@ export default function SearchBar() {
       .filter((t) => !filter || t === filter)
       .map((t) => ({
         type: t,
-        items: all[t].filter((item) =>
-          (item.name ?? "").toLowerCase().includes(q),
+        items: all[t]?.filter((item) =>
+          (item.name ?? "")?.toLowerCase()?.includes(q),
         ),
       }))
       .filter((group) => group.items.length > 0);

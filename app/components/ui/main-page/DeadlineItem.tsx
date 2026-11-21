@@ -7,7 +7,6 @@ import type {
 } from "~/types/deadlines";
 import {
   formatDuration,
-  formatMonth,
   formatTime,
   getDueStatus,
   pluralize,

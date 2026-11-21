@@ -84,7 +84,7 @@ export default function SessionHistory({
   } else if (filtered?.length === 0) {
     body = (
       <EmptyState
-        title={`No ${filterLabel.toLowerCase()} yet`}
+        title={`No ${filterLabel?.toLowerCase()} yet`}
         description="Complete one and it will show up here."
         action={
           <button
@@ -156,7 +156,7 @@ export default function SessionHistory({
         >
           {filter === "all"
             ? `${filtered.length} sessions shown`
-            : `${filtered.length} ${filterLabel.toLowerCase()} shown`}
+            : `${filtered.length} ${filterLabel?.toLowerCase()} shown`}
         </p>
       </>
     );

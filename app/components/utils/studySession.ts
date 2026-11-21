@@ -29,7 +29,7 @@ export function normalizeSessionKind(value: unknown): SessionKind | null {
     return normalizeSessionKind(session.sessionType);
   }
   if (typeof value !== "string") return null;
-  return KIND_ALIASES.get(value.toLowerCase().replace(/[\s_-]+/g, "")) ?? null;
+  return KIND_ALIASES.get(value?.toLowerCase()?.replace(/[\s_-]+/g, "")) ?? null;
 }
 
 function parseTime(value: unknown): number | null {

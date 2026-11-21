@@ -24,10 +24,10 @@ export default function useGetEvents<T = any>({
 }: UseGetEventsArgs) {
   const url = endpoint ?? (event ? EVENT_ENDPOINTS[event] : undefined);
 
-  if (!url) throw new Error("No Endpoint To Request");
+  if (!url) return;
 
   return useQuery<any, Error, T>({
-    queryKey: [url, opt ?? null],
+    queryKey: [event],
     queryFn: ({ signal }) => apiFetch(url, { ...opt, signal }),
     select: (res) => res.data,
     enabled,
