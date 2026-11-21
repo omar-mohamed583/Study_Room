@@ -8,6 +8,7 @@ import {
 } from "react";
 import { useNavigate } from "react-router";
 import { apiFetch } from "~/api/api";
+import { queryKeys } from "~/api/queryKeys";
 import {
   ensureSession,
   getAccessToken,
@@ -39,11 +40,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   function clearAuth() {
     setAccessToken(null);
-    queryClient.removeQueries({ queryKey: ["user"] });
+    queryClient.removeQueries({ queryKey: queryKeys.user });
   }
 
   const userQuery = useQuery({
-    queryKey: ["user"],
+    queryKey: queryKeys.user,
     queryFn: ({ signal }) => apiFetch("/users/me", { signal }),
     enabled: !!accessToken,
     retry: false,
@@ -64,7 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   function onAuthSuccess(data: { jwt: string; user: unknown }) {
     setAccessToken(data.jwt);
-    queryClient.setQueryData(["user"], data.user);
+    queryClient.setQueryData(queryKeys.user, data.user);
   }
 
   const registerMutation = useMutation({

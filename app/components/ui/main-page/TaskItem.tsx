@@ -3,10 +3,9 @@ import { Trash01 } from "@untitledui/icons";
 import { Check, Pen, Play } from "lucide-react";
 import { Link, useNavigate } from "react-router";
 import { apiFetch } from "~/api/api";
+import { queryKeys } from "~/api/queryKeys";
 import useTheme from "~/context/themeContext";
 import type { Task } from "~/types/taskType";
-
-const TASKS_QUERY_KEY = ["tasks"] as const;
 
 export default function TaskItem({ task }: { task: Task }) {
   const navigate = useNavigate();
@@ -29,7 +28,7 @@ export default function TaskItem({ task }: { task: Task }) {
             method: "DELETE",
           }),
     onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: TASKS_QUERY_KEY }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks }),
   });
 
   const dueDate = task.dueDate ? new Date(task.dueDate) : null;

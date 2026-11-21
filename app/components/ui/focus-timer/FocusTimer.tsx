@@ -20,6 +20,7 @@ export const links: LinksFunction = () => [
 import type { TimerMode } from "~/types/customContextType";
 import type { LinksFunction } from "react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "~/api/queryKeys";
 import { apiFetch } from "~/api/api";
 import NotificationModal from "../global/NotificationModal";
 import SearchBar from "../header/SearchBar";
@@ -65,7 +66,7 @@ export default function FocusTimer({
 
     onSuccess: () =>
       client.invalidateQueries({
-        queryKey: ["study-sessions"],
+        queryKey: queryKeys.studySessions,
       }),
   });
 

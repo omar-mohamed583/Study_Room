@@ -1,7 +1,9 @@
-import { Pie } from "@nivo/pie";
 import useTheme from "~/context/themeContext";
 import EmptyState from "./global/EmptyState";
 import type { Subject } from "~/types/subjectTypes";
+import PieChart from "../charts/pie/pie-chart";
+import PieSlice from "../charts/pie/pie-slice";
+import { getColor } from "../utils/generateColors";
 
 export type PieData = {
   id: string;
@@ -12,16 +14,10 @@ export type PieData = {
 
 type MyPieProps = {
   subjects: Subject[];
-  width: number;
-  height: number;
-  valueFormat: any;
 };
 
 export default function MyPie({
   subjects,
-  width,
-  height,
-  valueFormat,
 }: MyPieProps) {
   if (!subjects?.some((subj) => subj?.studySessions?.length))
     return (
@@ -31,36 +27,26 @@ export default function MyPie({
       />
     );
 
-  const { theme } = useTheme();
-
-  const formateData = subjects.map((subject) => ({
+  const formateData = subjects.map((subject, ind) => ({
     id: subject.name,
     label: subject.name,
-    color: subject.color,
+    color: getColor(ind),
     value: subject.studySessions.reduce((acc, v) => acc + +v.duration / 60, 0),
   }));
 
   return (
-    <>
-      {
-        <Pie
-          data={formateData}
-          margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
-          height={height}
-          width={width}
-          innerRadius={0.5}
-          padAngle={0.6}
-          cornerRadius={2}
-          valueFormat={valueFormat}
-          activeOuterRadiusOffset={8}
-          arcLinkLabelsSkipAngle={10}
-          arcLinkLabelsTextColor={theme === "light" ? "#333333" : "#fff"}
-          arcLinkLabelsThickness={2}
-          arcLinkLabelsColor={{ from: "color" }}
-          arcLabelsSkipAngle={10}
-          arcLabelsTextColor={{ from: "color", modifiers: [["darker", 2]] }}
+    <PieChart
+      data={formateData}
+      size={280}
+    >
+      {formateData.map((item, index) => (
+        <PieSlice
+          key={item.id}
+          index={index}
+          animate
+          hoverEffect="translate"
         />
-      }
-    </>
+      ))}
+    </PieChart>
   );
 }

@@ -5,6 +5,7 @@ import AccountContent from "../../layout/AccountDialog";
 import SettingsContent from "../../layout/SettingDialog";
 import { useAuth } from "../../providers/authProvider";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "~/api/queryKeys";
 import { apiFetch } from "~/api/api";
 
 export default function DialogComp({
@@ -30,7 +31,7 @@ export default function DialogComp({
         method: "PUT",
         body: JSON.stringify(updatedFields),
       }),
-    onSuccess: () => client.invalidateQueries({ queryKey: ["user"] }),
+    onSuccess: () => client.invalidateQueries({ queryKey: queryKeys.user }),
   });
 
   // When `open` is controlled the trigger is rendered by the caller, so the

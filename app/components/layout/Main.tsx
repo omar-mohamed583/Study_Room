@@ -495,15 +495,6 @@ export default function DefaultMain() {
             <div className="justify-self-center text-black">
               <MyPie
                 subjects={subjects ?? []}
-                valueFormat={(value: any) =>
-                  value / 60 >= 1 ? value / 60 + "h" : value + "m"
-                }
-                width={
-                  typeof window !== "undefined" && window.innerWidth > 500
-                    ? 500
-                    : 297
-                }
-                height={380}
               />
             </div>
           </DefaultMainSection>

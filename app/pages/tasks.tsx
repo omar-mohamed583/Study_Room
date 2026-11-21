@@ -9,6 +9,7 @@ import {
 } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { apiFetch } from "~/api/api";
+import { queryKeys } from "~/api/queryKeys";
 import DashboardPage from "~/components/ui/dashboard-page/DashboardPage";
 import {
   buildAreaChartData,
@@ -29,8 +30,6 @@ import {
   type TaskFormErrors,
   type TaskFormValues,
 } from "~/lib/taskForm";
-
-const TASKS_QUERY_KEY = ["tasks"];
 
 const FIELD_ORDER: (keyof TaskFormValues)[] = [
   "title",
@@ -65,7 +64,7 @@ export default function tasks() {
   const mutation = useMutation({
     mutationFn: createTask,
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: TASKS_QUERY_KEY });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.tasks });
       setToasts((prev) => [
         ...prev,
         {
@@ -235,7 +234,7 @@ export default function tasks() {
 
   return (
     <DashboardPage
-      queryKey={TASKS_QUERY_KEY}
+      queryKey={[...queryKeys.tasks]}
       statsChartData={statsChartData}
       areaChartData={areaChartData}
       searchEvent={task}

@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "./api";
+import { queryKeyForEndpoint } from "./queryKeys";
 
 export type EventType = "task" | "subject" | "exam";
 
@@ -24,12 +25,13 @@ export default function useGetEvents<T = any>({
 }: UseGetEventsArgs) {
   const url = endpoint ?? (event ? EVENT_ENDPOINTS[event] : undefined);
 
-  if (!url) return;
-
   return useQuery<any, Error, T>({
-    queryKey: [event],
-    queryFn: ({ signal }) => apiFetch(url, { ...opt, signal }),
+    queryKey: queryKeyForEndpoint(url),
+    queryFn: ({ signal }) => {
+      if (!url) throw new Error("An event endpoint is required.");
+      return apiFetch(url, { ...opt, signal });
+    },
     select: (res) => res.data,
-    enabled,
+    enabled: enabled && Boolean(url),
   });
 }
