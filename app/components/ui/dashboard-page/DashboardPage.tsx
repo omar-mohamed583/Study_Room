@@ -45,11 +45,9 @@ export default function DashboardPage({
   handleDueDateChange,
   mutation,
   onSubmit,
-  queryKey,
   updateFunc,
   validateField,
 }: {
-  queryKey: string[];
   statsChartData: { title: string; chartData: any }[];
   areaChartData: AreaPoint[];
   searchEvent: RefObject<string | null>;

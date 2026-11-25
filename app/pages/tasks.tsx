@@ -7,7 +7,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { useLocation, useNavigate } from "react-router";
+import { useLocation, useNavigate, type LinksFunction, type MetaFunction } from "react-router";
 import { apiFetch } from "~/api/api";
 import { queryKeys } from "~/api/queryKeys";
 import DashboardPage from "~/components/ui/dashboard-page/DashboardPage";
@@ -30,6 +30,28 @@ import {
   type TaskFormErrors,
   type TaskFormValues,
 } from "~/lib/taskForm";
+import lightLogo from "~/assets/light-logo.svg";
+import darkLogo from "~/assets/dark-logo.svg";
+
+export const links: LinksFunction = () => [
+  {
+    rel: "icon",
+    type: "image/svg+xml",
+    href: window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? darkLogo
+      : lightLogo,
+  },
+];
+
+export const meta: MetaFunction = () => [
+  {
+    title: "Study Planner - Tasks Dashboard",
+  },
+  {
+    name: "",
+    content: "",
+  },
+];
 
 const FIELD_ORDER: (keyof TaskFormValues)[] = [
   "title",
@@ -234,7 +256,6 @@ export default function tasks() {
 
   return (
     <DashboardPage
-      queryKey={[...queryKeys.tasks]}
       statsChartData={statsChartData}
       areaChartData={areaChartData}
       searchEvent={task}

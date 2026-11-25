@@ -26,10 +26,10 @@ import SubjectItems from "../ui/main-page/SubjectItem";
 import TaskItemSkeleton from "../skeleton/TodayTasksSkeleton";
 import DeadlineItemSkeleton from "../skeleton/UpcomingDeadlinesSkeleton";
 import SubjectItemsSkeleton from "../skeleton/SubjectsSkeleton";
-import { ProgressBarSkeleton } from "../skeleton/ProgressBarsSkeleton";
-import ProgressBars from "../ui/main-page/ProgressBar";
 import { ensureSession } from "~/auth/session";
 import { lazy } from "react";
+import type { Subject } from "~/types/subjectTypes";
+import RingChartComp from "../ui/main-page/RingChart";
 
 export const links: LinksFunction = () => [
   {
@@ -56,6 +56,10 @@ const MemoFocusTimer = memo(() => (
     size="sm"
     anchor
   />
+));
+
+const MemoPie = memo(({ subjects }: { subjects: Subject[] | undefined }) => (
+  <MyPie subjects={subjects ?? []} />
 ));
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
@@ -263,6 +267,7 @@ export default function DefaultMain() {
   return (
     <>
       <Header />
+
       <main
         ref={container}
         className="relative grid grid-cols-2 gap-7 max-w-350 mx-auto px-4 md:px-8 pt-28 pb-10 *:grid *:gap-10 *:bg-(--sect-bg) *:p-3 *:rounded-[20px] *:overflow-auto max-[1010px]:grid-cols-1 *:shadow-[0_0_8px_0_var(--contrast-text)] *:min-h-120"
@@ -493,16 +498,14 @@ export default function DefaultMain() {
             }
           >
             <div className="justify-self-center text-black">
-              <MyPie
-                subjects={subjects ?? []}
-              />
+              <MemoPie subjects={subjects} />
             </div>
           </DefaultMainSection>
         </section>
         <section className="gs-animate">
           <DefaultMainSection
             sectionTitle="Progress"
-            sectionDescription="Completed tasks percentages"
+            sectionDescription="Completed events percentages in subjects"
             sectionTitleLogo={
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -521,20 +524,9 @@ export default function DefaultMain() {
               </svg>
             }
           >
-            <div className="max-w-130 mx-auto mt-10">
+            <div className="mx-auto max-w-fit">
               <div>
-                {(subjectsQuery.isLoading || tasksQuery.isLoading) &&
-                  [1, 2, 3, 4, 5].map((item) => (
-                    <ProgressBarSkeleton key={item} />
-                  ))}
-
-                {!(subjectsQuery.isLoading || tasksQuery.isLoading) && (
-                  <ProgressBars
-                    subjects={subjects ?? []}
-                    tasks={tasks ?? []}
-                    className=""
-                  />
-                )}
+                <RingChartComp subjects={subjects ?? []} />
               </div>
             </div>
           </DefaultMainSection>

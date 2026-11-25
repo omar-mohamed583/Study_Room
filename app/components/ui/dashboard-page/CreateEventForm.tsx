@@ -310,10 +310,10 @@ export default function CreateEventForm({
             <button
               type="submit"
               disabled={mutation.isPending}
-              className="bg-(--text-primary) py-2 font-medium text-(--contrast-text) hover:bg-(--text-primary)/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background text-center"
+              className="bg-(--text-primary) py-2 font-medium text-(--contrast-text) hover:bg-(--text-primary)/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background text-center flex place-content-center"
             >
               {mutation.isPending ? (
-                <span className="scale-150 mx-auto">
+                <span className="scale-200">
                   <ThinkingOrb
                     state="composing"
                     size={20}

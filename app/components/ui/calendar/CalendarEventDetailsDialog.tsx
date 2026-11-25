@@ -1,5 +1,5 @@
 import { Dialog } from "@base-ui/react/dialog";
-import type { SubmitEvent } from "react";
+import { useState, type SubmitEvent } from "react";
 import { ChevronDown } from "@untitledui/icons";
 import { Checkbox } from "@heroui/react";
 import type { Key } from "react-aria-components";
@@ -66,6 +66,7 @@ function DialogSelect({
   value,
   options,
   placeholder,
+  portalContainer,
   isDisabled = false,
   isInvalid = false,
   onChange,
@@ -74,6 +75,7 @@ function DialogSelect({
   value: string;
   options: SelectOption[];
   placeholder: string;
+  portalContainer: Element | null;
   isDisabled?: boolean;
   isInvalid?: boolean;
   onChange: (value: string) => void;
@@ -93,7 +95,9 @@ function DialogSelect({
         color="secondary"
         iconTrailing={ChevronDown}
         isDisabled={isDisabled}
-        className="mt-2 h-11 w-full justify-between rounded-lg px-3 text-left text-sm font-normal"
+        className={`mt-2 h-11 w-full justify-between rounded-lg px-3 text-left text-sm font-normal ${
+          isInvalid ? "border-red-500/70" : ""
+        }`}
       >
         <span className={!selectedOption ? "text-placeholder" : "truncate"}>
           {selectedOption?.label ?? placeholder}
@@ -102,6 +106,7 @@ function DialogSelect({
       <Dropdown.Popover
         className="max-h-64 w-64"
         style={{ zIndex: 20_000_002 }}
+        UNSTABLE_portalContainer={portalContainer ?? undefined}
       >
         <Dropdown.Menu
           aria-label={ariaLabel}
@@ -116,18 +121,16 @@ function DialogSelect({
             if (option && !option.isDisabled) onChange(option.value);
           }}
         >
-          <Dropdown.Section>
-            {options.map((option) => (
-              <Dropdown.Item
-                key={option.key ?? option.value}
-                id={option.key ?? option.value}
-                textValue={option.label}
-                isDisabled={option.isDisabled}
-              >
-                {option.label}
-              </Dropdown.Item>
-            ))}
-          </Dropdown.Section>
+          {options.map((option) => (
+            <Dropdown.Item
+              key={option.key ?? option.value}
+              id={option.key ?? option.value}
+              textValue={option.label}
+              isDisabled={option.isDisabled}
+            >
+              {option.label}
+            </Dropdown.Item>
+          ))}
         </Dropdown.Menu>
       </Dropdown.Popover>
     </Dropdown.Root>
@@ -156,6 +159,8 @@ export default function CalendarEventDetailsDialog({
   onDelete,
   onReset,
 }: Props) {
+  const [popoverPortalContainer, setPopoverPortalContainer] =
+    useState<HTMLDivElement | null>(null);
   const isCreate = mode === "create";
   const sameSubjectIds = sameItems(
     values.subjectDocumentIds,
@@ -211,7 +216,10 @@ export default function CalendarEventDetailsDialog({
     >
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 z-19999999 bg-black/45 backdrop-blur-sm data-starting-style:opacity-0 data-ending-style:opacity-0 transition-opacity" />
-        <Dialog.Viewport className="fixed inset-0 z-20000000 grid place-items-center p-4">
+        <Dialog.Viewport
+          ref={setPopoverPortalContainer}
+          className="fixed inset-0 z-20000000 grid place-items-center p-4"
+        >
           <Dialog.Popup className="relative flex max-h-[min(88dvh,52rem)] w-full max-w-2xl flex-col overflow-hidden border border-zinc-400/35 bg-white text-neutral-950 shadow-[0.25rem_0.25rem_0] shadow-black/15 dark:bg-neutral-950 dark:text-white">
             <Dialog.Close
               disabled={isSaving}
@@ -256,6 +264,7 @@ export default function CalendarEventDetailsDialog({
                       ariaLabel="Event type"
                       value={values.entityType}
                       placeholder="Select event type"
+                      portalContainer={popoverPortalContainer}
                       isDisabled={isSaving}
                       options={[
                         { value: "task", label: "Task" },
@@ -309,6 +318,7 @@ export default function CalendarEventDetailsDialog({
                     ariaLabel="Calendar"
                     value={values.calendarId}
                     placeholder="Select a calendar"
+                    portalContainer={popoverPortalContainer}
                     isDisabled={isSaving || calendars.length === 0}
                     options={[
                       ...calendars.map((calendar) => {
@@ -418,6 +428,7 @@ export default function CalendarEventDetailsDialog({
                     <DialogSelect
                       ariaLabel="Subject"
                       value={values.subjectDocumentIds[0] ?? ""}
+                      portalContainer={popoverPortalContainer}
                       placeholder={
                         subjectsLoading
                           ? "Loading subjects..."
@@ -509,6 +520,7 @@ export default function CalendarEventDetailsDialog({
                       <DialogSelect
                         ariaLabel="Priority"
                         value={values.priority}
+                        portalContainer={popoverPortalContainer}
                         placeholder="Select priority"
                         isDisabled={isSaving}
                         options={[

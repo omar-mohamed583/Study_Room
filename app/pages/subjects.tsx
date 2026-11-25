@@ -1,12 +1,25 @@
-import Header from "~/components/layout/Header";
+import { useMemo } from "react";
+import EntityListPage, { type EntityRow } from "~/components/ui/entity-page/EntityListPage";
+import useStudyData from "~/context/studyDataContext";
 
-export default function Subject() {
-  return (
-    <>
-      <Header />
-      <main className="mx-auto grid w-full max-w-350 gap-4 px-4 pb-10 pt-28 md:px-8">
-        <h1 className="text-2xl font-black">Subject</h1>
-      </main>
-    </>
-  );
+export default function Subjects() {
+  const { subjects: { data = [], isLoading, isError } } = useStudyData();
+  const rows = useMemo<EntityRow[]>(() => data.map((subject) => ({
+    id: subject.documentId,
+    title: subject.name,
+    searchable: `${subject.icon} ${subject.name}`,
+    cells: [String(subject.tasks?.length ?? 0), String(subject.exams?.length ?? 0)],
+  })), [data]);
+
+  return <EntityListPage
+    title="Subjects"
+    description="Browse and find your subjects."
+    rows={rows}
+    isLoading={isLoading}
+    isError={isError}
+    columns={[
+      { label: "Tasks", value: (row) => row.cells[0] },
+      { label: "Exams", value: (row) => row.cells[1] },
+    ]}
+  />;
 }

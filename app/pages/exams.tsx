@@ -1,31 +1,55 @@
-import type { MetaFunction } from "react-router";
-import Header from "~/components/layout/Header";
-
-export const meta: MetaFunction = () => [
-  {
-    title: "Study Planner - Exams",
-  },
-  {
-    name: "",
-    content: "",
-  },
-];
+import { useMemo } from "react";
+import EntityListPage, { type EntityFilter, type EntityRow } from "~/components/ui/entity-page/EntityListPage";
+import useStudyData from "~/context/studyDataContext";
 
 export default function Exams() {
-  return (
-    <>
-      <Header />
-      <main className="mx-auto w-full max-w-350 px-4 pb-10 pt-28 md:px-8">
-        <section className="rounded-[20px] border border-[hsl(from_var(--text-primary)_h_s_l_/.08)] bg-(--sect-bg) p-6 shadow-[0_0_8px_0_var(--contrast-text)] sm:p-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-(--pale-text)">
-            Study Planner
-          </p>
-          <h1 className="mt-2 text-3xl font-black tracking-tight">Exams</h1>
-          <p className="mt-3 max-w-prose text-sm text-(--pale-text)">
-            This page is a placeholder. Exam planning is coming soon.
-          </p>
-        </section>
-      </main>
-    </>
-  );
+  const { exams: { data = [], isLoading, isError } } = useStudyData();
+  const { rows, filters } = useMemo(() => {
+    const subjects = [...new Set(data.flatMap((exam) => exam.subject?.map((subject) => subject.name) ?? []))].sort();
+    const rows: EntityRow[] = data.map((exam) => {
+      const date = new Date(exam.examDate);
+      return {
+        id: exam.documentId,
+        title: exam.title,
+        searchable: `${exam.description ?? ""} ${exam.subject?.map((subject) => subject.name).join(" ") ?? ""}`,
+        cells: [
+          Number.isNaN(date.getTime()) ? "" : date.toLocaleDateString(),
+          exam.subject?.map((subject) => subject.name).join(", ") ?? "",
+          String(exam.exam_topics?.length ?? 0),
+          Number.isNaN(date.getTime()) ? "" : date.toISOString(),
+        ],
+      };
+    });
+    const filters: EntityFilter[] = [
+      {
+        label: "Date",
+        options: [{ label: "Upcoming", value: "upcoming" }, { label: "Past", value: "past" }],
+        matches: (row, value) => {
+          const date = new Date(row.cells[3]);
+          if (Number.isNaN(date.getTime())) return false;
+          return value === "upcoming" ? date.getTime() >= Date.now() : date.getTime() < Date.now();
+        },
+      },
+      {
+        label: "Subject",
+        options: subjects.map((name) => ({ label: name, value: name })),
+        matches: (row, value) => row.cells[1].split(", ").includes(value),
+      },
+    ];
+    return { rows, filters };
+  }, [data]);
+
+  return <EntityListPage
+    title="Exams"
+    description="Browse exams, their dates, subjects, and topic counts."
+    rows={rows}
+    isLoading={isLoading}
+    isError={isError}
+    filters={filters}
+    columns={[
+      { label: "Date", value: (row) => row.cells[0] },
+      { label: "Subject", value: (row) => row.cells[1] },
+      { label: "Topics", value: (row) => row.cells[2] },
+    ]}
+  />;
 }

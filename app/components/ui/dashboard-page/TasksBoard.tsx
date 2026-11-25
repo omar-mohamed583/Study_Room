@@ -5,7 +5,6 @@ import {
   useMemo,
   useState,
 } from "react";
-import { parseDate as parseCalendarDate } from "@internationalized/date";
 import { ChevronDown } from "@untitledui/icons";
 import type { Key } from "react-aria-components";
 import { Button } from "~/components/base/buttons/button";
@@ -637,7 +636,7 @@ function TaskRow({ task }: { task: Task }) {
 /* -------------------------------------------------------------------------- */
 
 const BADGE_BASE =
-  "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.75 text-xs font-medium whitespace-nowrap";
+  "inline-flex items-center gap-1.5 rounded-full text-xs font-medium whitespace-nowrap";
 
 const PRIORITY_STYLES: Record<
   Priority,
@@ -646,21 +645,21 @@ const PRIORITY_STYLES: Record<
   high: {
     label: "High",
     badge:
-      "border-rose-400/80 bg-rose-200/40 text-rose-600 leading-[normal] in-[body.dark]:border-rose-500/30 in-[body.dark]:bg-rose-500/10 in-[body.dark]:text-rose-300",
+      "text-rose-600 leading-[normal] in-[body.dark]:text-rose-300",
     dot: "bg-rose-500/70",
     glow: "shadow-[0_0_8px_2px_rgba(244,63,94,0.4)]",
   },
   medium: {
     label: "Medium",
     badge:
-      "border-amber-400/80 bg-amber-200/40 text-amber-600 leading-[normal] in-[body.dark]:border-amber-500/30 in-[body.dark]:bg-amber-500/10 in-[body.dark]:text-amber-300",
+      "text-amber-600 leading-[normal] in-[body.dark]:text-amber-300",
     dot: "bg-amber-500/70",
     glow: "shadow-[0_0_8px_2px_rgba(245,158,11,0.4)]",
   },
   low: {
     label: "Low",
     badge:
-      "border-sky-400/80 bg-sky-200/40 text-sky-600 leading-[normal] in-[body.dark]:border-sky-500/30 in-[body.dark]:bg-sky-500/10 in-[body.dark]:text-sky-300",
+      "text-sky-600 leading-[normal] in-[body.dark]:text-sky-300",
     dot: "bg-sky-500/70",
     glow: "shadow-[0_0_8px_2px_rgba(14,165,233,0.4)]",
   },
@@ -670,16 +669,16 @@ const STATUS_STYLES: Record<TaskStatus, { label: string; badge: string }> = {
   completed: {
     label: "Completed",
     badge:
-      "border-emerald-400/80 bg-emerald-200/40 text-emerald-600 in-[body.dark]:border-emerald-500/30 in-[body.dark]:bg-emerald-500/10 in-[body.dark]:text-emerald-300 leading-normal",
+      "text-emerald-600 in-[body.dark]:text-emerald-300 leading-[normal]",
   },
   overdue: {
     label: "Overdue",
     badge:
-      "border-rose-400/80 bg-rose-200/40 text-rose-600 in-[body.dark]:border-rose-500/30 in-[body.dark]:bg-rose-500/10 in-[body.dark]:text-rose-300 leading-[normal]",
+      "text-rose-600 in-[body.dark]:text-rose-300 leading-[normal]",
   },
   pending: {
     label: "Pending",
-    badge: "bg-zinc-400/50 border-zinc-500/80 leading-[normal]",
+    badge: "leading-[normal]",
   },
 };
 
@@ -700,7 +699,7 @@ function StatusCell({ task, status }: { task: Task; status: TaskStatus }) {
   const style = STATUS_STYLES[status];
 
   return (
-    <div className="grid justify-items-start gap-1">
+    <div className="grid justify-items-start gap-1 **:leading-[normal]">
       <span className={`${BADGE_BASE} ${style.badge}`}>{style.label}</span>
       {status === "completed" && task.completedAt && (
         <span
